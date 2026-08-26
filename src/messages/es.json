@@ -1,0 +1,105 @@
+{
+  "common": {
+    "appName": "Agenda Bressol",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "search": "Buscar",
+    "noResults": "Sin resultados",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "present": "Presente",
+    "absent": "Ausente",
+    "students": "Alumnos",
+    "classrooms": "Aulas",
+    "teachers": "Educadores",
+    "families": "Familias"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Has olvidado la contraseña?",
+    "welcomeBack": "Bienvenido/a de nuevo"
+  },
+  "roles": {
+    "admin": "Dirección",
+    "teacher": "Educador/a",
+    "guardian": "Familia"
+  },
+  "dashboard": {
+    "title": "Resumen del día",
+    "presentToday": "Presentes hoy",
+    "activeClassrooms": "Aulas activas",
+    "pendingLogs": "Registros pendientes",
+    "upcomingEvents": "Próximos eventos",
+    "alerts": "Avisos"
+  },
+  "classroom": {
+    "title": "Mi aula",
+    "takeAttendance": "Pasar lista",
+    "groupNote": "Nota grupal",
+    "uploadPhoto": "Subir foto",
+    "presentCount": "{count} presentes",
+    "level": "Nivel {level}"
+  },
+  "dailyLog": {
+    "title": "Agenda del día",
+    "mood": "Estado de ánimo",
+    "meals": "Alimentación",
+    "diaper": "Pañal",
+    "nap": "Siesta",
+    "photos": "Fotos del día",
+    "notes": "Notas",
+    "notesPlaceholder": "Añade una nota sobre el día..."
+  },
+  "mood": {
+    "happy": "Contento/a",
+    "calm": "Tranquilo/a",
+    "sad": "Triste",
+    "irritable": "Irritable"
+  },
+  "meals": {
+    "breakfast": "Desayuno",
+    "lunch": "Comida",
+    "snack": "Merienda",
+    "all": "Todo",
+    "most": "Bastante",
+    "little": "Poco",
+    "none": "Nada"
+  },
+  "diaper": {
+    "pee": "Pipí",
+    "poo": "Caca",
+    "both": "Ambos",
+    "dry": "Seco",
+    "changes": "Cambios",
+    "changesCount": "{count, plural, =0 {Ningún cambio} one {# cambio} other {# cambios}}"
+  },
+  "nap": {
+    "start": "Inicio",
+    "end": "Fin",
+    "duration": "Duración",
+    "noNap": "Sin siesta"
+  },
+  "family": {
+    "todayNote": "Nota del día",
+    "momentsToday": "Momentos de hoy",
+    "mealSummary": "Alimentación",
+    "napSummary": "Siesta",
+    "diaperSummary": "Pañal",
+    "contact": "Contactar",
+    "noPhotosToday": "Hoy no hay fotos"
+  },
+  "events": {
+    "upcoming": "Próximos",
+    "event": "Evento",
+    "announcement": "Anuncio",
+    "alert": "Alerta"
+  }
+}

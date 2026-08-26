@@ -1,0 +1,105 @@
+{
+  "common": {
+    "appName": "Agenda Bressol",
+    "loading": "Carregant...",
+    "save": "Desar",
+    "cancel": "Cancel·lar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Tornar",
+    "next": "Següent",
+    "search": "Cercar",
+    "noResults": "Sense resultats",
+    "today": "Avui",
+    "yesterday": "Ahir",
+    "present": "Present",
+    "absent": "Absent",
+    "students": "Alumnes",
+    "classrooms": "Aules",
+    "teachers": "Educadors",
+    "families": "Famílies"
+  },
+  "auth": {
+    "login": "Iniciar sessió",
+    "logout": "Tancar sessió",
+    "email": "Correu electrònic",
+    "password": "Contrasenya",
+    "forgotPassword": "Has oblidat la contrasenya?",
+    "welcomeBack": "Benvingut/da de nou"
+  },
+  "roles": {
+    "admin": "Direcció",
+    "teacher": "Educador/a",
+    "guardian": "Família"
+  },
+  "dashboard": {
+    "title": "Resum del dia",
+    "presentToday": "Presents avui",
+    "activeClassrooms": "Aules actives",
+    "pendingLogs": "Registres pendents",
+    "upcomingEvents": "Propers esdeveniments",
+    "alerts": "Avisos"
+  },
+  "classroom": {
+    "title": "La meva aula",
+    "takeAttendance": "Passar llista",
+    "groupNote": "Nota grupal",
+    "uploadPhoto": "Pujar foto",
+    "presentCount": "{count} presents",
+    "level": "Nivell {level}"
+  },
+  "dailyLog": {
+    "title": "Agenda del dia",
+    "mood": "Estat d'ànim",
+    "meals": "Alimentació",
+    "diaper": "Bolquer",
+    "nap": "Migdiada",
+    "photos": "Fotos del dia",
+    "notes": "Notes",
+    "notesPlaceholder": "Afegeix una nota sobre el dia..."
+  },
+  "mood": {
+    "happy": "Content/a",
+    "calm": "Tranquil/a",
+    "sad": "Trist/a",
+    "irritable": "Irritable"
+  },
+  "meals": {
+    "breakfast": "Esmorzar",
+    "lunch": "Dinar",
+    "snack": "Berenar",
+    "all": "Tot",
+    "most": "Bastant",
+    "little": "Poc",
+    "none": "Res"
+  },
+  "diaper": {
+    "pee": "Pipí",
+    "poo": "Caca",
+    "both": "Tots dos",
+    "dry": "Sec",
+    "changes": "Canvis",
+    "changesCount": "{count, plural, =0 {Cap canvi} one {# canvi} other {# canvis}}"
+  },
+  "nap": {
+    "start": "Inici",
+    "end": "Fi",
+    "duration": "Durada",
+    "noNap": "Sense migdiada"
+  },
+  "family": {
+    "todayNote": "Nota del dia",
+    "momentsToday": "Moments d'avui",
+    "mealSummary": "Alimentació",
+    "napSummary": "Migdiada",
+    "diaperSummary": "Bolquer",
+    "contact": "Contactar",
+    "noPhotosToday": "Avui no hi ha fotos"
+  },
+  "events": {
+    "upcoming": "Propers",
+    "event": "Esdeveniment",
+    "announcement": "Anunci",
+    "alert": "Alerta"
+  }
+}
