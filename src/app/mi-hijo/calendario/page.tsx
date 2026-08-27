@@ -1,14 +1,45 @@
-'use client'
+import { Calendar as CalendarIcon } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
-import { useState } from 'react'
-import { Calendar as CalendarIcon, CheckCircle2, XCircle } from 'lucide-react'
+export default async function FamilyCalendarPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-export default function FamilyCalendarPage() {
-  const [selectedMonth, setSelectedMonth] = useState('Agost 2026')
+  if (!user) {
+    redirect('/login')
+  }
+
+  const { data: guardianRel } = await supabase
+    .from('student_guardians')
+    .select('student_id')
+    .eq('guardian_id', user.id)
+    .limit(1)
+    .single()
+
+  let logs: any[] = []
   
-  // Dummy data for visual representation
+  if (guardianRel) {
+    const studentId = guardianRel.student_id
+    
+    // Fetch logs for the current month roughly
+    // In a full implementation we would take year/month from searchParams
+    const { data } = await supabase
+      .from('daily_logs')
+      .select('date')
+      .eq('student_id', studentId)
+
+    logs = data || []
+  }
+
+  // Set of dates the student attended
+  const attendedDates = new Set(logs.map(l => l.date))
+
+  const selectedMonth = 'Agost 2026'
   const days = Array.from({ length: 31 }, (_, i) => i + 1)
-  
+  const today = new Date()
+  const todayDateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+
   return (
     <main className="max-w-md mx-auto px-4 pt-4 pb-8 space-y-4">
       <div className="flex items-center gap-2 mb-4">
@@ -38,11 +69,17 @@ export default function FamilyCalendarPage() {
           ))}
           
           {days.map(day => {
-            const isToday = day === 27
-            const isAbsent = day === 14
-            const isPresent = day < 27 && day !== 14 && day > 2 && day < 25 && ![8, 9, 15, 16, 22, 23].includes(day)
+            const dateStr = `2026-08-${String(day).padStart(2,'0')}`
+            const isToday = dateStr === todayDateStr
+            const isPresent = attendedDates.has(dateStr)
+            
+            // Assume weekends are 1, 2, 8, 9, 15, 16, 22, 23, 29, 30 for Aug 2026
             const isWeekend = [1, 2, 8, 9, 15, 16, 22, 23, 29, 30].includes(day)
             
+            // If it's not a weekend, and we have no log, and it's in the past (before today) -> absent
+            const isPast = day < today.getDate() && today.getMonth() === 7 // August
+            const isAbsent = !isPresent && !isWeekend && isPast
+
             return (
               <div 
                 key={day}

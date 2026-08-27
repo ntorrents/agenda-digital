@@ -1,16 +1,23 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 interface DateSelectorProps {
-  selectedDate: Date
-  onChange: (date: Date) => void
   className?: string
 }
 
-export function DateSelector({ selectedDate, onChange, className }: DateSelectorProps) {
+export function DateSelector({ className }: DateSelectorProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
+  // Get currently selected date from URL, default to today
+  const urlDate = searchParams.get('date')
+  const selectedDate = urlDate ? new Date(urlDate) : new Date()
+  selectedDate.setHours(0, 0, 0, 0)
 
   // Generate an array of 14 days (7 days before, 7 days after today)
   const today = new Date()
@@ -30,7 +37,23 @@ export function DateSelector({ selectedDate, onChange, className }: DateSelector
         selectedEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
       }
     }
-  }, [selectedDate])
+  }, [selectedDate.getTime()])
+
+  const handleDateChange = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const dateString = `${year}-${month}-${day}`
+    
+    // Create new URLSearchParams to preserve other params
+    const newParams = new URLSearchParams(searchParams.toString())
+    
+    // If it's today, we can just remove the date param for cleaner URLs, 
+    // but keeping it explicit is safer for server fetching. Let's set it.
+    newParams.set('date', dateString)
+    
+    router.push(`${pathname}?${newParams.toString()}`)
+  }
 
   return (
     <div className={cn('w-full overflow-hidden', className)}>
@@ -43,13 +66,14 @@ export function DateSelector({ selectedDate, onChange, className }: DateSelector
           const isSelected = date.getTime() === selectedDate.getTime()
           const isToday = date.getTime() === today.getTime()
           
-          const dayName = new Intl.DateTimeFormat('ca-ES', { weekday: 'short' }).format(date)
+          let dayName = new Intl.DateTimeFormat('ca-ES', { weekday: 'short' }).format(date)
+          dayName = dayName.replace(/\./g, '')
           const dayNumber = date.getDate()
 
           return (
             <button
               key={date.toISOString()}
-              onClick={() => onChange(date)}
+              onClick={() => handleDateChange(date)}
               data-selected={isSelected}
               className={cn(
                 'flex flex-col items-center justify-center min-w-[3.5rem] h-16 rounded-2xl snap-center shrink-0 border transition-all active:scale-95 cursor-pointer',

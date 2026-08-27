@@ -1,14 +1,49 @@
-'use client'
-
 import { Image as ImageIcon } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
-export default function FamilyGalleryPage() {
-  const photos = [
-    { id: 1, url: 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=800&auto=format&fit=crop&q=80', date: 'Avui', desc: "Jugant a l'espai de construccions" },
-    { id: 2, url: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=800&auto=format&fit=crop&q=80', date: 'Ahir', desc: 'Pintant amb els dits' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1587691592099-24045742c181?w=800&auto=format&fit=crop&q=80', date: 'Dilluns', desc: 'Hora del pati' },
-    { id: 4, url: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=800&auto=format&fit=crop&q=80', date: 'Divendres passat', desc: 'Festa de final de setmana' },
-  ]
+export default async function FamilyGalleryPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect('/login')
+  }
+
+  const { data: guardianRel } = await supabase
+    .from('student_guardians')
+    .select('student_id')
+    .eq('guardian_id', user.id)
+    .limit(1)
+    .single()
+
+  let photos: { id: string; url: string; date: string; desc: string }[] = []
+
+  if (guardianRel) {
+    const studentId = guardianRel.student_id
+
+    const { data: logsWithPhotos } = await supabase
+      .from('daily_logs')
+      .select('id, date, photos, notes')
+      .eq('student_id', studentId)
+      .not('photos', 'eq', '{}')
+      .order('date', { ascending: false })
+
+    if (logsWithPhotos) {
+      logsWithPhotos.forEach(log => {
+        if (log.photos && Array.isArray(log.photos)) {
+          log.photos.forEach((url: string, index: number) => {
+            photos.push({
+              id: `${log.id}-${index}`,
+              url: url,
+              date: new Date(log.date).toLocaleDateString('ca-ES'),
+              desc: log.notes ? log.notes.substring(0, 50) + '...' : 'Foto del dia'
+            })
+          })
+        }
+      })
+    }
+  }
 
   return (
     <main className="max-w-md mx-auto px-4 pt-4 pb-8 space-y-4">
@@ -20,6 +55,10 @@ export default function FamilyGalleryPage() {
       </div>
 
       <div className="space-y-4">
+        {photos.length === 0 && (
+          <p className="text-sm text-stone-500 text-center py-8">Encara no hi ha fotos.</p>
+        )}
+
         {photos.map((photo) => (
           <div key={photo.id} className="rounded-[28px] border border-stone-200/80 bg-white p-3 shadow-xs overflow-hidden">
             <div className="aspect-4/3 w-full overflow-hidden rounded-[20px] bg-stone-100 relative group">

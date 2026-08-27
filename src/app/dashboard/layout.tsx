@@ -38,14 +38,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Mètriques' },
     { href: '/dashboard/aulas', icon: Building2, label: 'Aules' },
+    { href: '/dashboard/alumnos', icon: Baby, label: 'Alumnes' },
     { href: '/dashboard/personal', icon: Users, label: 'Personal' },
     { href: '/dashboard/avisos', icon: Bell, label: 'Avisos' },
   ]
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-stone-800 pb-16 font-sans flex flex-col">
+    <div className="min-h-screen bg-[#faf8f5] text-stone-800 pb-20 sm:pb-16 font-sans flex flex-col relative">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-8 py-3.5 shadow-xs">
+      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md shadow-xs flex flex-col">
+        <div className="px-4 sm:px-8 py-3.5 w-full">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-700 text-white shadow-md shadow-teal-700/20">
@@ -75,10 +77,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Button>
           </div>
         </div>
+        </div>
         
-        {/* Tab Navigation */}
-        <div className="max-w-5xl mx-auto mt-4">
-          <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
+        {/* Tab Navigation (Tablet/Desktop only) */}
+        <div className="hidden sm:block w-full border-t border-stone-100 bg-white">
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2">
+            <nav className="flex items-center gap-2 overflow-x-auto no-scrollbar">
             {navItems.map((item) => {
               const isActive = item.href === '/dashboard' 
                 ? pathname === '/dashboard' 
@@ -101,6 +105,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )
             })}
           </nav>
+          </div>
         </div>
       </header>
 
@@ -108,6 +113,41 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 w-full max-w-5xl mx-auto">
         {children}
       </div>
+
+      {/* Bottom Tab Navigation (Mobile only) */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-stone-200/80 px-2 pb-safe pt-2 flex items-center justify-around">
+        {navItems.map((item) => {
+          const isActive = item.href === '/dashboard' 
+            ? pathname === '/dashboard' 
+            : pathname.startsWith(item.href)
+            
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all cursor-pointer relative',
+                isActive 
+                  ? 'text-teal-700' 
+                  : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
+              )}
+            >
+              {isActive && (
+                <span className="absolute -top-1 w-8 h-1 rounded-full bg-teal-600" />
+              )}
+              <div className={cn(
+                'flex items-center justify-center rounded-xl p-1.5 transition-all',
+                isActive ? 'bg-teal-100/50' : 'bg-transparent'
+              )}>
+                <item.icon className={cn("h-5 w-5", isActive ? 'animate-in zoom-in duration-300' : '')} />
+              </div>
+              <span className={cn('text-[9px] font-bold mt-1', isActive ? 'text-teal-800' : '')}>
+                {item.label}
+              </span>
+            </Link>
+          )
+        })}
+      </nav>
     </div>
   )
 }
