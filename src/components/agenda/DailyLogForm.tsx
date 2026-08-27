@@ -107,22 +107,21 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData }: D
           </div>
           <div className="grid grid-cols-4 gap-2">
             {[
-              { id: 'happy', emoji: '😄', label: 'Feliç' },
-              { id: 'calm', emoji: '😌', label: 'Tranquil' },
-              { id: 'sad', emoji: '😢', label: 'Trist' },
-              { id: 'irritable', emoji: '😠', label: 'Irritable' },
+              { id: 'happy', label: 'Feliç' },
+              { id: 'calm', label: 'Tranquil' },
+              { id: 'sad', label: 'Trist' },
+              { id: 'irritable', label: 'Irritable' },
             ].map((m) => (
               <button
                 key={m.id}
                 onClick={() => setMood(m.id)}
-                className={`flex flex-col items-center justify-center p-3 rounded-[20px] transition-all cursor-pointer border-2 ${
+                className={`flex flex-col items-center justify-center p-4 rounded-[20px] transition-all cursor-pointer border-2 ${
                   mood === m.id 
                     ? 'border-teal-500 bg-teal-50 shadow-sm scale-105' 
                     : 'border-stone-100 bg-white hover:border-teal-200 hover:bg-stone-50'
                 }`}
               >
-                <span className="text-2xl mb-1">{m.emoji}</span>
-                <span className={`text-[10px] font-bold ${mood === m.id ? 'text-teal-700' : 'text-stone-500'}`}>
+                <span className={`text-xs font-bold ${mood === m.id ? 'text-teal-700' : 'text-stone-500'}`}>
                   {m.label}
                 </span>
               </button>
@@ -138,6 +137,25 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData }: D
           </div>
           
           <div className="space-y-3">
+            <div className="bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
+              <label className="text-xs font-bold text-stone-600 mb-2 block">Esmorzar</label>
+              <div className="flex bg-white rounded-xl overflow-hidden border border-stone-200/80 p-1">
+                {mealOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setBreakfast(opt.value)}
+                    className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-colors cursor-pointer ${
+                      breakfast === opt.value
+                        ? `bg-${opt.color}-50 text-${opt.color}-700 shadow-xs`
+                        : 'text-stone-500 hover:bg-stone-50'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
               <label className="text-xs font-bold text-stone-600 mb-2 block">Dinar</label>
               <div className="flex bg-white rounded-xl overflow-hidden border border-stone-200/80 p-1">
@@ -157,67 +175,22 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData }: D
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
-                <label className="text-xs font-bold text-stone-600 mb-2 block">Esmorzar</label>
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex bg-white rounded-xl overflow-hidden border border-stone-200/80 p-1">
-                    {mealOptions.slice(0,3).map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setBreakfast(opt.value)}
-                        className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-colors cursor-pointer ${
-                          breakfast === opt.value
-                            ? `bg-${opt.color}-50 text-${opt.color}-700 shadow-xs`
-                            : 'text-stone-500 hover:bg-stone-50'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
+            <div className="bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
+              <label className="text-xs font-bold text-stone-600 mb-2 block">Berenar</label>
+              <div className="flex bg-white rounded-xl overflow-hidden border border-stone-200/80 p-1">
+                {mealOptions.map((opt) => (
                   <button
-                    onClick={() => setBreakfast(mealOptions[3].value)}
-                    className={`w-full py-1.5 text-[10px] font-bold rounded-xl transition-colors border cursor-pointer ${
-                      breakfast === mealOptions[3].value
-                        ? 'bg-red-50 text-red-700 border-red-200'
-                        : 'bg-white text-stone-500 border-stone-200/80 hover:bg-stone-50'
+                    key={opt.value}
+                    onClick={() => setSnack(opt.value)}
+                    className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-colors cursor-pointer ${
+                      snack === opt.value
+                        ? `bg-${opt.color}-50 text-${opt.color}-700 shadow-xs`
+                        : 'text-stone-500 hover:bg-stone-50'
                     }`}
                   >
-                    No ha esmorzat / Res
+                    {opt.label}
                   </button>
-                </div>
-              </div>
-
-              <div className="bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
-                <label className="text-xs font-bold text-stone-600 mb-2 block">Berenar</label>
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex bg-white rounded-xl overflow-hidden border border-stone-200/80 p-1">
-                    {mealOptions.slice(0,3).map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setSnack(opt.value)}
-                        className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-colors cursor-pointer ${
-                          snack === opt.value
-                            ? `bg-${opt.color}-50 text-${opt.color}-700 shadow-xs`
-                            : 'text-stone-500 hover:bg-stone-50'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setSnack(mealOptions[3].value)}
-                    className={`w-full py-1.5 text-[10px] font-bold rounded-xl transition-colors border cursor-pointer ${
-                      snack === mealOptions[3].value
-                        ? 'bg-red-50 text-red-700 border-red-200'
-                        : 'bg-white text-stone-500 border-stone-200/80 hover:bg-stone-50'
-                    }`}
-                  >
-                    No ha berenat / Res
-                  </button>
-                </div>
+                ))}
               </div>
             </div>
           </div>

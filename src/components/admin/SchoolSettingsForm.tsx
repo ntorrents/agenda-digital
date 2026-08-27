@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Save, Loader2, CheckCircle2 } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Save, Loader2, CheckCircle2, Image as ImageIcon, Upload, Building } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { updateSchoolSettings } from '@/app/actions/school'
 
@@ -9,6 +9,24 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
   const [isSaving, setIsSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState(false)
+  
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg('L\'arxiu és massa gran. El límit és 5MB.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => setLogoPreview(e.target?.result as string)
+    reader.readAsDataURL(file)
+    setErrorMsg('')
+  }
 
   // Default structure
   const settings = {
@@ -39,6 +57,11 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
       payload.append('contact_email', formData.get('contact_email') as string)
       payload.append('name', formData.get('name') as string)
       payload.append('address', formData.get('address') as string)
+      
+      const logoFile = formData.get('logo') as File | null
+      if (logoFile && logoFile.size > 0) {
+        payload.append('logo', logoFile)
+      }
 
       await updateSchoolSettings(payload)
       setSuccessMsg(true)
@@ -66,6 +89,51 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
       )}
 
       <div className="space-y-4">
+        {/* Logo de la escuela */}
+        <div className="space-y-3 pb-4 border-b border-stone-100">
+          <label className="text-xs font-bold text-stone-500 pl-1 flex items-center gap-2">
+            <ImageIcon className="h-4 w-4 text-stone-400" />
+            Logotip del Centre
+          </label>
+          
+          <div className="flex items-center gap-6">
+            <div className="relative h-20 w-20 rounded-2xl bg-stone-50 border-2 border-dashed border-stone-200 flex items-center justify-center overflow-hidden shrink-0 group">
+              {(logoPreview || schoolInfo?.logo_url) ? (
+                <img 
+                  src={logoPreview || schoolInfo?.logo_url} 
+                  alt="Logo preview" 
+                  className="w-full h-full object-cover" 
+                />
+              ) : (
+                <Building className="h-8 w-8 text-stone-300" />
+              )}
+            </div>
+            
+            <div className="space-y-2 flex-1">
+              <input 
+                type="file"
+                name="logo"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-xl h-9 border-stone-200 text-stone-600 hover:text-stone-900 font-bold text-xs bg-white"
+              >
+                <Upload className="h-3 w-3 mr-2" />
+                Pujar Nova Imatge
+              </Button>
+              <p className="text-[10px] font-medium text-stone-400 leading-tight">
+                Format PNG o JPG quadrat (màx 5MB).
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-stone-500 pl-1">Nom del Centre</label>
           <input 

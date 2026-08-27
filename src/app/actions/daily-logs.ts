@@ -195,7 +195,7 @@ export async function bulkAddNote(dateStr: string, note: string) {
   if (!logs) return { success: true }
 
   for (const log of logs) {
-    const newNote = log.notes ? `${log.notes}\n\nNota General: ${note}` : note
+    const newNote = log.notes ? `${log.notes}\n\nNota General: ${note}` : `\n\nNota General: ${note}`
     await supabase.from('daily_logs').update({ notes: newNote }).eq('id', log.id)
   }
   

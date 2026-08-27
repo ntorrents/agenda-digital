@@ -1,5 +1,4 @@
 import { Utensils, Moon, Droplets, Smile, Calendar, MessageCircle, ImageIcon, ChevronRight } from 'lucide-react'
-import { DateSelector } from '@/components/shared/DateSelector'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -58,10 +57,10 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
   const isFuture = selectedDate.getTime() > today.getTime()
 
   const mealMap: Record<string, string> = {
-    all: 'Tot ✅',
+    all: 'Tot',
     most: 'Gairebé tot',
     little: 'Poc',
-    none: 'Res ❌'
+    none: 'Res'
   }
   
   const moodMap: Record<string, string> = {
@@ -81,8 +80,6 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
   return (
     <main className="max-w-md mx-auto pt-4 pb-8 space-y-5 px-4">
       
-      <DateSelector />
-
       <div className="space-y-5">
         {isFuture ? (
           <div className="rounded-[28px] border border-stone-200/80 bg-white p-8 text-center shadow-xs">
@@ -116,7 +113,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar snap-x">
                   {dailyLog.photos.map((photo: string, index: number) => (
                     <Link href={`/mi-hijo/galeria`} key={index} className="shrink-0 snap-start">
-                      <div className="relative h-24 w-24 rounded-[16px] overflow-hidden border border-stone-100">
+                      <div className="relative h-16 w-16 rounded-[16px] overflow-hidden border border-stone-100">
                         {/* Placeholder visual por ahora. En produccion usariamos next/image con el src real */}
                         <div className="absolute inset-0 bg-stone-200 flex items-center justify-center text-[10px] text-stone-400">
                           Foto {index + 1}
@@ -200,15 +197,15 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
               </div>
             </div>
 
-            {/* Anotaciones */}
+            {/* Anotaciones Específicas */}
             <div className="bg-white border border-orange-200/50 rounded-[28px] overflow-hidden shadow-xs">
               <div className="bg-orange-400/90 px-4 py-2.5">
                 <h3 className="text-[11px] font-black uppercase text-white tracking-wider">Anotacions de l&apos;Educadora</h3>
               </div>
               <div className="p-5 bg-orange-50/30">
-                {dailyLog.notes ? (
+                {dailyLog.notes && dailyLog.notes.split('\n\nNota General: ')[0].trim() ? (
                   <p className="text-sm font-bold text-stone-800 leading-relaxed italic">
-                    "{dailyLog.notes}"
+                    "{dailyLog.notes.split('\n\nNota General: ')[0].trim()}"
                   </p>
                 ) : (
                   <p className="text-sm text-stone-400 italic">Sense anotacions avui.</p>
@@ -224,6 +221,21 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 </div>
               </div>
             </div>
+
+            {/* Anotaciones Globales */}
+            {dailyLog.notes && dailyLog.notes.includes('\n\nNota General: ') && (
+              <div className="bg-white border border-blue-200/50 rounded-[28px] overflow-hidden shadow-xs mt-4">
+                <div className="bg-blue-500/90 px-4 py-2.5 flex items-center gap-2">
+                  <MessageCircle className="h-3.5 w-3.5 text-white" />
+                  <h3 className="text-[11px] font-black uppercase text-white tracking-wider">Nota General de l'Aula</h3>
+                </div>
+                <div className="p-5 bg-blue-50/30">
+                  <p className="text-sm font-bold text-stone-800 leading-relaxed italic">
+                    "{dailyLog.notes.split('\n\nNota General: ')[1].trim()}"
+                  </p>
+                </div>
+              </div>
+            )}
 
           </>
         )}

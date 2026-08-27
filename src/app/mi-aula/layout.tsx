@@ -1,19 +1,28 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { LogOut, LayoutDashboard, Users, Calendar, Wrench, Baby } from 'lucide-react'
+import { LogOut, LayoutDashboard, Users, Calendar, Wrench, Baby, Megaphone } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { DateSelector } from '@/components/shared/DateSelector'
 
 export default function EducatorLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const [teacherName, setTeacherName] = useState<string>('Carregant...')
   const [classroomName, setClassroomName] = useState<string>('Aula')
+  const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
+  const searchParams = useSearchParams()
+  const currentDate = searchParams.get('date') || new Date().toISOString().split('T')[0]
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value
+    if (newDate) {
+      router.push(`${pathname}?date=${newDate}`)
+    }
+  }
 
   useEffect(() => {
     async function loadProfile() {
@@ -23,6 +32,24 @@ export default function EducatorLayout({ children }: { children: React.ReactNode
         setTeacherName(user.user_metadata.full_name)
       }
       if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('school_id')
+          .eq('id', user.id)
+          .single()
+
+        if (profile?.school_id) {
+          const { data: school } = await supabase
+            .from('schools')
+            .select('name, logo_url')
+            .eq('id', profile.school_id)
+            .single()
+          
+          if (school) {
+            setSchoolInfo({ name: school.name, logo_url: school.logo_url })
+          }
+        }
+
         const { data: classroom } = await supabase
           .from('classrooms')
           .select('name')
@@ -47,6 +74,7 @@ export default function EducatorLayout({ children }: { children: React.ReactNode
     { href: '/mi-aula/alumnos', icon: Users, label: 'Alumnes' },
     { href: '/mi-aula/calendario', icon: Calendar, label: 'Calendari' },
     { href: '/mi-aula/herramientas', icon: Wrench, label: 'Eines' },
+    { href: '/mi-aula/avisos', icon: Megaphone, label: 'Avisos' },
   ]
 
   // Para ocultar la tab bar inferior en ciertas subrutas donde queramos pantalla completa
@@ -60,14 +88,18 @@ export default function EducatorLayout({ children }: { children: React.ReactNode
         <div className="px-4 sm:px-6 py-3.5 w-full">
           <div className="max-w-5xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-md shadow-orange-500/20">
-                <Baby className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 border border-orange-100 overflow-hidden shadow-sm shadow-orange-500/10 shrink-0">
+                {schoolInfo?.logo_url ? (
+                  <img src={schoolInfo.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <Baby className="h-5 w-5 text-orange-500" />
+                )}
               </div>
-              <div>
-                <h1 className="text-base font-black text-stone-900 leading-tight">
-                  {classroomName}
+              <div className="min-w-0">
+                <h1 className="text-base font-black text-stone-900 leading-tight truncate">
+                  {schoolInfo?.name || 'Escola'} - {classroomName}
                 </h1>
-                <p className="text-xs text-stone-500 font-medium">{teacherName}</p>
+                <p className="text-xs text-stone-500 font-medium truncate">{teacherName}</p>
               </div>
             </div>
 
@@ -95,10 +127,13 @@ export default function EducatorLayout({ children }: { children: React.ReactNode
 
         {/* Global Date Selector (always visible in header) */}
         {!isStudentDetail && (
-           <div className="w-full bg-white/50 border-t border-stone-100">
-             <div className="max-w-5xl mx-auto">
-                <DateSelector className="py-1" />
-             </div>
+           <div className="w-full bg-white/50 border-t border-stone-100 flex items-center justify-center py-2">
+             <input 
+              type="date" 
+              value={currentDate}
+              onChange={handleDateChange}
+              className="bg-stone-100 border border-stone-200 text-stone-700 text-xs font-bold rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
+            />
            </div>
         )}
         
@@ -114,7 +149,7 @@ export default function EducatorLayout({ children }: { children: React.ReactNode
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={`${item.href}?date=${currentDate}`}
                     className={cn(
                       'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer active:scale-95',
                       isActive
@@ -148,7 +183,7 @@ export default function EducatorLayout({ children }: { children: React.ReactNode
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={`${item.href}?date=${currentDate}`}
                 className={cn(
                   'flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all cursor-pointer relative',
                   isActive 

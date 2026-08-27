@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,17 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname()
   const [studentName, setStudentName] = useState<string>('Infant')
   const [classroomName, setClassroomName] = useState<string>('')
+  const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const searchParams = useSearchParams()
+  const currentDate = searchParams.get('date') || new Date().toISOString().split('T')[0]
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value
+    if (newDate) {
+      router.push(`${pathname}?date=${newDate}`)
+    }
+  }
 
   useEffect(() => {
     async function loadProfile() {
@@ -43,6 +53,25 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
           setStudentName(student.first_name)
           const c = Array.isArray(student.classrooms) ? student.classrooms[0] : student.classrooms
           if (c) setClassroomName(`${c.name} (${c.level})`)
+        }
+
+        // Fetch school info for the header
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('school_id')
+          .eq('id', user.id)
+          .single()
+          
+        if (profile?.school_id) {
+          const { data: school } = await supabase
+            .from('schools')
+            .select('name, logo_url')
+            .eq('id', profile.school_id)
+            .single()
+          
+          if (school) {
+            setSchoolInfo({ name: school.name, logo_url: school.logo_url })
+          }
         }
       }
     }
@@ -115,7 +144,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href === '/mi-hijo' ? item.href : `${item.href}?date=${currentDate}`}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold transition-all',
                   isActive 
@@ -176,12 +205,25 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
           )}
         </div>
 
-        {isHome && (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-            <h1 className="text-[15px] font-black text-stone-900 leading-tight">
-              Agenda Digital
-            </h1>
+        {isHome ? (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center flex-col">
+            {schoolInfo?.logo_url ? (
+              <img src={schoolInfo.logo_url} alt="Logo escola" className="h-6 w-auto object-contain mb-0.5" />
+            ) : (
+              <h1 className="text-[15px] font-black text-stone-900 leading-tight">
+                {schoolInfo?.name || 'Agenda Digital'}
+              </h1>
+            )}
             <p className="text-[10px] text-stone-500 font-bold capitalize">{todayFormatted}</p>
+          </div>
+        ) : (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
+            <input 
+              type="date" 
+              value={currentDate}
+              onChange={handleDateChange}
+              className="bg-stone-100 border border-stone-200 text-stone-700 text-xs font-bold rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none"
+            />
           </div>
         )}
 

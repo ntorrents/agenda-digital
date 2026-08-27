@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const pathname = usePathname()
   const [userName, setUserName] = useState<string>('Marta Rovira')
-  const [schoolName] = useState<string>('Escola Bressol Els Menuts')
+  const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
 
   useEffect(() => {
     async function loadProfile() {
@@ -24,6 +24,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
       if (user.user_metadata?.full_name) {
         setUserName(user.user_metadata.full_name)
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('school_id')
+        .eq('id', user.id)
+        .single()
+        
+      if (profile?.school_id) {
+        const { data: school } = await supabase
+          .from('schools')
+          .select('name, logo_url')
+          .eq('id', profile.school_id)
+          .single()
+        
+        if (school) {
+          setSchoolInfo({ name: school.name, logo_url: school.logo_url })
+        }
       }
     }
     loadProfile()
@@ -49,12 +67,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="px-4 sm:px-8 py-3.5 w-full">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-700 text-white shadow-md shadow-teal-700/20">
-              <Baby className="h-5 w-5" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 border border-teal-100 overflow-hidden shadow-md shadow-teal-700/10 shrink-0">
+              {schoolInfo?.logo_url ? (
+                <img src={schoolInfo.logo_url} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <Baby className="h-5 w-5 text-teal-700" />
+              )}
             </div>
             <div>
               <h1 className="text-base font-black text-stone-900 leading-tight">
-                {schoolName}
+                {schoolInfo?.name || 'Escola'}
               </h1>
               <p className="text-xs text-stone-500 font-medium">Panell de Direcció</p>
             </div>

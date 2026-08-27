@@ -38,12 +38,6 @@ export default async function GaleriaPage() {
       
       {/* Cabecera */}
       <div className="flex items-center gap-3">
-        <Link 
-          href="/mi-hijo"
-          className="p-2 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 active:scale-95 transition-all"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Link>
         <div>
           <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">
             <ImageIcon className="h-6 w-6 text-emerald-600" /> Fotos i Galeria

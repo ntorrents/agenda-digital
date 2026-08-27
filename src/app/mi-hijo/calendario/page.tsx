@@ -171,11 +171,8 @@ export default async function MonthlyCalendarPage(props: { searchParams: Promise
               >
                 <span>{day.date.getDate()}</span>
                 {/* Indicator Dot */}
-                {dayLog && dayLog.attendance === 'present' && (
+                {dayLog && (
                   <span className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
-                )}
-                {dayLog && dayLog.attendance === 'absent' && (
-                  <span className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-white/60' : 'bg-red-400'}`} />
                 )}
               </Link>
             )
@@ -197,15 +194,13 @@ export default async function MonthlyCalendarPage(props: { searchParams: Promise
             
             {/* Asistencia */}
             <div className="flex items-center gap-3 pb-4 border-b border-stone-100">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-[14px] shadow-sm ${
-                selectedLog.attendance === 'present' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
-              }`}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-[14px] shadow-sm bg-emerald-100 text-emerald-600">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">Assistència</p>
                 <p className="text-sm font-black text-stone-900">
-                  {selectedLog.attendance === 'present' ? 'Ha assistit a classe' : 'No ha assistit'}
+                  Ha assistit a classe
                 </p>
               </div>
             </div>
@@ -216,9 +211,19 @@ export default async function MonthlyCalendarPage(props: { searchParams: Promise
                 <p className="text-[11px] font-black uppercase text-orange-600/70 tracking-wider">
                   Nota Especial
                 </p>
-                <p className="text-sm font-semibold text-stone-800 leading-relaxed italic">
-                  "{selectedLog.notes}"
-                </p>
+                {selectedLog.notes.split('\n\nNota General: ')[0].trim() && (
+                  <p className="text-sm font-semibold text-stone-800 leading-relaxed italic">
+                    "{selectedLog.notes.split('\n\nNota General: ')[0].trim()}"
+                  </p>
+                )}
+                {selectedLog.notes.includes('\n\nNota General: ') && (
+                  <div className="mt-2 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider mb-1">Nota General de l'Aula</p>
+                    <p className="text-sm font-medium text-stone-700 italic">
+                      "{selectedLog.notes.split('\n\nNota General: ')[1].trim()}"
+                    </p>
+                  </div>
+                )}
                 <p className="text-[10px] font-bold text-stone-500 mt-2">
                   — {selectedLog.teacher?.full_name || 'Educadora'}
                 </p>

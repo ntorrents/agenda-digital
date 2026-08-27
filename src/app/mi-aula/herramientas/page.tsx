@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Wrench, CheckSquare, Utensils, MessageSquare, AlertTriangle, Loader2, X } from 'lucide-react'
 import { bulkMarkPresent, bulkMarkLunch, bulkAddNote } from '@/app/actions/daily-logs'
 
-type ActionType = 'present' | 'lunch' | 'note' | null
+type ActionType = 'present' | 'lunch' | null
 
 export default function EducatorToolsPage() {
   const searchParams = useSearchParams()
@@ -33,12 +33,6 @@ export default function EducatorToolsPage() {
         await bulkMarkLunch(dateStr)
         setSuccessMsg("S'ha marcat 'Tot' al dinar per a tots els presents.")
       }
-      else if (confirmAction === 'note') {
-        if (!noteText.trim()) return
-        await bulkAddNote(dateStr, noteText)
-        setSuccessMsg("S'ha enviat la nota global a tots els alumnes.")
-        setNoteText('')
-      }
     } catch (error) {
       alert('Hi ha hagut un error.')
     } finally {
@@ -63,13 +57,6 @@ export default function EducatorToolsPage() {
       icon: Utensils, 
       color: 'orange',
     },
-    { 
-      id: 'note' as ActionType,
-      title: 'Nota global', 
-      desc: 'Escriu una nota que apareixerà a l\'agenda de tots els alumnes.', 
-      icon: MessageSquare, 
-      color: 'teal',
-    },
   ]
 
   const getConfirmationConfig = () => {
@@ -83,11 +70,6 @@ export default function EducatorToolsPage() {
         title: 'Dinar per defecte',
         desc: 'S\'actualitzaran les agendes de tots els alumnes PRESENTS marcant que s\'ho han menjat "Tot" al dinar. Aquesta acció sobreescriurà el que hi hagués abans al dinar.',
         btnText: 'Sí, aplicar dinar'
-      }
-      case 'note': return {
-        title: 'Nota Global',
-        desc: 'Escriu el text que vols que aparegui a l\'apartat de notes de tots els alumnes PRESENTS de l\'aula.',
-        btnText: 'Enviar nota a tots'
       }
       default: return null
     }
@@ -132,15 +114,6 @@ export default function EducatorToolsPage() {
                 {conf.desc}
               </p>
 
-              {confirmAction === 'note' && (
-                <textarea
-                  value={noteText}
-                  onChange={(e) => setNoteText(e.target.value)}
-                  placeholder="Escriu aquí la nota per a totes les famílies..."
-                  className="w-full h-24 bg-stone-50 border border-stone-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 resize-none"
-                />
-              )}
-
               <div className="flex gap-2 pt-2">
                 <button 
                   onClick={() => setConfirmAction(null)}
@@ -151,7 +124,7 @@ export default function EducatorToolsPage() {
                 </button>
                 <button 
                   onClick={handleAction}
-                  disabled={isLoading || (confirmAction === 'note' && !noteText.trim())}
+                  disabled={isLoading}
                   className="flex-1 py-3.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition-colors flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : conf.btnText}

@@ -1,7 +1,8 @@
-import { Users, Camera, Utensils, ChevronRight } from 'lucide-react'
+import { Users, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { TeacherQuickActions } from '@/components/educator/TeacherQuickActions'
 
 export default async function ClassroomSummaryPage(props: { searchParams: Promise<{ date?: string }> }) {
   const searchParams = await props.searchParams
@@ -108,23 +109,7 @@ export default async function ClassroomSummaryPage(props: { searchParams: Promis
             </div>
           </Link>
 
-          {/* Quick Action Buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 py-4 rounded-[20px] border border-stone-200/80 bg-white hover:bg-stone-50 text-xs font-bold text-stone-700 shadow-2xs cursor-pointer active:scale-95 transition-all"
-            >
-              <Camera className="h-5 w-5 text-teal-700" />
-              <span>Foto grupal</span>
-            </button>
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 py-4 rounded-[20px] border border-stone-200/80 bg-white hover:bg-stone-50 text-xs font-bold text-stone-700 shadow-2xs cursor-pointer active:scale-95 transition-all"
-            >
-              <Utensils className="h-5 w-5 text-orange-500" />
-              <span>Menú del dia</span>
-            </button>
-          </div>
+          <TeacherQuickActions dateStr={dateStr} />
 
           {/* Pending Tasks */}
           <div className="pt-2">

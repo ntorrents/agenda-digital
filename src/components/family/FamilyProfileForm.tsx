@@ -11,12 +11,14 @@ export function FamilyProfileForm({ profile, email, student }: { profile: any, e
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const form = e.currentTarget
+    
     setIsSaving(true)
     setErrorMsg('')
     setSuccessMsg(false)
     
     try {
-      const formData = new FormData(e.currentTarget)
+      const formData = new FormData(form)
       if (student) {
         formData.append('student_id', student.id)
       }
@@ -30,7 +32,6 @@ export function FamilyProfileForm({ profile, email, student }: { profile: any, e
       await updateFamilyProfile(formData)
       
       // Limpiar campos de contraseña
-      const form = e.currentTarget
       form.reset() // Esto resetea todo, pero queremos mantener los valores actuales de los inputs
       
       setSuccessMsg(true)

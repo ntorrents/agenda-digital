@@ -30,12 +30,6 @@ export default async function NotaPage() {
       
       {/* Cabecera */}
       <div className="flex items-center gap-3">
-        <Link 
-          href="/mi-hijo"
-          className="p-2 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 active:scale-95 transition-all"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Link>
         <div>
           <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">
             <FileText className="h-6 w-6 text-purple-600" /> Històric de Notes
@@ -70,11 +64,19 @@ export default async function NotaPage() {
                     Veure agenda completa
                   </Link>
                 </div>
-                
-                <p className="text-sm font-semibold text-stone-800 leading-relaxed italic">
-                  "{note.notes}"
-                </p>
-                
+                {note.notes.split('\n\nNota General: ')[0].trim() && (
+                  <p className="text-sm font-semibold text-stone-800 leading-relaxed italic">
+                    "{note.notes.split('\n\nNota General: ')[0].trim()}"
+                  </p>
+                )}
+                {note.notes.includes('\n\nNota General: ') && (
+                  <div className="mt-2 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider mb-1">Nota General de l'Aula</p>
+                    <p className="text-sm font-medium text-stone-700 italic">
+                      "{note.notes.split('\n\nNota General: ')[1].trim()}"
+                    </p>
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-1 text-xs font-bold text-stone-400">
                   <span>— {note.teacher?.full_name || 'Educadora'}</span>
                 </div>

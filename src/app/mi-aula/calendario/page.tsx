@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Calendar as CalendarIcon, CheckCircle2, Users } from 'lucide-react'
+import Link from 'next/link'
 
-export default async function EducatorCalendarPage({
-  searchParams,
-}: {
-  searchParams: { date?: string }
+export default async function EducatorCalendarPage(props: {
+  searchParams: Promise<{ date?: string }>
 }) {
+  const searchParams = await props.searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -34,15 +34,24 @@ export default async function EducatorCalendarPage({
 
   const { data: logs } = await supabase
     .from('daily_logs')
-    .select('date')
+    .select('date, notes')
     .eq('classroom_id', classroom.id)
     .gte('date', startDateStr)
     .lte('date', endDateStr)
 
-  // Group by date to count attendance
+  // Group by date to count attendance and collect global notes
   const attendanceCount: Record<string, number> = {}
+  const globalNotes: Record<string, string> = {}
+
   logs?.forEach(log => {
     attendanceCount[log.date] = (attendanceCount[log.date] || 0) + 1
+    if (log.notes && log.notes.includes('Nota General: ')) {
+      // Extract the global note part
+      const parts = log.notes.split('Nota General: ')
+      if (parts.length > 1) {
+        globalNotes[log.date] = parts[1]
+      }
+    }
   })
 
   // Get total students enrolled to calculate absentees
@@ -81,54 +90,95 @@ export default async function EducatorCalendarPage({
         </div>
       </div>
 
-      <div className="bg-white rounded-[28px] border border-stone-200/80 shadow-xs overflow-hidden">
-        {/* Days of week */}
-        <div className="grid grid-cols-7 border-b border-stone-100 bg-stone-50/50">
-          {['dl', 'dt', 'dc', 'dj', 'dv', 'ds', 'dg'].map(day => (
-            <div key={day} className="py-3 text-center text-[10px] font-black uppercase text-stone-400">
-              {day}
-            </div>
-          ))}
-        </div>
-        
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 p-2 gap-1 sm:gap-2">
-          {days.map((dayNum, i) => {
-            if (!dayNum) return <div key={`empty-${i}`} className="h-16 sm:h-20" />
-            
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
-            const present = attendanceCount[dateStr] || 0
-            const isWeekend = i % 7 === 5 || i % 7 === 6
-            const hasData = present > 0
-
-            return (
-              <div 
-                key={dateStr} 
-                className={`relative flex flex-col items-center justify-center h-16 sm:h-20 rounded-[16px] border ${
-                  isWeekend ? 'bg-stone-50/50 border-transparent text-stone-300' : 
-                  hasData ? 'bg-white border-stone-200 shadow-sm' : 'bg-white border-dashed border-stone-200 text-stone-400'
-                }`}
-              >
-                <span className={`text-sm font-black ${isWeekend ? 'text-stone-300' : 'text-stone-700'}`}>
-                  {dayNum}
-                </span>
-                
-                {hasData && !isWeekend && (
-                  <div className="mt-1 flex flex-col items-center">
-                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                      <Users className="h-2.5 w-2.5" /> {present}/{studentCount}
-                    </span>
-                    {studentCount - present > 0 && (
-                      <span className="text-[9px] font-semibold text-red-500">
-                        {studentCount - present} absents
-                      </span>
-                    )}
-                  </div>
-                )}
+      <div className="flex flex-col md:flex-row gap-6 items-start">
+        <div className="bg-white rounded-[28px] border border-stone-200/80 shadow-xs overflow-hidden w-full md:flex-1">
+          {/* Days of week */}
+          <div className="grid grid-cols-7 border-b border-stone-100 bg-stone-50/50">
+            {['dl', 'dt', 'dc', 'dj', 'dv', 'ds', 'dg'].map(day => (
+              <div key={day} className="py-3 text-center text-[10px] font-black uppercase text-stone-400">
+                {day}
               </div>
-            )
-          })}
+            ))}
+          </div>
+          
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 p-2 gap-1 sm:gap-2">
+            {days.map((dayNum, i) => {
+              if (!dayNum) return <div key={`empty-${i}`} className="h-16 sm:h-20" />
+              
+              const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`
+              const present = attendanceCount[dateStr] || 0
+              const isWeekend = i % 7 === 5 || i % 7 === 6
+              const hasData = present > 0
+
+              const isSelected = dateStr === searchParams?.date
+
+              return (
+                <Link
+                  href={`?date=${dateStr}`}
+                  replace={true}
+                  scroll={false}
+                  key={dateStr} 
+                  className={`relative flex flex-col items-center justify-center h-16 sm:h-20 rounded-[16px] border cursor-pointer active:scale-95 transition-all ${
+                    isSelected ? 'bg-orange-600 text-white border-orange-600 shadow-md ring-4 ring-orange-100' :
+                    isWeekend ? 'bg-stone-50/50 border-transparent text-stone-300 pointer-events-none' : 
+                    hasData ? 'bg-white border-stone-200 shadow-sm hover:border-orange-300' : 'bg-white border-dashed border-stone-200 text-stone-400 hover:border-orange-300'
+                  }`}
+                >
+                  <span className={`text-sm font-black ${isSelected ? 'text-white' : isWeekend ? 'text-stone-300' : 'text-stone-700'}`}>
+                    {dayNum}
+                  </span>
+                  
+                  {hasData && !isWeekend && (
+                    <div className="mt-1 flex flex-col items-center">
+                      <span className={`text-[10px] font-bold flex items-center gap-0.5 ${isSelected ? 'text-orange-100' : 'text-emerald-600'}`}>
+                        <Users className="h-2.5 w-2.5" /> {present}/{studentCount}
+                      </span>
+                      {studentCount - present > 0 && (
+                        <span className={`text-[9px] font-semibold ${isSelected ? 'text-orange-200' : 'text-red-500'}`}>
+                          {studentCount - present} absents
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
         </div>
+
+        {searchParams?.date && (
+          <div className="bg-white rounded-[28px] border border-stone-200/80 shadow-xs p-6 animate-in slide-in-from-bottom-4 w-full md:w-80 shrink-0 sticky top-24">
+            <h3 className="text-sm font-black text-stone-900 mb-4 flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-orange-500" />
+              Resum del dia {new Date(searchParams.date).toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-emerald-50 rounded-[20px] p-4 border border-emerald-100">
+                <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Assistència</p>
+                <p className="text-2xl font-black text-emerald-700">{attendanceCount[searchParams.date] || 0} <span className="text-sm font-semibold text-emerald-600/70">/ {studentCount}</span></p>
+              </div>
+              <div className="bg-red-50 rounded-[20px] p-4 border border-red-100">
+                <p className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">Absències</p>
+                <p className="text-2xl font-black text-red-700">{studentCount - (attendanceCount[searchParams.date] || 0)}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider">Nota Global Enviada</h4>
+              {globalNotes[searchParams.date] ? (
+                <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 text-sm font-medium text-stone-700 italic">
+                  "{globalNotes[searchParams.date]}"
+                </div>
+              ) : (
+                <div className="bg-stone-50 border border-dashed border-stone-200 rounded-xl p-4 text-sm text-stone-400 text-center">
+                  No es va enviar cap nota global aquest dia.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   )
