@@ -1,0 +1,237 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { Baby, Filter, Search, Plus, Eye } from 'lucide-react'
+import { DeleteStudentButton } from '@/components/admin/DeleteStudentButton'
+import Link from 'next/link'
+
+export default async function DashboardConfigAlumnosPage({
+  searchParams: searchParamsPromise,
+}: {
+  searchParams: Promise<{ q?: string; gender?: string; classroom?: string }>
+}) {
+  const searchParams = await searchParamsPromise
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('school_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile) redirect('/login')
+
+  // Build query for students
+  let query = supabase
+    .from('students')
+    .select(`
+      *,
+      classrooms (
+        id,
+        name,
+        level
+      )
+    `)
+    .eq('school_id', profile.school_id)
+    .order('first_name', { ascending: true })
+
+  // Apply filters
+  if (searchParams?.gender) {
+    query = query.eq('gender', searchParams.gender)
+  }
+  if (searchParams?.classroom) {
+    query = query.eq('classroom_id', searchParams.classroom)
+  }
+  if (searchParams?.q) {
+    query = query.or(`first_name.ilike.%${searchParams.q}%,last_name.ilike.%${searchParams.q}%`)
+  }
+
+  const { data: students } = await query
+
+  // Fetch all classrooms to populate filters
+  const { data: classrooms } = await supabase
+    .from('classrooms')
+    .select('id, name, level')
+    .eq('school_id', profile.school_id)
+    .order('level', { ascending: true })
+
+  const getGenderLabel = (g: string) => {
+    switch (g) {
+      case 'boy': return 'Nen'
+      case 'girl': return 'Nena'
+      case 'other': return 'Altre'
+      default: return '-'
+    }
+  }
+
+  const getClassroomColor = (level: string) => {
+    switch (level) {
+      case 'I0': return 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+      case 'I1': return 'bg-blue-100 text-blue-800 border border-blue-200'
+      case 'I2': return 'bg-purple-100 text-purple-800 border border-purple-200'
+      default: return 'bg-stone-100 text-stone-800 border border-stone-200'
+    }
+  }
+
+  // Group students by level
+  const levels = ['I0', 'I1', 'I2']
+  const studentsByLevel = levels.reduce((acc, level) => {
+    acc[level] = students?.filter(s => {
+      const c = Array.isArray(s.classrooms) ? s.classrooms[0] : s.classrooms
+      return c?.level === level
+    }) || []
+    return acc
+  }, {} as Record<string, any[]>)
+  
+  // Unassigned students
+  const unassigned = students?.filter(s => !s.classrooms) || []
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
+            <Baby className="h-5 w-5 text-teal-600" /> Alumnes del Centre
+          </h3>
+          <p className="text-xs text-stone-500">Gestió completa, filtres i edició</p>
+        </div>
+        
+        <Link 
+          href="/dashboard/config/alumnos/nuevo"
+          className="inline-flex items-center justify-center rounded-2xl bg-teal-600 text-white hover:bg-teal-700 font-bold text-xs h-9 px-4 shadow-sm transition-all"
+        >
+          <Plus className="h-3.5 w-3.5 mr-1" /> Nou Alumne
+        </Link>
+      </div>
+
+      {/* Filters Bar */}
+      <div className="bg-white p-3 rounded-2xl border border-stone-200/80 shadow-xs flex flex-wrap gap-3 items-center">
+        <div className="flex items-center gap-2 text-stone-400">
+          <Filter className="h-4 w-4" />
+          <span className="text-xs font-bold">Filtres:</span>
+        </div>
+        
+        <div className="flex gap-2 text-xs font-semibold">
+          <Link 
+            href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, gender: ''}).toString()}`}
+            className={`px-3 py-1.5 rounded-lg border ${!searchParams.gender ? 'bg-teal-50 border-teal-200 text-teal-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
+          >
+            Tots
+          </Link>
+          <Link 
+            href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, gender: 'girl'}).toString()}`}
+            className={`px-3 py-1.5 rounded-lg border ${searchParams.gender === 'girl' ? 'bg-teal-50 border-teal-200 text-teal-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
+          >
+            Nenes
+          </Link>
+          <Link 
+            href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, gender: 'boy'}).toString()}`}
+            className={`px-3 py-1.5 rounded-lg border ${searchParams.gender === 'boy' ? 'bg-teal-50 border-teal-200 text-teal-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
+          >
+            Nens
+          </Link>
+        </div>
+
+        <div className="h-6 w-px bg-stone-200 hidden sm:block"></div>
+
+        <div className="flex gap-2 text-xs font-semibold overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+          <Link 
+            href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, classroom: ''}).toString()}`}
+            className={`px-3 py-1.5 rounded-lg border whitespace-nowrap ${!searchParams.classroom ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
+          >
+            Totes les aules
+          </Link>
+          {classrooms?.map(c => (
+            <Link 
+              key={c.id}
+              href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, classroom: c.id}).toString()}`}
+              className={`px-3 py-1.5 rounded-lg border whitespace-nowrap ${searchParams.classroom === c.id ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
+            >
+              {c.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Render tables by level */}
+      <div className="space-y-8">
+        {[...levels, 'Sense Aula'].map(level => {
+          const list = level === 'Sense Aula' ? unassigned : studentsByLevel[level]
+          if (list.length === 0) return null
+
+          return (
+            <div key={level} className="space-y-3">
+              <h4 className="text-sm font-black text-stone-800 ml-2">Nivell {level}</h4>
+              <div className="bg-white border border-stone-200/80 rounded-[24px] overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm text-stone-600">
+                    <thead className="bg-stone-50/50 text-xs uppercase font-black text-stone-400 border-b border-stone-100">
+                      <tr>
+                        <th className="px-4 py-3">Nom i Cognoms</th>
+                        <th className="px-4 py-3">Aula</th>
+                        <th className="px-4 py-3">Gènere</th>
+                        <th className="px-4 py-3">Data Naix.</th>
+                        <th className="px-4 py-3">Intoleràncies</th>
+                        <th className="px-4 py-3 text-right">Accions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-100">
+                      {list.map((student: any) => {
+                        const classroom = Array.isArray(student.classrooms) ? student.classrooms[0] : student.classrooms
+                        const colorClass = classroom ? getClassroomColor(classroom.level) : 'bg-stone-100 text-stone-800 border-stone-200'
+
+                        return (
+                          <tr key={student.id} className="hover:bg-stone-50/50 transition-colors">
+                            <td className="px-4 py-3 font-bold text-stone-900 whitespace-nowrap">
+                              {student.first_name} {student.last_name}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${colorClass}`}>
+                                {classroom ? classroom.name : 'Sense assignar'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-xs font-semibold">
+                              {getGenderLabel(student.gender)}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-stone-500">
+                              {new Date(student.date_of_birth).toLocaleDateString('ca-ES')}
+                            </td>
+                            <td className="px-4 py-3 text-xs">
+                              {student.intolerances ? (
+                                <span className="text-red-600 font-semibold bg-red-50 px-2 py-0.5 rounded border border-red-100">Sí</span>
+                              ) : (
+                                <span className="text-stone-300">-</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Link 
+                                  href={`/dashboard/config/alumnos/${student.id}`}
+                                  className="flex items-center gap-1.5 text-[10px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-2.5 py-1.5 rounded-xl transition-colors border border-teal-200/50"
+                                >
+                                  <Eye className="h-3 w-3" /> Fitxa
+                                </Link>
+                                <DeleteStudentButton studentId={student.id} />
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+        {students?.length === 0 && (
+          <div className="text-center py-12 text-stone-500 text-sm bg-white rounded-[24px] border border-stone-200/80">
+            No s'han trobat alumnes amb aquests filtres.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

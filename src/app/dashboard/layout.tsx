@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { LogOut, LayoutDashboard, Building2, Users, Bell, Baby } from 'lucide-react'
+import { LogOut, LayoutDashboard, Bell, Baby, Settings, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -37,9 +37,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Mètriques' },
-    { href: '/dashboard/aulas', icon: Building2, label: 'Aules' },
-    { href: '/dashboard/alumnos', icon: Baby, label: 'Alumnes' },
-    { href: '/dashboard/personal', icon: Users, label: 'Personal' },
+    { href: '/dashboard/equipo', icon: Users, label: 'Equip' },
+    { href: '/dashboard/config/alumnos', icon: Settings, label: 'Configuració' },
     { href: '/dashboard/avisos', icon: Bell, label: 'Avisos' },
   ]
 
@@ -84,9 +83,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2">
             <nav className="flex items-center gap-2 overflow-x-auto no-scrollbar">
             {navItems.map((item) => {
-              const isActive = item.href === '/dashboard' 
-                ? pathname === '/dashboard' 
-                : pathname.startsWith(item.href)
+              let isActive = false
+              if (item.href === '/dashboard') {
+                isActive = pathname === '/dashboard'
+              } else if (item.href === '/dashboard/config/alumnos') {
+                isActive = pathname.startsWith('/dashboard/config')
+              } else {
+                isActive = pathname.startsWith(item.href)
+              }
                 
               return (
                 <Link
@@ -117,9 +121,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Bottom Tab Navigation (Mobile only) */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-stone-200/80 px-2 pb-safe pt-2 flex items-center justify-around">
         {navItems.map((item) => {
-          const isActive = item.href === '/dashboard' 
-            ? pathname === '/dashboard' 
-            : pathname.startsWith(item.href)
+          let isActive = false
+          if (item.href === '/dashboard') {
+            isActive = pathname === '/dashboard'
+          } else if (item.href === '/dashboard/config/alumnos') {
+            isActive = pathname.startsWith('/dashboard/config')
+          } else {
+            isActive = pathname.startsWith(item.href)
+          }
             
           return (
             <Link
