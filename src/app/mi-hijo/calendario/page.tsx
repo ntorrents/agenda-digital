@@ -1,14 +1,50 @@
-import { Calendar as CalendarIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, CheckCircle2, Clock } from 'lucide-react'
+import Link from 'next/link'
 
-export default async function FamilyCalendarPage() {
+// Utility function to generate calendar days
+function getLocalISODate(d: Date) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function getDaysInMonth(year: number, month: number) {
+  const date = new Date(year, month, 1)
+  const days = []
+  
+  // Backfill to Monday (assuming Monday is start of week)
+  let dayOfWeek = date.getDay() - 1
+  if (dayOfWeek === -1) dayOfWeek = 6 // Sunday
+  
+  for (let i = 0; i < dayOfWeek; i++) {
+    const prevDate = new Date(year, month, -dayOfWeek + i + 1)
+    days.push({ date: prevDate, isCurrentMonth: false })
+  }
+
+  while (date.getMonth() === month) {
+    days.push({ date: new Date(date), isCurrentMonth: true })
+    date.setDate(date.getDate() + 1)
+  }
+
+  // Forward fill to Sunday
+  let nextMonthDay = 1
+  while (days.length % 7 !== 0) {
+    days.push({ date: new Date(year, month + 1, nextMonthDay++), isCurrentMonth: false })
+  }
+
+  return days
+}
+
+export default async function MonthlyCalendarPage(props: { searchParams: Promise<{ month?: string, selected?: string }> }) {
+  const searchParams = await props.searchParams
+  
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
+  if (!user) redirect('/login')
 
   const { data: guardianRel } = await supabase
     .from('student_guardians')
@@ -17,96 +53,190 @@ export default async function FamilyCalendarPage() {
     .limit(1)
     .single()
 
-  let logs: any[] = []
-  
-  if (guardianRel) {
-    const studentId = guardianRel.student_id
-    
-    // Fetch logs for the current month roughly
-    // In a full implementation we would take year/month from searchParams
-    const { data } = await supabase
-      .from('daily_logs')
-      .select('date')
-      .eq('student_id', studentId)
+  if (!guardianRel) redirect('/login')
+  const studentId = guardianRel.student_id
 
-    logs = data || []
+  // Date parsing
+  const today = new Date()
+  today.setHours(0,0,0,0)
+  
+  let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  if (searchParams.month) {
+    const [y, m] = searchParams.month.split('-')
+    if (y && m) currentMonth = new Date(parseInt(y), parseInt(m) - 1, 1)
   }
 
-  // Set of dates the student attended
-  const attendedDates = new Set(logs.map(l => l.date))
+  const selectedDateStr = searchParams.selected || getLocalISODate(today)
+  const selectedDate = new Date(selectedDateStr)
+  selectedDate.setHours(0,0,0,0)
 
-  const selectedMonth = 'Agost 2026'
-  const days = Array.from({ length: 31 }, (_, i) => i + 1)
-  const today = new Date()
-  const todayDateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+  // Navigation Links
+  const prevMonthDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
+  const nextMonthDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
+  
+  const prevMonthStr = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}`
+  const nextMonthStr = `${nextMonthDate.getFullYear()}-${(nextMonthDate.getMonth() + 1).toString().padStart(2, '0')}`
+
+  // Fetch logs for the whole month to show dots/status
+  const monthStartStr = getLocalISODate(currentMonth)
+  const nextMonthStartStr = getLocalISODate(nextMonthDate)
+
+  const { data: monthLogs } = await supabase
+    .from('daily_logs')
+    .select('date, attendance')
+    .eq('student_id', studentId)
+    .gte('date', monthStartStr)
+    .lt('date', nextMonthStartStr)
+
+  // Fetch log for the specifically selected date
+  const { data: selectedLog } = await supabase
+    .from('daily_logs')
+    .select('*, teacher:profiles!teacher_id(full_name)')
+    .eq('student_id', studentId)
+    .eq('date', selectedDateStr)
+    .maybeSingle()
+
+  const days = getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth())
+  const weekDays = ['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg']
+
+  // Month formatter
+  const monthName = currentMonth.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' })
+  const selectedDateFormatted = selectedDate.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <main className="max-w-md mx-auto px-4 pt-4 pb-8 space-y-4">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
-          <CalendarIcon className="h-4 w-4" />
-        </div>
-        <h2 className="text-lg font-black text-stone-900">Historial i Calendari</h2>
+    <main className="max-w-md mx-auto pt-6 pb-12 px-4 space-y-6">
+      
+      <div>
+        <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">
+          <CalendarIcon className="h-6 w-6 text-purple-600" /> Calendari
+        </h2>
+        <p className="text-sm text-stone-500 mt-1">
+          Visió mensual i resum diari.
+        </p>
       </div>
 
-      <div className="rounded-[28px] border border-stone-200/80 bg-white p-5 shadow-xs">
+      {/* Calendar Card */}
+      <div className="bg-white border border-stone-200/80 rounded-[28px] p-5 shadow-xs">
+        
+        {/* Header (Prev / Month / Next) */}
         <div className="flex items-center justify-between mb-4">
-          <button className="text-stone-400 hover:text-stone-700 font-bold px-2 py-1">{'<'}</button>
-          <span className="font-bold text-stone-800">{selectedMonth}</span>
-          <button className="text-stone-400 hover:text-stone-700 font-bold px-2 py-1">{'>'}</button>
+          <Link 
+            href={`/mi-hijo/calendario?month=${prevMonthStr}&selected=${selectedDateStr}`}
+            replace={true}
+            scroll={false}
+            className="p-2 rounded-xl hover:bg-stone-100 text-stone-600 active:scale-95 transition-all"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Link>
+          <h3 className="font-bold text-stone-800 capitalize">{monthName}</h3>
+          <Link 
+            href={`/mi-hijo/calendario?month=${nextMonthStr}&selected=${selectedDateStr}`}
+            replace={true}
+            scroll={false}
+            className="p-2 rounded-xl hover:bg-stone-100 text-stone-600 active:scale-95 transition-all"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Link>
         </div>
-        
-        <div className="grid grid-cols-7 gap-1 text-center mb-2">
-          {['dl', 'dt', 'dc', 'dj', 'dv', 'ds', 'dg'].map(d => (
-            <div key={d} className="text-[10px] font-bold text-stone-400 uppercase">{d}</div>
-          ))}
-        </div>
-        
-        <div className="grid grid-cols-7 gap-1.5">
-          {/* Offset for August 2026 starts on Saturday */}
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={`empty-${i}`} />
-          ))}
-          
-          {days.map(day => {
-            const dateStr = `2026-08-${String(day).padStart(2,'0')}`
-            const isToday = dateStr === todayDateStr
-            const isPresent = attendedDates.has(dateStr)
-            
-            // Assume weekends are 1, 2, 8, 9, 15, 16, 22, 23, 29, 30 for Aug 2026
-            const isWeekend = [1, 2, 8, 9, 15, 16, 22, 23, 29, 30].includes(day)
-            
-            // If it's not a weekend, and we have no log, and it's in the past (before today) -> absent
-            const isPast = day < today.getDate() && today.getMonth() === 7 // August
-            const isAbsent = !isPresent && !isWeekend && isPast
 
+        {/* Weekdays */}
+        <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+          {weekDays.map(wd => (
+            <div key={wd} className="text-[10px] font-black text-stone-400 uppercase">{wd}</div>
+          ))}
+        </div>
+
+        {/* Days Grid */}
+        <div className="grid grid-cols-7 gap-1">
+          {days.map((day, idx) => {
+            const dateStr = getLocalISODate(day.date)
+            const isSelected = dateStr === selectedDateStr
+            const isToday = day.date.getTime() === today.getTime()
+            
+            // Find log for this day
+            const dayLog = monthLogs?.find(l => l.date === dateStr)
+            
             return (
-              <div 
-                key={day}
+              <Link 
+                key={idx}
+                href={`/mi-hijo/calendario?month=${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}&selected=${dateStr}`}
+                replace={true}
+                scroll={false}
                 className={`
-                  aspect-square rounded-xl flex flex-col items-center justify-center text-xs font-bold relative
-                  ${isToday ? 'bg-teal-700 text-white shadow-md' : ''}
-                  ${isWeekend && !isToday ? 'text-stone-300' : ''}
-                  ${!isToday && !isWeekend ? 'bg-stone-50 text-stone-700 hover:bg-stone-100 cursor-pointer' : ''}
+                  relative flex flex-col items-center justify-center h-12 w-full rounded-2xl transition-all cursor-pointer active:scale-95
+                  ${isSelected ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20 font-black' : 
+                    day.isCurrentMonth ? 'bg-stone-50 text-stone-800 font-bold hover:bg-stone-100' : 'bg-transparent text-stone-300 font-medium'}
+                  ${isToday && !isSelected ? 'border border-purple-300' : ''}
                 `}
               >
-                {day}
-                {isPresent && !isToday && <div className="absolute bottom-1 w-1 h-1 rounded-full bg-emerald-500" />}
-                {isAbsent && !isToday && <div className="absolute bottom-1 w-1 h-1 rounded-full bg-red-400" />}
-              </div>
+                <span>{day.date.getDate()}</span>
+                {/* Indicator Dot */}
+                {dayLog && dayLog.attendance === 'present' && (
+                  <span className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
+                )}
+                {dayLog && dayLog.attendance === 'absent' && (
+                  <span className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-white/60' : 'bg-red-400'}`} />
+                )}
+              </Link>
             )
           })}
         </div>
-        
-        <div className="mt-6 flex flex-col gap-2 pt-4 border-t border-stone-100">
-          <div className="flex items-center gap-2 text-xs font-medium text-stone-600">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" /> Ha assistit al centre
-          </div>
-          <div className="flex items-center gap-2 text-xs font-medium text-stone-600">
-            <div className="w-2 h-2 rounded-full bg-red-400" /> Absència
-          </div>
-        </div>
       </div>
+
+      {/* Resumen del Día Seleccionado */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-black text-stone-900 capitalize px-2">{selectedDateFormatted}</h3>
+        
+        {!selectedLog ? (
+          <div className="bg-stone-50 border border-stone-200/80 rounded-[24px] p-6 text-center shadow-xs flex flex-col items-center justify-center gap-2 text-stone-500">
+            <Clock className="h-6 w-6 text-stone-400" />
+            <p className="text-xs font-medium">No hi ha dades per a aquest dia.</p>
+          </div>
+        ) : (
+          <div className="bg-white border border-stone-200/80 rounded-[28px] p-5 shadow-xs space-y-4">
+            
+            {/* Asistencia */}
+            <div className="flex items-center gap-3 pb-4 border-b border-stone-100">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-[14px] shadow-sm ${
+                selectedLog.attendance === 'present' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
+              }`}>
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-stone-500 uppercase tracking-wider">Assistència</p>
+                <p className="text-sm font-black text-stone-900">
+                  {selectedLog.attendance === 'present' ? 'Ha assistit a classe' : 'No ha assistit'}
+                </p>
+              </div>
+            </div>
+
+            {/* Nota */}
+            {selectedLog.notes && (
+              <div className="bg-orange-50/50 rounded-2xl p-4 border border-orange-100/50 space-y-2">
+                <p className="text-[11px] font-black uppercase text-orange-600/70 tracking-wider">
+                  Nota Especial
+                </p>
+                <p className="text-sm font-semibold text-stone-800 leading-relaxed italic">
+                  "{selectedLog.notes}"
+                </p>
+                <p className="text-[10px] font-bold text-stone-500 mt-2">
+                  — {selectedLog.teacher?.full_name || 'Educadora'}
+                </p>
+              </div>
+            )}
+
+            <div className="pt-2">
+              <Link 
+                href={`/mi-hijo/agenda?date=${selectedDateStr}`}
+                className="w-full flex items-center justify-center h-12 rounded-[20px] bg-stone-900 text-white font-bold text-xs hover:bg-stone-800 active:scale-95 transition-all shadow-md"
+              >
+                Veure Agenda Completa
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+
     </main>
   )
 }

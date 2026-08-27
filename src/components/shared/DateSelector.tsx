@@ -52,7 +52,7 @@ export function DateSelector({ className }: DateSelectorProps) {
     // but keeping it explicit is safer for server fetching. Let's set it.
     newParams.set('date', dateString)
     
-    router.push(`${pathname}?${newParams.toString()}`)
+    router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
   }
 
   return (
