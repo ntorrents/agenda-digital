@@ -40,7 +40,7 @@ export default function ForcePasswordResetPage() {
       
       if (result.success) {
         if (result.role === 'admin') router.push('/dashboard')
-        else if (result.role === 'teacher') router.push('/mi-aula')
+        else if (result.role === 'teacher') router.push('/dashboard')
         else if (result.role === 'guardian') router.push('/mi-hijo')
         else router.push('/login')
       }

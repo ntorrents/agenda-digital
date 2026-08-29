@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { LogOut, LayoutDashboard, Users, Calendar, Wrench, Baby, Megaphone, Home, CalendarDays, Settings, Bell, MessageCircle } from 'lucide-react'
+import { Settings, LogOut, Users, Home, CalendarDays, Bell, MessageCircle, ArrowLeft, Loader2, Baby } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function EducatorLayout({ children }: { children: React.ReactNode }) {
+  redirect('/dashboard')
   const router = useRouter()
   const pathname = usePathname()
   const [teacherName, setTeacherName] = useState<string>('Carregant...')

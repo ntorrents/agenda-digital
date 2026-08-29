@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Shield, GraduationCap, Heart, Loader2, ArrowRight, Baby } from 'lucide-react'
+import { Sparkles, Shield, GraduationCap, Heart, Loader2, ArrowRight, Baby, Crown } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -57,10 +57,12 @@ export default function LoginPage() {
       // Redirigir según el rol del usuario
       const role = data.user.app_metadata?.role
 
-      if (role === 'admin') {
+      if (role === 'superadmin') {
+        router.push('/superadmin')
+      } else if (role === 'admin') {
         router.push('/dashboard')
       } else if (role === 'teacher') {
-        router.push('/mi-aula')
+        router.push('/dashboard')
       } else if (role === 'guardian') {
         router.push('/mi-hijo')
       } else {
@@ -204,6 +206,15 @@ export default function LoginPage() {
                 <span className="text-xs font-bold">Família</span>
               </button>
             </div>
+
+            <button
+              type="button"
+              onClick={() => { window.location.href = '/superadmin' }}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-stone-900 border border-stone-800 hover:bg-stone-800 hover:border-stone-700 text-stone-300 transition-all active:scale-95 cursor-pointer shadow-xs mt-2"
+            >
+              <Crown className="h-4 w-4 text-violet-400" />
+              <span className="text-xs font-bold tracking-wide">Súper Admin (Demo UI)</span>
+            </button>
           </div>
         </Card>
 

@@ -79,9 +79,9 @@ export async function upsertDailyLog(formData: FormData) {
     if (error) throw new Error(error.message)
   }
 
-  revalidatePath('/mi-aula')
-  revalidatePath('/mi-aula/alumnos')
-  revalidatePath(`/mi-aula/alumnos/${student_id}`)
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/agendas')
+  revalidatePath(`/dashboard/agendas/${student_id}`)
   
   return { success: true }
 }
@@ -136,8 +136,8 @@ export async function bulkMarkPresent(dateStr: string) {
   
   if (error) throw new Error(error.message)
   
-  revalidatePath('/mi-aula')
-  revalidatePath('/mi-aula/alumnos')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/agendas')
   
   return { success: true, count: studentsWithoutLog.length }
 }
@@ -164,8 +164,8 @@ export async function bulkMarkLunch(dateStr: string) {
 
   if (error) throw new Error(error.message)
   
-  revalidatePath('/mi-aula')
-  revalidatePath('/mi-aula/alumnos')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/agendas')
   
   return { success: true }
 }
@@ -199,8 +199,8 @@ export async function bulkAddNote(dateStr: string, note: string) {
     await supabase.from('daily_logs').update({ notes: newNote }).eq('id', log.id)
   }
   
-  revalidatePath('/mi-aula')
-  revalidatePath('/mi-aula/alumnos')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/agendas')
   
   return { success: true }
 }

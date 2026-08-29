@@ -53,7 +53,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
       await upsertDailyLog(formData)
       
       // Redirect to the same page with ?success=true
-      router.push(`/mi-aula/alumnos/${studentId}?date=${dateStr}&success=true`)
+      router.push(`/dashboard/agendas/${studentId}?date=${dateStr}&success=true`)
       
     } catch (error) {
       console.error('Error saving log:', error)
@@ -83,7 +83,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => router.push('/mi-aula/alumnos')}
+          onClick={() => router.push('/dashboard/agendas')}
           className="h-10 w-10 rounded-full hover:bg-stone-100 -ml-2 shrink-0 cursor-pointer text-stone-500 hover:text-stone-900 transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />

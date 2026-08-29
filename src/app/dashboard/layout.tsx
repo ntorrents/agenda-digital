@@ -26,6 +26,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const pathname = usePathname()
   const [userName, setUserName] = useState<string>('Marta Rovira')
+  const [role, setRole] = useState<string>('teacher')
   const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -43,10 +44,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('school_id')
+        .select('school_id, role')
         .eq('id', user.id)
         .single()
         
+      if (profile) {
+        setRole(profile.role)
+      }
+      
       if (profile?.school_id) {
         const { data: school } = await supabase
           .from('schools')
@@ -73,7 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setIsMobileMenuOpen(false)
   }, [pathname])
 
-  const navItems = [
+  const adminNavItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Mètriques' },
     { href: '/dashboard/config/aulas', icon: Building2, label: 'Aules' },
     { href: '/dashboard/config/alumnos', icon: Baby, label: 'Alumnes' },
@@ -84,6 +89,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: '/dashboard/galeria', icon: ImageIcon, label: 'Galeria' },
     { href: '/dashboard/config/centro', icon: Settings, label: 'Ajustes del Centre' },
   ]
+
+  const teacherNavItems = [
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Resum del dia' },
+    { href: '/dashboard/aula', icon: Building2, label: 'La meva Aula' },
+    { href: '/dashboard/config/alumnos', icon: Baby, label: 'Alumnes' },
+    { href: '/dashboard/agendas', icon: MessageSquare, label: 'Agendes' },
+    { href: '/dashboard/calendario', icon: CalendarIcon, label: 'Calendari' },
+    { href: '/dashboard/comunicacion', icon: Bell, label: 'Comunicació' },
+  ]
+
+  const navItems = role === 'admin' ? adminNavItems : teacherNavItems
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white">
@@ -99,7 +115,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <h1 className="text-base font-black text-stone-900 leading-tight truncate">
             {schoolInfo?.name || 'Escola'}
           </h1>
-          <p className="text-xs text-stone-500 font-medium">Panell de Direcció</p>
+          <p className="text-xs text-stone-500 font-medium">
+            {role === 'admin' ? 'Panell de Direcció' : 'Panell Educador/a'}
+          </p>
         </div>
       </div>
 
@@ -132,7 +150,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-between">
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-bold text-stone-800 truncate">{userName}</span>
-            <span className="text-[10px] text-teal-700 font-semibold uppercase tracking-wider">Directora</span>
+            <span className="text-[10px] text-teal-700 font-semibold uppercase tracking-wider">
+              {role === 'admin' ? 'Directora' : 'Educador/a'}
+            </span>
           </div>
           <Button
             variant="ghost"

@@ -12,6 +12,8 @@ export default function CalendarioPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [isCreating, setIsCreating] = useState(false)
   const [schoolId, setSchoolId] = useState<string | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<string>('teacher')
   
   // Form state
   const [title, setTitle] = useState('')
@@ -28,14 +30,16 @@ export default function CalendarioPage() {
   async function loadEvents() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+    setCurrentUserId(user.id)
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('school_id')
+      .select('school_id, role')
       .eq('id', user.id)
       .single()
 
     if (profile) {
+      setUserRole(profile.role)
       setSchoolId(profile.school_id)
       
       const year = currentDate.getFullYear()
@@ -64,25 +68,22 @@ export default function CalendarioPage() {
     const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0')
     const day = selectedDate.getDate().toString().padStart(2, '0')
     const dateStr = `${year}-${month}-${day}`
-    const { data: { user } } = await supabase.auth.getUser()
+    
+    const { error } = await supabase.from('events_announcements').insert([{
+      school_id: schoolId,
+      author_id: currentUserId,
+      title,
+      description: description || null,
+      event_date: dateStr,
+      event_type: 'event',
+      audience
+    }])
 
-    if (user) {
-      const { error } = await supabase.from('events_announcements').insert({
-        school_id: schoolId,
-        author_id: user.id,
-        title,
-        description,
-        event_date: dateStr,
-        event_type: 'event',
-        audience
-      })
-
-      if (!error) {
-        setIsCreating(false)
-        setTitle('')
-        setDescription('')
-        loadEvents()
-      }
+    if (!error) {
+      setIsCreating(false)
+      setTitle('')
+      setDescription('')
+      loadEvents()
     }
     setIsSubmitting(false)
   }
@@ -186,14 +187,17 @@ export default function CalendarioPage() {
                     </span>
                     
                     <div className="mt-1 flex-1 w-full overflow-hidden flex flex-col gap-1">
-                      {dayEvents.slice(0, 3).map(e => (
-                        <div key={e.id} className={cn(
-                          'text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded truncate w-full',
-                          e.audience === 'school' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                        )}>
-                          {e.title}
-                        </div>
-                      ))}
+                      <div className="flex flex-col gap-1 w-full px-1">
+                        {dayEvents.slice(0, 3).map(e => (
+                          <div key={e.id} className={cn(
+                            'text-[9px] font-bold px-1 py-0.5 rounded flex items-center gap-1 w-full',
+                            e.audience === 'school' ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-purple-50 text-purple-700 border border-purple-100'
+                          )} title={e.title}>
+                            {e.audience === 'school' ? <Baby className="h-2.5 w-2.5 shrink-0" /> : <Users className="h-2.5 w-2.5 shrink-0" />}
+                            <span className="truncate">{e.title}</span>
+                          </div>
+                        ))}
+                      </div>
                       {dayEvents.length > 3 && (
                         <div className="text-[9px] font-bold text-stone-400 pl-1">
                           +{dayEvents.length - 3} més
@@ -301,12 +305,14 @@ export default function CalendarioPage() {
                       'p-4 rounded-2xl border flex flex-col gap-2 relative group',
                       event.audience === 'school' ? 'bg-blue-50/50 border-blue-100' : 'bg-purple-50/50 border-purple-100'
                     )}>
-                      <button
-                        onClick={() => handleDeleteEvent(event.id)}
-                        className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:text-red-600 hover:border-red-200 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
+                      {(userRole === 'admin' || event.author_id === currentUserId) && (
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:text-red-600 hover:border-red-200 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                       <div className="flex items-center gap-1.5">
                         {event.audience === 'school' ? (
                           <span className="flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full uppercase tracking-wider">

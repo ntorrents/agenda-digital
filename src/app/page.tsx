@@ -22,7 +22,7 @@ export default function HomePage() {
       if (role === 'admin') {
         router.replace('/dashboard')
       } else if (role === 'teacher') {
-        router.replace('/mi-aula')
+        router.replace('/dashboard')
       } else if (role === 'guardian') {
         router.replace('/mi-hijo')
       } else {

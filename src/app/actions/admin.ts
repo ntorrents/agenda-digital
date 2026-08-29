@@ -3,11 +3,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function createStaffMember(formData: FormData) {
+async function requireAdmin() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) throw new Error('Not authenticated')
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') throw new Error('Unauthorized. Admin access required.')
+  return { supabase, user }
+}
+
+export async function createStaffMember(formData: FormData) {
+  const { supabase, user } = await requireAdmin()
 
   const fullName = formData.get('full_name') as string
   const email = formData.get('email') as string
@@ -36,10 +42,7 @@ export async function createStaffMember(formData: FormData) {
 }
 
 export async function createClassroom(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) throw new Error('Not authenticated')
+  const { supabase, user } = await requireAdmin()
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -78,10 +81,7 @@ export async function createClassroom(formData: FormData) {
 }
 
 export async function updateClassroom(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) throw new Error('Not authenticated')
+  const { supabase } = await requireAdmin()
 
   const id = formData.get('id') as string
   const name = formData.get('name') as string
@@ -112,10 +112,7 @@ export async function updateClassroom(formData: FormData) {
 }
 
 export async function deleteClassroom(classroomId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) throw new Error('Not authenticated')
+  const { supabase } = await requireAdmin()
 
   const { error } = await supabase
     .from('classrooms')
@@ -129,10 +126,7 @@ export async function deleteClassroom(classroomId: string) {
 }
 
 export async function createStudent(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) throw new Error('Not authenticated')
+  const { supabase, user } = await requireAdmin()
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -220,10 +214,7 @@ export async function createStudent(formData: FormData) {
 }
 
 export async function updateStudent(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) throw new Error('Not authenticated')
+  const { supabase } = await requireAdmin()
 
   const id = formData.get('id') as string
   const firstName = formData.get('first_name') as string
@@ -261,10 +252,7 @@ export async function updateStudent(formData: FormData) {
 }
 
 export async function deleteStudent(studentId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) throw new Error('Not authenticated')
+  const { supabase } = await requireAdmin()
 
   const { error } = await supabase
     .from('students')

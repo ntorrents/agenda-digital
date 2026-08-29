@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Baby, Users, Building2, Settings, ChevronRight, Sparkles, Calendar, ShieldAlert, HeartPulse, Activity, LayoutDashboard } from 'lucide-react'
+import { Baby, Users, Building2, Settings, ChevronRight, Sparkles, Calendar, ShieldAlert, HeartPulse, Activity, LayoutDashboard, MessageSquare } from 'lucide-react'
+import { TeacherDashboard } from '@/components/teacher/TeacherDashboard'
 
 export default async function DashboardSummaryPage() {
   const supabase = await createClient()
@@ -12,7 +13,7 @@ export default async function DashboardSummaryPage() {
   // Find school for this admin
   const { data: profile } = await supabase
     .from('profiles')
-    .select('school_id')
+    .select('school_id, role')
     .eq('id', user.id)
     .single()
 
@@ -113,6 +114,15 @@ export default async function DashboardSummaryPage() {
       stat: null
     }
   ]
+
+  // If the user is a teacher, render their specific dashboard instead of the admin one
+  if (profile.role === 'teacher') {
+    return (
+      <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <TeacherDashboard schoolId={schoolId} userId={user.id} />
+      </main>
+    )
+  }
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">

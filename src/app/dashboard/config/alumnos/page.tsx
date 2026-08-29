@@ -4,12 +4,7 @@ import { Baby, Filter, Search, Plus, Eye } from 'lucide-react'
 import { DeleteStudentButton } from '@/components/admin/DeleteStudentButton'
 import Link from 'next/link'
 
-export default async function DashboardConfigAlumnosPage({
-  searchParams: searchParamsPromise,
-}: {
-  searchParams: Promise<{ q?: string; gender?: string; classroom?: string }>
-}) {
-  const searchParams = await searchParamsPromise
+export default async function DashboardConfigAlumnosPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -17,11 +12,22 @@ export default async function DashboardConfigAlumnosPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('school_id')
+    .select('school_id, role')
     .eq('id', user.id)
     .single()
 
   if (!profile) redirect('/login')
+
+  // If teacher, find their classroom
+  let teacherClassroomId: string | null = null
+  if (profile.role === 'teacher') {
+    const { data: c } = await supabase
+      .from('classrooms')
+      .select('id')
+      .eq('teacher_id', user.id)
+      .single()
+    if (c) teacherClassroomId = c.id
+  }
 
   // Build query for students
   let query = supabase
@@ -37,25 +43,16 @@ export default async function DashboardConfigAlumnosPage({
     .eq('school_id', profile.school_id)
     .order('first_name', { ascending: true })
 
-  // Apply filters
-  if (searchParams?.gender) {
-    query = query.eq('gender', searchParams.gender)
-  }
-  if (searchParams?.classroom) {
-    query = query.eq('classroom_id', searchParams.classroom)
-  }
-  if (searchParams?.q) {
-    query = query.or(`first_name.ilike.%${searchParams.q}%,last_name.ilike.%${searchParams.q}%`)
+  if (profile.role === 'teacher') {
+    if (teacherClassroomId) {
+      query = query.eq('classroom_id', teacherClassroomId)
+    } else {
+      // Teacher has no classroom, show empty
+      query = query.eq('id', '00000000-0000-0000-0000-000000000000') 
+    }
   }
 
   const { data: students } = await query
-
-  // Fetch all classrooms to populate filters
-  const { data: classrooms } = await supabase
-    .from('classrooms')
-    .select('id, name, level')
-    .eq('school_id', profile.school_id)
-    .order('level', { ascending: true })
 
   const getGenderLabel = (g: string) => {
     switch (g) {
@@ -92,38 +89,43 @@ export default async function DashboardConfigAlumnosPage({
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Link 
-            href="/dashboard/config"
-            className="p-2 rounded-xl bg-white border border-stone-200 text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-sm cursor-pointer flex items-center justify-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-          </Link>
+          {profile.role === 'admin' && (
+            <Link 
+              href="/dashboard/config"
+              className="p-2 rounded-xl bg-white border border-stone-200 text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-sm cursor-pointer flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </Link>
+          )}
           <div>
             <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
-              <Baby className="h-5 w-5 text-teal-600" /> Alumnes del Centre
+              <Baby className="h-5 w-5 text-teal-600" /> {profile.role === 'admin' ? 'Alumnes del Centre' : 'Els meus Alumnes'}
             </h3>
-            <p className="text-xs text-stone-500">Gestió completa, filtres i edició</p>
+            <p className="text-xs text-stone-500">{profile.role === 'admin' ? 'Gestió completa y llistat' : 'Alumnes de la teva aula'}</p>
           </div>
         </div>
         
-        <Link 
-          href="/dashboard/config/alumnos/nuevo"
-          className="inline-flex items-center justify-center rounded-2xl bg-teal-600 text-white hover:bg-teal-700 font-bold text-xs h-9 px-4 shadow-sm transition-all"
-        >
-          <Plus className="h-3.5 w-3.5 mr-1" /> Nou Alumne
-        </Link>
+        {profile.role === 'admin' && (
+          <Link 
+            href="/dashboard/config/alumnos/nuevo"
+            className="inline-flex items-center justify-center rounded-2xl bg-teal-600 text-white hover:bg-teal-700 font-bold text-xs h-9 px-4 shadow-sm transition-all"
+          >
+            <Plus className="h-3.5 w-3.5 mr-1" /> Nou Alumne
+          </Link>
+        )}
       </div>
 
 
       {/* Render tables by level */}
       <div className="space-y-8">
         {[...levels, 'Sense Aula'].map(level => {
+          if (profile.role === 'teacher' && level === 'Sense Aula') return null; // Teachers don't see unassigned students
           const list = level === 'Sense Aula' ? unassigned : studentsByLevel[level]
           if (list.length === 0) return null
 
           return (
             <div key={level} className="space-y-3">
-              <h4 className="text-sm font-black text-stone-800 ml-2">Nivell {level}</h4>
+              {profile.role === 'admin' && <h4 className="text-sm font-black text-stone-800 ml-2">Nivell {level}</h4>}
               <div className="bg-white border border-stone-200/80 rounded-[24px] overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-stone-600">
@@ -173,7 +175,7 @@ export default async function DashboardConfigAlumnosPage({
                                 >
                                   <Eye className="h-3 w-3" /> Fitxa
                                 </Link>
-                                <DeleteStudentButton studentId={student.id} />
+                                {profile.role === 'admin' && <DeleteStudentButton studentId={student.id} />}
                               </div>
                             </td>
                           </tr>

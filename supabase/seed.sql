@@ -10,7 +10,7 @@ DECLARE
   v_admin_id UUID := '22222222-2222-2222-2222-222222222222';
   v_teacher_id UUID := '33333333-3333-3333-3333-333333333333';
   v_guardian_id UUID := '44444444-4444-4444-4444-444444444444';
-  
+  v_superadmin_id UUID := '99999999-9999-9999-9999-999999999999';
   v_class_i1_id UUID := '55555555-5555-5555-5555-555555555551';
   v_class_i2_id UUID := '55555555-5555-5555-5555-555555555552';
   
@@ -28,8 +28,8 @@ BEGIN
   DELETE FROM public.students WHERE school_id = v_school_id;
   DELETE FROM public.classrooms WHERE school_id = v_school_id;
   DELETE FROM public.profiles WHERE school_id = v_school_id OR id IN (v_admin_id, v_teacher_id, v_guardian_id);
-  DELETE FROM auth.identities WHERE user_id IN (v_admin_id, v_teacher_id, v_guardian_id);
-  DELETE FROM auth.users WHERE id IN (v_admin_id, v_teacher_id, v_guardian_id);
+  DELETE FROM auth.identities WHERE user_id IN (v_admin_id, v_teacher_id, v_guardian_id, v_superadmin_id);
+  DELETE FROM auth.users WHERE id IN (v_admin_id, v_teacher_id, v_guardian_id, v_superadmin_id);
   DELETE FROM public.schools WHERE id = v_school_id;
 
   -- 2. Crear Escuela
@@ -137,13 +137,13 @@ BEGIN
     extensions.crypt('123456', extensions.gen_salt('bf')),
     now(),
     jsonb_build_object('provider', 'email', 'providers', array['email'], 'school_id', v_school_id, 'role', 'guardian'),
-    jsonb_build_object('full_name', 'Jordi Puig (Pare)', 'email', 'familia@bressol.cat', 'email_verified', true, 'sub', v_guardian_id::text),
+    jsonb_build_object('full_name', 'Teresa Pons (Família)', 'email', 'familia@bressol.cat', 'email_verified', true, 'sub', v_guardian_id::text),
     'authenticated',
     'authenticated',
     false,
     now(),
     now(),
-    NULL,
+    '+34 666 444 444',
     '',
     '',
     '',
@@ -151,25 +151,45 @@ BEGIN
     false
   );
 
-  INSERT INTO auth.identities (
-    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+  -- Usuario 4: Superadmin
+  INSERT INTO auth.users (
+    id, instance_id, email, encrypted_password, email_confirmed_at,
+    raw_app_meta_data, raw_user_meta_data, aud, role, is_super_admin,
+    created_at, updated_at, phone, confirmation_token, recovery_token,
+    email_change_token_new, email_change, is_anonymous
   ) VALUES (
-    v_guardian_id,
-    v_guardian_id,
-    jsonb_build_object('sub', v_guardian_id::text, 'email', 'familia@bressol.cat', 'email_verified', true, 'phone_verified', false),
-    'email',
-    v_guardian_id::text,
+    v_superadmin_id,
+    '00000000-0000-0000-0000-000000000000',
+    'superadmin@bressol.cat',
+    extensions.crypt('123456', extensions.gen_salt('bf')),
+    now(),
+    jsonb_build_object('provider', 'email', 'providers', array['email'], 'role', 'superadmin'),
+    jsonb_build_object('full_name', 'Admin Global (SaaS)', 'email', 'superadmin@bressol.cat', 'email_verified', true, 'sub', v_superadmin_id::text),
+    'authenticated',
+    'authenticated',
+    false,
     now(),
     now(),
-    now()
+    '',
+    '',
+    '',
+    '',
+    '',
+    false
   );
+
+  INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
+  VALUES 
+    (gen_random_uuid(), v_guardian_id, jsonb_build_object('sub', v_guardian_id::text, 'email', 'familia@bressol.cat'), 'email', v_guardian_id::text, now(), now(), now()),
+    (gen_random_uuid(), v_superadmin_id, jsonb_build_object('sub', v_superadmin_id::text, 'email', 'superadmin@bressol.cat'), 'email', v_superadmin_id::text, now(), now(), now());
 
   -- 4. Crear Perfiles en public.profiles
   INSERT INTO public.profiles (id, school_id, role, full_name, email, phone)
   VALUES 
     (v_admin_id, v_school_id, 'admin', 'Marta Rovira', 'admin@bressol.cat', '+34 600 111 222'),
-    (v_teacher_id, v_school_id, 'teacher', 'Clara Soler', 'educadora@bressol.cat', '+34 600 333 444'),
-    (v_guardian_id, v_school_id, 'guardian', 'Jordi Puig', 'familia@bressol.cat', '+34 600 555 666');
+    (v_teacher_id, v_school_id, 'teacher', 'Laura Gómez', 'educadora@bressol.cat', '+34 666 222 222'),
+    (v_guardian_id, v_school_id, 'guardian', 'Teresa Pons', 'familia@bressol.cat', '+34 666 444 444'),
+    (v_superadmin_id, v_school_id, 'superadmin', 'Admin Global', 'superadmin@bressol.cat', '');
 
   -- 5. Crear Aulas
   INSERT INTO public.classrooms (id, school_id, name, level, teacher_id, capacity)

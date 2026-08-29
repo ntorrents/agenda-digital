@@ -1,0 +1,132 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { CheckCircle2, AlertCircle, Baby, ChevronRight } from 'lucide-react'
+import { BulkActionsWidget } from '@/components/agenda/BulkActionsWidget'
+
+export default async function AgendasIndexPage(props: { searchParams: Promise<{ date?: string }> }) {
+  const searchParams = await props.searchParams
+  const dateStr = searchParams.date || new Date().toISOString().split('T')[0]
+  
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  // Find the teacher's classroom
+  const { data: classroom } = await supabase
+    .from('classrooms')
+    .select('id, name')
+    .eq('teacher_id', user.id)
+    .single()
+
+  if (!classroom) {
+    return (
+      <div className="p-8 text-center bg-amber-50 rounded-2xl m-6">
+        <AlertCircle className="mx-auto h-8 w-8 text-amber-600 mb-3" />
+        <p className="font-bold text-amber-800">No tens cap aula assignada.</p>
+      </div>
+    )
+  }
+
+  // Get all active students in the classroom
+  const { data: students } = await supabase
+    .from('students')
+    .select('id, first_name, last_name')
+    .eq('classroom_id', classroom.id)
+    .eq('status', 'active')
+    .order('first_name', { ascending: true })
+
+  // Get all logs for today
+  const { data: logs } = await supabase
+    .from('daily_logs')
+    .select('student_id')
+    .eq('classroom_id', classroom.id)
+    .eq('date', dateStr)
+
+  const loggedStudentIds = new Set(logs?.map(l => l.student_id) || [])
+
+  const pendingStudents = students?.filter(s => !loggedStudentIds.has(s.id)) || []
+  const completedStudents = students?.filter(s => loggedStudentIds.has(s.id)) || []
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-stone-800">Agendes del Dia</h2>
+          <p className="text-sm font-medium text-stone-500 mt-1">Aula: {classroom.name} • Data: {new Date(dateStr).toLocaleDateString('ca-ES')}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <BulkActionsWidget dateStr={dateStr} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Pending List */}
+        <div className="bg-white border border-stone-200 rounded-[24px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertCircle className="h-5 w-5 text-amber-500" />
+            <h3 className="font-bold text-stone-800">Pendents ({pendingStudents.length})</h3>
+          </div>
+          
+          {pendingStudents.length === 0 ? (
+            <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">No hi ha agendes pendents! 🎉</p>
+          ) : (
+            <div className="space-y-2">
+              {pendingStudents.map(student => (
+                <Link 
+                  key={student.id} 
+                  href={`/dashboard/agendas/${student.id}?date=${dateStr}`}
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 border border-transparent hover:border-stone-200 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-amber-100 text-amber-700 h-8 w-8 rounded-full flex items-center justify-center shrink-0">
+                      <Baby className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-bold text-stone-700">{student.first_name} {student.last_name}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-stone-600 transition-colors" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Completed List */}
+        <div className="bg-white border border-stone-200 rounded-[24px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            <h3 className="font-bold text-stone-800">Completades ({completedStudents.length})</h3>
+          </div>
+          
+          {completedStudents.length === 0 ? (
+            <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">Encara no has omplert cap agenda avui.</p>
+          ) : (
+            <div className="space-y-2">
+              {completedStudents.map(student => (
+                <Link 
+                  key={student.id} 
+                  href={`/dashboard/agendas/${student.id}?date=${dateStr}`}
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 border border-transparent hover:border-stone-200 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-emerald-100 text-emerald-700 h-8 w-8 rounded-full flex items-center justify-center shrink-0">
+                      <Baby className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-bold text-stone-700">{student.first_name} {student.last_name}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-stone-600 transition-colors" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+      </div>
+
+    </div>
+  )
+}

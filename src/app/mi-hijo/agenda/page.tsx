@@ -31,7 +31,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
 
     const { data: student } = await supabase
       .from('students')
-      .select('first_name')
+      .select('first_name, classroom_id')
       .eq('id', studentId)
       .single()
 
@@ -48,6 +48,22 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
       .maybeSingle()
       
     dailyLog = log
+
+    let globalNote = null
+    if (log && student?.classroom_id) {
+      const { data: gn } = await supabase
+        .from('classroom_daily_notes')
+        .select('note, photo_url')
+        .eq('classroom_id', student.classroom_id)
+        .eq('date', dateStr)
+        .maybeSingle()
+      if (gn) {
+        globalNote = gn.note
+        dailyLog.globalNotePhoto = gn.photo_url
+      }
+    }
+
+    dailyLog.globalNote = globalNote
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -225,9 +241,9 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 <h3 className="text-[11px] font-black uppercase text-white tracking-wider">Anotacions de l&apos;Educadora</h3>
               </div>
               <div className="p-5 bg-orange-50/30">
-                {dailyLog.notes && dailyLog.notes.split('\n\nNota General: ')[0].trim() ? (
+                {dailyLog.notes && dailyLog.notes.trim() ? (
                   <p className="text-sm font-bold text-stone-800 leading-relaxed italic">
-                    "{dailyLog.notes.split('\n\nNota General: ')[0].trim()}"
+                    "{dailyLog.notes.trim()}"
                   </p>
                 ) : (
                   <p className="text-sm text-stone-400 italic">Sense anotacions avui.</p>
@@ -245,19 +261,26 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
             </div>
 
             {/* Anotaciones Globales */}
-            {dailyLog.notes && dailyLog.notes.includes('\n\nNota General: ') && (
+            {(dailyLog.globalNote || dailyLog.globalNotePhoto) && (
               <div className="bg-white border border-blue-200/50 rounded-[28px] overflow-hidden shadow-xs mt-4">
                 <div className="bg-blue-500/90 px-4 py-2.5 flex items-center gap-2">
                   <MessageCircle className="h-3.5 w-3.5 text-white" />
-                  <h3 className="text-[11px] font-black uppercase text-white tracking-wider">Nota General de l'Aula</h3>
+                  <h3 className="text-[11px] font-black uppercase text-white tracking-wider">Nota Global de l'Aula</h3>
                 </div>
                 <div className="p-5 bg-blue-50/30">
-                  <p className="text-sm font-bold text-stone-800 leading-relaxed italic">
-                    "{dailyLog.notes.split('\n\nNota General: ')[1].trim()}"
-                  </p>
+                  <div className="text-sm font-bold text-stone-800 leading-relaxed italic whitespace-pre-wrap">
+                    {dailyLog.globalNote && <p className="mb-4">"{dailyLog.globalNote.trim()}"</p>}
+                    
+                    {dailyLog.globalNotePhoto && (
+                      <div className="rounded-xl overflow-hidden shadow-sm border border-stone-200 inline-block mt-2">
+                        <img src={dailyLog.globalNotePhoto} alt="Foto Grupal" className="w-full h-auto max-h-64 object-cover" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
+
 
           </>
         )}
