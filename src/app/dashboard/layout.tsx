@@ -5,7 +5,21 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { LogOut, LayoutDashboard, Bell, Baby, Settings, Users } from 'lucide-react'
+import { 
+  LogOut, 
+  LayoutDashboard, 
+  Bell, 
+  Baby, 
+  Settings, 
+  Users, 
+  Building2, 
+  Utensils, 
+  MessageSquare, 
+  Calendar as CalendarIcon, 
+  Image as ImageIcon,
+  Menu,
+  X
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname()
   const [userName, setUserName] = useState<string>('Marta Rovira')
   const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     async function loadProfile() {
@@ -53,132 +68,138 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push('/login')
   }
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [pathname])
+
   const navItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Mètriques' },
+    { href: '/dashboard/config/aulas', icon: Building2, label: 'Aules' },
+    { href: '/dashboard/config/alumnos', icon: Baby, label: 'Alumnes' },
     { href: '/dashboard/equipo', icon: Users, label: 'Equip' },
-    { href: '/dashboard/config/alumnos', icon: Settings, label: 'Configuració' },
-    { href: '/dashboard/avisos', icon: Bell, label: 'Avisos' },
+    { href: '/dashboard/menus', icon: Utensils, label: 'Menú Menjador' },
+    { href: '/dashboard/comunicacion', icon: MessageSquare, label: 'Comunicació' },
+    { href: '/dashboard/calendario', icon: CalendarIcon, label: 'Calendari' },
+    { href: '/dashboard/galeria', icon: ImageIcon, label: 'Galeria' },
+    { href: '/dashboard/config/centro', icon: Settings, label: 'Ajustes del Centre' },
   ]
 
-  return (
-    <div className="min-h-screen bg-[#faf8f5] text-stone-800 pb-20 sm:pb-16 font-sans flex flex-col relative">
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md shadow-xs flex flex-col">
-        <div className="px-4 sm:px-8 py-3.5 w-full">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 border border-teal-100 overflow-hidden shadow-md shadow-teal-700/10 shrink-0">
-              {schoolInfo?.logo_url ? (
-                <img src={schoolInfo.logo_url} alt="Logo" className="w-full h-full object-cover" />
-              ) : (
-                <Baby className="h-5 w-5 text-teal-700" />
-              )}
-            </div>
-            <div>
-              <h1 className="text-base font-black text-stone-900 leading-tight">
-                {schoolInfo?.name || 'Escola'}
-              </h1>
-              <p className="text-xs text-stone-500 font-medium">Panell de Direcció</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex flex-col text-right">
-              <span className="text-xs font-bold text-stone-800">{userName}</span>
-              <span className="text-[10px] text-teal-700 font-semibold uppercase tracking-wider">Directora</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              className="rounded-2xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 cursor-pointer h-9 w-9"
-              title="Tancar sessió"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-6 flex items-center gap-3 border-b border-stone-100">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 border border-teal-100 overflow-hidden shadow-md shadow-teal-700/10 shrink-0">
+          {schoolInfo?.logo_url ? (
+            <img src={schoolInfo.logo_url} alt="Logo" className="w-full h-full object-cover" />
+          ) : (
+            <Baby className="h-5 w-5 text-teal-700" />
+          )}
         </div>
+        <div className="overflow-hidden">
+          <h1 className="text-base font-black text-stone-900 leading-tight truncate">
+            {schoolInfo?.name || 'Escola'}
+          </h1>
+          <p className="text-xs text-stone-500 font-medium">Panell de Direcció</p>
         </div>
-        
-        {/* Tab Navigation (Tablet/Desktop only) */}
-        <div className="hidden sm:block w-full border-t border-stone-100 bg-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-8 py-2">
-            <nav className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-            {navItems.map((item) => {
-              let isActive = false
-              if (item.href === '/dashboard') {
-                isActive = pathname === '/dashboard'
-              } else if (item.href === '/dashboard/config/alumnos') {
-                isActive = pathname.startsWith('/dashboard/config')
-              } else {
-                isActive = pathname.startsWith(item.href)
-              }
-                
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap cursor-pointer active:scale-95',
-                    isActive
-                      ? 'bg-teal-100 text-teal-900 shadow-sm border border-teal-200/50'
-                      : 'text-stone-500 hover:bg-stone-100 hover:text-stone-800 border border-transparent'
-                  )}
-                >
-                  <item.icon className={cn('h-4 w-4', isActive ? 'text-teal-600' : '')} />
-                  {item.label}
-                </Link>
-              )
-            })}
-          </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container */}
-      <div className="flex-1 w-full max-w-5xl mx-auto">
-        {children}
       </div>
 
-      {/* Bottom Tab Navigation (Mobile only) */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-stone-200/80 px-2 pb-safe pt-2 flex items-center justify-around">
+      <div className="flex-1 overflow-y-auto py-4 px-4 space-y-1 no-scrollbar">
         {navItems.map((item) => {
-          let isActive = false
-          if (item.href === '/dashboard') {
-            isActive = pathname === '/dashboard'
-          } else if (item.href === '/dashboard/config/alumnos') {
-            isActive = pathname.startsWith('/dashboard/config')
-          } else {
-            isActive = pathname.startsWith(item.href)
-          }
-            
+          // Exact match for dashboard to avoid highlighting it when on subroutes
+          const isActive = item.href === '/dashboard' 
+            ? pathname === '/dashboard' 
+            : pathname.startsWith(item.href)
+
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center w-16 h-14 rounded-2xl transition-all cursor-pointer relative',
-                isActive 
-                  ? 'text-teal-700' 
-                  : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer group',
+                isActive
+                  ? 'bg-teal-50 text-teal-800'
+                  : 'text-stone-500 hover:bg-stone-50 hover:text-stone-900'
               )}
             >
-              {isActive && (
-                <span className="absolute -top-1 w-8 h-1 rounded-full bg-teal-600" />
-              )}
-              <div className={cn(
-                'flex items-center justify-center rounded-xl p-1.5 transition-all',
-                isActive ? 'bg-teal-100/50' : 'bg-transparent'
-              )}>
-                <item.icon className={cn("h-5 w-5", isActive ? 'animate-in zoom-in duration-300' : '')} />
-              </div>
-              <span className={cn('text-[9px] font-bold mt-1', isActive ? 'text-teal-800' : '')}>
-                {item.label}
-              </span>
+              <item.icon className={cn('h-5 w-5', isActive ? 'text-teal-600' : 'text-stone-400 group-hover:text-stone-600')} />
+              {item.label}
             </Link>
           )
         })}
-      </nav>
+      </div>
+
+      <div className="p-4 border-t border-stone-100 bg-stone-50/50">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col overflow-hidden">
+            <span className="text-sm font-bold text-stone-800 truncate">{userName}</span>
+            <span className="text-[10px] text-teal-700 font-semibold uppercase tracking-wider">Directora</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            className="shrink-0 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 cursor-pointer h-9 w-9 transition-colors"
+            title="Tancar sessió"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="min-h-screen bg-[#faf8f5] text-stone-800 font-sans flex flex-col lg:flex-row">
+      
+      {/* Sidebar Desktop */}
+      <aside className="hidden lg:block w-72 h-screen sticky top-0 border-r border-stone-200/80 z-20 shrink-0">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile Header */}
+      <header className="lg:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200/80 p-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 border border-teal-100 overflow-hidden shrink-0">
+            {schoolInfo?.logo_url ? (
+              <img src={schoolInfo.logo_url} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
+              <Baby className="h-4 w-4 text-teal-700" />
+            )}
+          </div>
+          <h1 className="text-sm font-black text-stone-900 leading-tight">
+            {schoolInfo?.name || 'Escola'}
+          </h1>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-stone-600 h-9 w-9 rounded-xl hover:bg-stone-100 cursor-pointer"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+      </header>
+
+      {/* Mobile Drawer (Overlay & Menu) */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-40 flex">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm" 
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          {/* Menu */}
+          <aside className="relative w-[80%] max-w-sm h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-left-full duration-200">
+            <SidebarContent />
+          </aside>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <main className="flex-1 min-w-0 relative">
+        {children}
+      </main>
+      
     </div>
   )
 }

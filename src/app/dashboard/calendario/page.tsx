@@ -1,0 +1,342 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, X, Users, Baby, Megaphone } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+export default function CalendarioPage() {
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [events, setEvents] = useState<any[]>([])
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [isCreating, setIsCreating] = useState(false)
+  const [schoolId, setSchoolId] = useState<string | null>(null)
+  
+  // Form state
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [audience, setAudience] = useState('school') // 'school' | 'staff'
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const supabase = createClient()
+
+  useEffect(() => {
+    loadEvents()
+  }, [currentDate])
+
+  async function loadEvents() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('school_id')
+      .eq('id', user.id)
+      .single()
+
+    if (profile) {
+      setSchoolId(profile.school_id)
+      
+      const year = currentDate.getFullYear()
+      const month = currentDate.getMonth() + 1
+      const startDate = `${year}-${month.toString().padStart(2, '0')}-01`
+      const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
+      const { data } = await supabase
+        .from('events_announcements')
+        .select('*')
+        .eq('school_id', profile.school_id)
+        .eq('event_type', 'event')
+        .gte('event_date', startDate)
+        .lte('event_date', endDate)
+
+      if (data) setEvents(data)
+    }
+  }
+
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!title || !schoolId) return
+    setIsSubmitting(true)
+
+    const year = selectedDate.getFullYear()
+    const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0')
+    const day = selectedDate.getDate().toString().padStart(2, '0')
+    const dateStr = `${year}-${month}-${day}`
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      const { error } = await supabase.from('events_announcements').insert({
+        school_id: schoolId,
+        author_id: user.id,
+        title,
+        description,
+        event_date: dateStr,
+        event_type: 'event',
+        audience
+      })
+
+      if (!error) {
+        setIsCreating(false)
+        setTitle('')
+        setDescription('')
+        loadEvents()
+      }
+    }
+    setIsSubmitting(false)
+  }
+
+  const handleDeleteEvent = async (id: string) => {
+    if (!confirm('Eliminar aquest esdeveniment?')) return
+    await supabase.from('events_announcements').delete().eq('id', id)
+    loadEvents()
+  }
+
+  // Calendar logic
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay()
+  const startingDayIndex = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1 // Start on Monday
+
+  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
+  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
+
+  const sYear = selectedDate.getFullYear()
+  const sMonth = (selectedDate.getMonth() + 1).toString().padStart(2, '0')
+  const sDay = selectedDate.getDate().toString().padStart(2, '0')
+  const selectedDateStr = `${sYear}-${sMonth}-${sDay}`
+  
+  const selectedEvents = events.filter(e => e.event_date === selectedDateStr)
+
+  const tDate = new Date()
+  const tYear = tDate.getFullYear()
+  const tMonth = (tDate.getMonth() + 1).toString().padStart(2, '0')
+  const tDay = tDate.getDate().toString().padStart(2, '0')
+  const todayStr = `${tYear}-${tMonth}-${tDay}`
+
+  return (
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-73px)] lg:h-screen">
+      
+      {/* Calendar Area */}
+      <div className="flex-1 overflow-y-auto bg-[#faf8f5] p-4 sm:p-6 lg:p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-[24px] border border-stone-200/80 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center">
+                <CalendarIcon className="h-5 w-5" />
+              </div>
+              <h2 className="text-xl font-black text-stone-800 capitalize">
+                {currentDate.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' })}
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={prevMonth} className="rounded-xl h-10 w-10">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" onClick={() => setCurrentDate(new Date())} className="rounded-xl font-bold h-10">
+                Avui
+              </Button>
+              <Button variant="outline" size="icon" onClick={nextMonth} className="rounded-xl h-10 w-10">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-[32px] border border-stone-200/80 shadow-sm overflow-hidden p-6">
+            <div className="grid grid-cols-7 gap-2 mb-2">
+              {['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'].map(day => (
+                <div key={day} className="text-center text-xs font-black text-stone-400 uppercase tracking-wider py-2">
+                  {day}
+                </div>
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-7 gap-2 sm:gap-3 auto-rows-[75px] sm:auto-rows-[85px]">
+              {Array.from({ length: startingDayIndex }).map((_, i) => (
+                <div key={`empty-${i}`} className="bg-stone-50/50 rounded-2xl border border-transparent" />
+              ))}
+              
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const date = i + 1
+                const fullDateStr = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${date.toString().padStart(2, '0')}`
+                const dayEvents = events.filter(e => e.event_date === fullDateStr)
+                const isSelected = selectedDateStr === fullDateStr
+                const isToday = todayStr === fullDateStr
+
+                return (
+                  <button
+                    key={date}
+                    onClick={() => {
+                      setSelectedDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), date))
+                      setIsCreating(false)
+                    }}
+                    className={cn(
+                      'relative flex flex-col p-2 sm:p-3 rounded-2xl border transition-all text-left hover:border-teal-300 hover:shadow-md cursor-pointer',
+                      isSelected ? 'border-teal-500 bg-teal-50 ring-4 ring-teal-500/10' : 'border-stone-200/80 bg-white',
+                      isToday && !isSelected ? 'border-amber-300 bg-amber-50/30' : ''
+                    )}
+                  >
+                    <span className={cn(
+                      'text-sm font-black w-7 h-7 flex items-center justify-center rounded-full shrink-0',
+                      isToday ? 'bg-amber-100 text-amber-700' : (isSelected ? 'bg-teal-600 text-white' : 'text-stone-700')
+                    )}>
+                      {date}
+                    </span>
+                    
+                    <div className="mt-1 flex-1 w-full overflow-hidden flex flex-col gap-1">
+                      {dayEvents.slice(0, 3).map(e => (
+                        <div key={e.id} className={cn(
+                          'text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded truncate w-full',
+                          e.audience === 'school' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                        )}>
+                          {e.title}
+                        </div>
+                      ))}
+                      {dayEvents.length > 3 && (
+                        <div className="text-[9px] font-bold text-stone-400 pl-1">
+                          +{dayEvents.length - 3} més
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      {/* Side Panel for Selected Day */}
+      <div className="w-full lg:w-96 bg-white border-l border-stone-200/80 flex flex-col h-full shrink-0">
+        <div className="p-6 border-b border-stone-100 bg-stone-50/50">
+          <h3 className="text-xl font-black text-stone-800 capitalize">
+            {selectedDate.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </h3>
+          <p className="text-sm text-stone-500 font-medium">
+            {selectedEvents.length} esdeveniments programats
+          </p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {isCreating ? (
+            <form onSubmit={handleCreateEvent} className="bg-stone-50 border border-stone-200 rounded-2xl p-4 space-y-4 animate-in slide-in-from-top-4 fade-in duration-200">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-stone-800 text-sm">Nou Esdeveniment</h4>
+                <Button type="button" variant="ghost" size="icon" onClick={() => setIsCreating(false)} className="h-6 w-6">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Títol</label>
+                  <input
+                    required
+                    type="text"
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="Ex: Excursió al parc"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Descripció (opcional)</label>
+                  <textarea
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    rows={2}
+                    className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                    placeholder="Detalls curts..."
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1 block">Públic</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAudience('school')}
+                      className={cn(
+                        'flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border transition-colors',
+                        audience === 'school' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-stone-200 text-stone-500'
+                      )}
+                    >
+                      <Baby className="h-3.5 w-3.5" /> Tots (Famílies)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAudience('staff')}
+                      className={cn(
+                        'flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border transition-colors',
+                        audience === 'staff' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-white border-stone-200 text-stone-500'
+                      )}
+                    >
+                      <Users className="h-3.5 w-3.5" /> Només Equip
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <Button type="submit" disabled={isSubmitting} className="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-xl h-10 font-bold">
+                {isSubmitting ? 'Guardant...' : 'Crear Esdeveniment'}
+              </Button>
+            </form>
+          ) : (
+            <>
+              {selectedEvents.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="bg-stone-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CalendarIcon className="h-8 w-8 text-stone-300" />
+                  </div>
+                  <p className="text-sm font-medium text-stone-500">No hi ha res planejat per avui.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {selectedEvents.map(event => (
+                    <div key={event.id} className={cn(
+                      'p-4 rounded-2xl border flex flex-col gap-2 relative group',
+                      event.audience === 'school' ? 'bg-blue-50/50 border-blue-100' : 'bg-purple-50/50 border-purple-100'
+                    )}>
+                      <button
+                        onClick={() => handleDeleteEvent(event.id)}
+                        className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:text-red-600 hover:border-red-200 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                      <div className="flex items-center gap-1.5">
+                        {event.audience === 'school' ? (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            <Baby className="h-3 w-3" /> Tota l'escola
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            <Users className="h-3 w-3" /> Només Equip
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="font-bold text-stone-900 text-sm">{event.title}</h4>
+                      {event.description && (
+                        <p className="text-xs font-medium text-stone-600 leading-relaxed">{event.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <Button
+                onClick={() => setIsCreating(true)}
+                className="w-full bg-white border-2 border-dashed border-stone-200 text-stone-600 hover:border-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded-2xl h-12 font-bold shadow-none"
+              >
+                <Plus className="h-4 w-4 mr-2" /> Afegir Esdeveniment
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -117,13 +117,13 @@ export function StaffDetailForm({ initialData }: StaffDetailFormProps) {
               <div className="flex items-center gap-3 bg-stone-50 px-4 py-3 border border-stone-200 rounded-xl h-[46px]">
                 <input 
                   type="checkbox"
-                  name="is_active"
-                  defaultChecked={initialData?.is_active}
-                  id="is_active"
+                  name="status"
+                  defaultChecked={initialData?.status === 'active'}
+                  id="status"
                   className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
                 />
-                <label htmlFor="is_active" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
-                  Compte Actiu
+                <label htmlFor="status" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
+                  Compte actiu
                 </label>
               </div>
             </div>

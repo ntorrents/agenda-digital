@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { LogOut, LayoutDashboard, Users, Calendar, Wrench, Baby, Megaphone } from 'lucide-react'
+import { LogOut, LayoutDashboard, Users, Calendar, Wrench, Baby, Megaphone, Home, CalendarDays, Settings, Bell, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function EducatorLayout({ children }: { children: React.ReactNode }) {
@@ -70,11 +70,12 @@ export default function EducatorLayout({ children }: { children: React.ReactNode
   }
 
   const navItems = [
-    { href: '/mi-aula', icon: LayoutDashboard, label: 'Aula' },
+    { href: '/mi-aula', icon: Home, label: 'Inici' },
+    { href: '/mi-aula/agenda', icon: CalendarDays, label: 'Agenda' },
+    { href: '/mi-aula/menus', icon: Settings, label: 'Menú' },
     { href: '/mi-aula/alumnos', icon: Users, label: 'Alumnes' },
-    { href: '/mi-aula/calendario', icon: Calendar, label: 'Calendari' },
-    { href: '/mi-aula/herramientas', icon: Wrench, label: 'Eines' },
-    { href: '/mi-aula/avisos', icon: Megaphone, label: 'Avisos' },
+    { href: '/mi-aula/avisos', icon: Bell, label: 'Avisos' },
+    { href: '/mi-aula/chat', icon: MessageCircle, label: 'Xat' },
   ]
 
   // Para ocultar la tab bar inferior en ciertas subrutas donde queramos pantalla completa

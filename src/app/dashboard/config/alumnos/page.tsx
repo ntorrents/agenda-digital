@@ -89,13 +89,21 @@ export default async function DashboardConfigAlumnosPage({
   const unassigned = students?.filter(s => !s.classrooms) || []
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
-            <Baby className="h-5 w-5 text-teal-600" /> Alumnes del Centre
-          </h3>
-          <p className="text-xs text-stone-500">Gestió completa, filtres i edició</p>
+        <div className="flex items-center gap-4">
+          <Link 
+            href="/dashboard/config"
+            className="p-2 rounded-xl bg-white border border-stone-200 text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-sm cursor-pointer flex items-center justify-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </Link>
+          <div>
+            <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
+              <Baby className="h-5 w-5 text-teal-600" /> Alumnes del Centre
+            </h3>
+            <p className="text-xs text-stone-500">Gestió completa, filtres i edició</p>
+          </div>
         </div>
         
         <Link 
@@ -106,54 +114,6 @@ export default async function DashboardConfigAlumnosPage({
         </Link>
       </div>
 
-      {/* Filters Bar */}
-      <div className="bg-white p-3 rounded-2xl border border-stone-200/80 shadow-xs flex flex-wrap gap-3 items-center">
-        <div className="flex items-center gap-2 text-stone-400">
-          <Filter className="h-4 w-4" />
-          <span className="text-xs font-bold">Filtres:</span>
-        </div>
-        
-        <div className="flex gap-2 text-xs font-semibold">
-          <Link 
-            href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, gender: ''}).toString()}`}
-            className={`px-3 py-1.5 rounded-lg border ${!searchParams.gender ? 'bg-teal-50 border-teal-200 text-teal-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
-          >
-            Tots
-          </Link>
-          <Link 
-            href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, gender: 'girl'}).toString()}`}
-            className={`px-3 py-1.5 rounded-lg border ${searchParams.gender === 'girl' ? 'bg-teal-50 border-teal-200 text-teal-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
-          >
-            Nenes
-          </Link>
-          <Link 
-            href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, gender: 'boy'}).toString()}`}
-            className={`px-3 py-1.5 rounded-lg border ${searchParams.gender === 'boy' ? 'bg-teal-50 border-teal-200 text-teal-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
-          >
-            Nens
-          </Link>
-        </div>
-
-        <div className="h-6 w-px bg-stone-200 hidden sm:block"></div>
-
-        <div className="flex gap-2 text-xs font-semibold overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-          <Link 
-            href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, classroom: ''}).toString()}`}
-            className={`px-3 py-1.5 rounded-lg border whitespace-nowrap ${!searchParams.classroom ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
-          >
-            Totes les aules
-          </Link>
-          {classrooms?.map(c => (
-            <Link 
-              key={c.id}
-              href={`/dashboard/config/alumnos?${new URLSearchParams({...searchParams, classroom: c.id}).toString()}`}
-              className={`px-3 py-1.5 rounded-lg border whitespace-nowrap ${searchParams.classroom === c.id ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-stone-50 border-stone-200 text-stone-600'}`}
-            >
-              {c.name}
-            </Link>
-          ))}
-        </div>
-      </div>
 
       {/* Render tables by level */}
       <div className="space-y-8">

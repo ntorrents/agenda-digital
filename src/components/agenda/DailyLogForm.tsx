@@ -11,9 +11,10 @@ interface DailyLogFormProps {
   studentName: string
   dateStr: string
   initialData?: any
+  settings?: any
 }
 
-export function DailyLogForm({ studentId, studentName, dateStr, initialData }: DailyLogFormProps) {
+export function DailyLogForm({ studentId, studentName, dateStr, initialData, settings = {} }: DailyLogFormProps) {
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   
@@ -100,8 +101,9 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData }: D
       <div className="space-y-6">
         
         {/* Mood Section */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 text-teal-700">
+        {settings.agenda_mood !== false && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 text-teal-700">
             <Smile className="h-5 w-5" />
             <h3 className="font-bold text-sm tracking-wide">Estat d&apos;ànim</h3>
           </div>
@@ -128,8 +130,10 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData }: D
             ))}
           </div>
         </section>
+        )}
 
         {/* Meals Section */}
+        {settings.agenda_food !== false && (
         <section className="space-y-3 pt-4 border-t border-stone-100">
           <div className="flex items-center gap-2 text-orange-600">
             <Utensils className="h-5 w-5" />
@@ -195,8 +199,10 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData }: D
             </div>
           </div>
         </section>
+        )}
 
         {/* Diaper Section */}
+        {settings.agenda_diaper !== false && (
         <section className="space-y-3 pt-4 border-t border-stone-100">
           <div className="flex items-center gap-2 text-amber-600">
             <Droplets className="h-5 w-5" />
@@ -239,8 +245,10 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData }: D
             </div>
           </div>
         </section>
+        )}
 
         {/* Nap Section */}
+        {settings.agenda_nap !== false && (
         <section className="space-y-3 pt-4 border-t border-stone-100">
           <div className="flex items-center gap-2 text-emerald-600">
             <Moon className="h-5 w-5" />
@@ -286,6 +294,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData }: D
             </div>
           )}
         </section>
+        )}
 
         {/* Notes & Photos */}
         <section className="space-y-3 pt-4 border-t border-stone-100">

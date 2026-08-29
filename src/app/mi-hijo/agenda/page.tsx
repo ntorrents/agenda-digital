@@ -24,6 +24,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
 
   let dailyLog = null
   let studentName = ''
+  let settings = {}
 
   if (guardianRel) {
     const studentId = guardianRel.student_id
@@ -47,6 +48,21 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
       .maybeSingle()
       
     dailyLog = log
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('school_id')
+      .eq('id', user.id)
+      .single()
+      
+    if (profile?.school_id) {
+      const { data: school } = await supabase
+        .from('schools')
+        .select('settings')
+        .eq('id', profile.school_id)
+        .single()
+      settings = school?.settings || {}
+    }
   }
 
   const selectedDate = new Date(dateStr)
@@ -126,6 +142,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
             )}
 
             {/* Alimentación */}
+            {settings.agenda_food !== false && (
             <div className="bg-[#8cc63f]/10 border border-[#8cc63f]/30 rounded-[28px] p-5 shadow-xs relative overflow-hidden">
               <div className="flex items-center gap-2 mb-4">
                 <div className="bg-[#8cc63f] text-white p-1.5 rounded-xl">
@@ -161,10 +178,12 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 )}
               </div>
             </div>
+            )}
 
             {/* Fisiológico y Siesta */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Siesta */}
+              {settings.agenda_nap !== false && (
               <div className="bg-emerald-50/80 border border-emerald-100 rounded-[24px] p-4 shadow-xs">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Moon className="h-4 w-4 text-emerald-600" />
@@ -179,8 +198,10 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                   </p>
                 )}
               </div>
+              )}
 
               {/* Pañal */}
+              {settings.agenda_diaper !== false && (
               <div className="bg-amber-50/80 border border-amber-100 rounded-[24px] p-4 shadow-xs">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Droplets className="h-4 w-4 text-amber-600" />
@@ -195,6 +216,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                   </p>
                 )}
               </div>
+              )}
             </div>
 
             {/* Anotaciones Específicas */}
@@ -213,7 +235,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 
                 <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
                   <span className="font-medium text-stone-600">{dailyLog.teacher?.full_name || 'Educadora'}</span>
-                  {dailyLog.mood && (
+                  {dailyLog.mood && settings.agenda_mood !== false && (
                     <span className="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-stone-100 font-bold text-stone-700">
                       <Smile className="h-3.5 w-3.5 text-amber-500" /> {moodMap[dailyLog.mood]}
                     </span>

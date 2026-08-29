@@ -41,6 +41,19 @@ export default function LoginPage() {
         return
       }
 
+      // Comprobar force_password_reset
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('force_password_reset')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profile?.force_password_reset) {
+        router.push('/force-password-reset')
+        router.refresh()
+        return
+      }
+
       // Redirigir según el rol del usuario
       const role = data.user.app_metadata?.role
 

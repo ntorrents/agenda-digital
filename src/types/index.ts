@@ -36,7 +36,7 @@ export interface Profile {
   avatar_url: string | null
   email: string
   phone: string | null
-  is_active: boolean
+  status: 'active' | 'inactive' | 'paused'
   created_at: string
 }
 
@@ -47,7 +47,7 @@ export interface Classroom {
   level: ClassroomLevel
   teacher_id: string | null
   capacity: number | null
-  is_active: boolean
+  status: 'active' | 'inactive' | 'paused'
   created_at: string
 }
 
@@ -61,7 +61,7 @@ export interface Student {
   avatar_url: string | null
   allergies: string | null
   notes: string | null
-  is_active: boolean
+  status: 'active' | 'inactive' | 'paused'
   created_at: string
 }
 

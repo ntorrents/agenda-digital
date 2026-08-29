@@ -64,7 +64,7 @@ export async function createClassroom(formData: FormData) {
     capacity,
     teacher_id: teacherId === 'none' ? null : teacherId,
     auxiliary_teacher_ids: auxIds.filter(id => id !== 'none'),
-    is_active: true
+    status: 'active'
   }
 
   const { error } = await supabase
@@ -163,15 +163,57 @@ export async function createStudent(formData: FormData) {
     gender,
     intolerances,
     authorized_pickup,
-    parents_phone,
-    internal_notes
+    internal_notes,
+    status: 'active'
   }
 
-  const { error } = await supabase
+  const { data: insertedStudent, error } = await supabase
     .from('students')
     .insert([payload])
+    .select('id')
+    .single()
 
   if (error) throw new Error(error.message)
+
+  const studentId = insertedStudent.id
+
+  // Helper to create guardian
+  const addGuardian = async (prefix: string) => {
+    const gName = formData.get(`${prefix}_name`) as string
+    const gEmail = formData.get(`${prefix}_email`) as string
+    const gPhone = formData.get(`${prefix}_phone`) as string
+    const gRel = formData.get(`${prefix}_relation`) as string
+
+    if (gName && gEmail && gPhone && gRel) {
+      // 1. Create guardian user
+      const { data: newGuardianId, error: rpcError } = await supabase.rpc('create_guardian_user', {
+        p_email: gEmail,
+        p_full_name: gName,
+        p_phone: gPhone,
+        p_school_id: profile.school_id,
+        p_password: 'changeme123'
+      })
+
+      if (rpcError) {
+        console.error(`Error creating guardian ${gEmail}:`, rpcError)
+        return
+      }
+
+      // 2. Link student to guardian
+      if (newGuardianId) {
+        await supabase
+          .from('student_guardians')
+          .insert({
+            student_id: studentId,
+            guardian_id: newGuardianId,
+            relation: gRel
+          })
+      }
+    }
+  }
+
+  await addGuardian('guardian_1')
+  await addGuardian('guardian_2')
 
   revalidatePath('/dashboard/config/alumnos')
   return { success: true }
@@ -204,7 +246,6 @@ export async function updateStudent(formData: FormData) {
     gender,
     intolerances,
     authorized_pickup,
-    parents_phone,
     internal_notes
   }
 

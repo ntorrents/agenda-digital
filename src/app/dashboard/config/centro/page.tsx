@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Settings } from 'lucide-react'
+import { Settings, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 import { SchoolSettingsForm } from '@/components/admin/SchoolSettingsForm'
 
 export default async function DashboardConfigCentroPage() {
@@ -24,24 +25,32 @@ export default async function DashboardConfigCentroPage() {
     .from('students')
     .select('*', { count: 'exact', head: true })
     .eq('school_id', schoolData.id)
-    .eq('is_active', true)
+    .eq('status', 'active')
 
   const { count: teacherCount } = await supabase
     .from('profiles')
     .select('*', { count: 'exact', head: true })
     .eq('school_id', schoolData.id)
     .in('role', ['teacher', 'admin'])
-    .eq('is_active', true)
+    .eq('status', 'active')
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
-          <Settings className="h-5 w-5 text-teal-600" /> Paràmetres del Centre
-        </h3>
-        <p className="text-xs text-stone-500 mt-1">
-          Configuració general de <strong>{schoolData.name}</strong>
-        </p>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <Link 
+          href="/dashboard/config"
+          className="p-2 rounded-xl bg-white border border-stone-200 text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-sm cursor-pointer flex items-center justify-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </Link>
+        <div>
+          <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
+            <Settings className="h-5 w-5 text-teal-600" /> Paràmetres del Centre
+          </h3>
+          <p className="text-xs text-stone-500 mt-1">
+            Configuració general de <strong>{schoolData.name}</strong>
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 max-w-lg">

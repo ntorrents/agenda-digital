@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { LogOut, Home, Calendar, Image as ImageIcon, Bell, Menu, X, ArrowLeft, MessageCircle, HelpCircle } from 'lucide-react'
+import { LogOut, Home, Calendar, Image as ImageIcon, Bell, Menu, X, ArrowLeft, MessageCircle, HelpCircle, Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function FamilyLayout({ children }: { children: React.ReactNode }) {
@@ -96,6 +96,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
     { href: '/mi-hijo', icon: Home, label: 'Inici' },
     { href: '/mi-hijo/agenda', icon: Calendar, label: 'Agenda Diària' },
     { href: '/mi-hijo/calendario', icon: Calendar, label: 'Calendari Mensual' },
+    { href: '/mi-hijo/menus', icon: Utensils, label: 'Menú' },
     { href: '/mi-hijo/mensajes', icon: MessageCircle, label: 'Missatges' },
     { href: '/mi-hijo/galeria', icon: ImageIcon, label: 'Fotos i Galeria' },
     { href: '/mi-hijo/avisos', icon: Bell, label: 'Tauler i Avisos' },

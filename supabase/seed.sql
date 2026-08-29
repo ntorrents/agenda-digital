@@ -48,7 +48,8 @@ BEGIN
   INSERT INTO auth.users (
     id, instance_id, email, encrypted_password, email_confirmed_at,
     raw_app_meta_data, raw_user_meta_data, aud, role, is_super_admin,
-    created_at, updated_at
+    created_at, updated_at, phone, confirmation_token, recovery_token,
+    email_change_token_new, email_change, is_anonymous
   ) VALUES (
     v_admin_id,
     '00000000-0000-0000-0000-000000000000',
@@ -56,12 +57,18 @@ BEGIN
     extensions.crypt('123456', extensions.gen_salt('bf')),
     now(),
     jsonb_build_object('provider', 'email', 'providers', array['email'], 'school_id', v_school_id, 'role', 'admin'),
-    jsonb_build_object('full_name', 'Marta Rovira (Directora)'),
+    jsonb_build_object('full_name', 'Marta Rovira (Directora)', 'email', 'admin@bressol.cat', 'email_verified', true, 'sub', v_admin_id::text),
     'authenticated',
     'authenticated',
     false,
     now(),
-    now()
+    now(),
+    NULL,
+    '',
+    '',
+    '',
+    '',
+    false
   );
 
   INSERT INTO auth.identities (
@@ -69,7 +76,7 @@ BEGIN
   ) VALUES (
     v_admin_id,
     v_admin_id,
-    jsonb_build_object('sub', v_admin_id::text, 'email', 'admin@bressol.cat', 'email_verified', true),
+    jsonb_build_object('sub', v_admin_id::text, 'email', 'admin@bressol.cat', 'email_verified', true, 'phone_verified', false),
     'email',
     v_admin_id::text,
     now(),
@@ -81,7 +88,8 @@ BEGIN
   INSERT INTO auth.users (
     id, instance_id, email, encrypted_password, email_confirmed_at,
     raw_app_meta_data, raw_user_meta_data, aud, role, is_super_admin,
-    created_at, updated_at
+    created_at, updated_at, phone, confirmation_token, recovery_token,
+    email_change_token_new, email_change, is_anonymous
   ) VALUES (
     v_teacher_id,
     '00000000-0000-0000-0000-000000000000',
@@ -89,12 +97,18 @@ BEGIN
     extensions.crypt('123456', extensions.gen_salt('bf')),
     now(),
     jsonb_build_object('provider', 'email', 'providers', array['email'], 'school_id', v_school_id, 'role', 'teacher'),
-    jsonb_build_object('full_name', 'Clara Soler (Educadora)'),
+    jsonb_build_object('full_name', 'Clara Soler (Educadora)', 'email', 'educadora@bressol.cat', 'email_verified', true, 'sub', v_teacher_id::text),
     'authenticated',
     'authenticated',
     false,
     now(),
-    now()
+    now(),
+    NULL,
+    '',
+    '',
+    '',
+    '',
+    false
   );
 
   INSERT INTO auth.identities (
@@ -102,7 +116,7 @@ BEGIN
   ) VALUES (
     v_teacher_id,
     v_teacher_id,
-    jsonb_build_object('sub', v_teacher_id::text, 'email', 'educadora@bressol.cat', 'email_verified', true),
+    jsonb_build_object('sub', v_teacher_id::text, 'email', 'educadora@bressol.cat', 'email_verified', true, 'phone_verified', false),
     'email',
     v_teacher_id::text,
     now(),
@@ -114,7 +128,8 @@ BEGIN
   INSERT INTO auth.users (
     id, instance_id, email, encrypted_password, email_confirmed_at,
     raw_app_meta_data, raw_user_meta_data, aud, role, is_super_admin,
-    created_at, updated_at
+    created_at, updated_at, phone, confirmation_token, recovery_token,
+    email_change_token_new, email_change, is_anonymous
   ) VALUES (
     v_guardian_id,
     '00000000-0000-0000-0000-000000000000',
@@ -122,12 +137,18 @@ BEGIN
     extensions.crypt('123456', extensions.gen_salt('bf')),
     now(),
     jsonb_build_object('provider', 'email', 'providers', array['email'], 'school_id', v_school_id, 'role', 'guardian'),
-    jsonb_build_object('full_name', 'Jordi Puig (Pare)'),
+    jsonb_build_object('full_name', 'Jordi Puig (Pare)', 'email', 'familia@bressol.cat', 'email_verified', true, 'sub', v_guardian_id::text),
     'authenticated',
     'authenticated',
     false,
     now(),
-    now()
+    now(),
+    NULL,
+    '',
+    '',
+    '',
+    '',
+    false
   );
 
   INSERT INTO auth.identities (
@@ -135,7 +156,7 @@ BEGIN
   ) VALUES (
     v_guardian_id,
     v_guardian_id,
-    jsonb_build_object('sub', v_guardian_id::text, 'email', 'familia@bressol.cat', 'email_verified', true),
+    jsonb_build_object('sub', v_guardian_id::text, 'email', 'familia@bressol.cat', 'email_verified', true, 'phone_verified', false),
     'email',
     v_guardian_id::text,
     now(),

@@ -135,18 +135,51 @@ export function StudentDetailForm({ classrooms, initialData }: StudentDetailForm
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-stone-500 pl-1">Telèfons de contacte (Pares)</label>
-            <input 
-              name="parents_phone"
-              defaultValue={initialData?.parents_phone}
-              type="text" 
-              placeholder="Ex: 600 123 456 (Mare)"
-              className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-stone-500 pl-1">Persones autoritzades (Recollida)</label>
+            <div className="space-y-4 col-span-2">
+              <h5 className="font-bold text-sm text-blue-700 pb-2 border-b border-blue-100">Tutor/a 1 (Obligatori)</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-500 pl-1">Nom complet</label>
+                  <input name="guardian_1_name" type="text" required placeholder="Nom i cognoms" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-500 pl-1">Parentiu (Ex: Mare, Pare...)</label>
+                  <input name="guardian_1_relation" type="text" required placeholder="Mare" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-500 pl-1">Correu (per a l'App)</label>
+                  <input name="guardian_1_email" type="email" required placeholder="correu@ejemplo.com" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-500 pl-1">Telèfon</label>
+                  <input name="guardian_1_phone" type="text" required placeholder="600 000 000" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 col-span-2 pt-4">
+              <h5 className="font-bold text-sm text-blue-700 pb-2 border-b border-blue-100">Tutor/a 2 (Opcional)</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-500 pl-1">Nom complet</label>
+                  <input name="guardian_2_name" type="text" placeholder="Nom i cognoms" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-500 pl-1">Parentiu</label>
+                  <input name="guardian_2_relation" type="text" placeholder="Pare" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-500 pl-1">Correu (per a l'App)</label>
+                  <input name="guardian_2_email" type="email" placeholder="correu2@ejemplo.com" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-500 pl-1">Telèfon</label>
+                  <input name="guardian_2_phone" type="text" placeholder="600 000 000" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+              </div>
+            </div>
+          <div className="space-y-1.5 col-span-2 pt-4">
+            <label className="text-xs font-bold text-stone-500 pl-1">Persones autoritzades (Recollida) - Altres familiars</label>
             <input 
               name="authorized_pickup"
               defaultValue={initialData?.authorized_pickup}

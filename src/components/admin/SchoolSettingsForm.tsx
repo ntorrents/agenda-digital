@@ -32,7 +32,10 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
   const settings = {
     opening_time: initialSettings?.opening_time || '07:30',
     closing_time: initialSettings?.closing_time || '18:00',
-    dining_service: initialSettings?.dining_service ?? true,
+    agenda_food: initialSettings?.agenda_food ?? true,
+    agenda_nap: initialSettings?.agenda_nap ?? true,
+    agenda_diaper: initialSettings?.agenda_diaper ?? true,
+    agenda_mood: initialSettings?.agenda_mood ?? true,
     ...initialSettings
   }
 
@@ -48,7 +51,10 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
       const newSettings = {
         opening_time: formData.get('opening_time'),
         closing_time: formData.get('closing_time'),
-        dining_service: formData.get('dining_service') === 'on',
+        agenda_food: formData.get('agenda_food') === 'on',
+        agenda_nap: formData.get('agenda_nap') === 'on',
+        agenda_diaper: formData.get('agenda_diaper') === 'on',
+        agenda_mood: formData.get('agenda_mood') === 'on',
       }
 
       const payload = new FormData()
@@ -199,17 +205,65 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
         </div>
       </div>
 
-      <div className="flex items-center gap-3 bg-stone-50 p-4 rounded-2xl border border-stone-200/80">
-        <input 
-          type="checkbox"
-          name="dining_service"
-          defaultChecked={settings.dining_service}
-          id="dining_service"
-          className="h-5 w-5 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
-        />
-        <label htmlFor="dining_service" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
-          Servei de Menjador Actiu
-        </label>
+      <div className="space-y-3">
+        <h3 className="text-sm font-black text-stone-800 border-b border-stone-100 pb-2">Opcions de l'Agenda</h3>
+        
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/80">
+            <input 
+              type="checkbox"
+              name="agenda_food"
+              defaultChecked={settings.agenda_food}
+              id="agenda_food"
+              className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
+            />
+            <label htmlFor="agenda_food" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
+              Habilitar registre d'Alimentació
+            </label>
+          </div>
+
+          <div className="flex items-center gap-3 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/80">
+            <input 
+              type="checkbox"
+              name="agenda_nap"
+              defaultChecked={settings.agenda_nap}
+              id="agenda_nap"
+              className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
+            />
+            <label htmlFor="agenda_nap" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
+              Habilitar registre de Son / Migdiades
+            </label>
+          </div>
+
+          <div className="flex items-center gap-3 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/80">
+            <input 
+              type="checkbox"
+              name="agenda_diaper"
+              defaultChecked={settings.agenda_diaper}
+              id="agenda_diaper"
+              className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
+            />
+            <label htmlFor="agenda_diaper" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
+              Habilitar registre de Control d'Esfínters
+            </label>
+          </div>
+
+          <div className="flex items-center gap-3 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/80">
+            <input 
+              type="checkbox"
+              name="agenda_mood"
+              defaultChecked={settings.agenda_mood}
+              id="agenda_mood"
+              className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
+            />
+            <label htmlFor="agenda_mood" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
+              Habilitar registre d'Estat d'Ànim
+            </label>
+          </div>
+        </div>
+        <p className="text-[10px] text-stone-500 font-medium pt-1">
+          Nota: Les fotos del dia i la nota global estaran sempre activades.
+        </p>
       </div>
 
       <Button 
