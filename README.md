@@ -19,7 +19,9 @@ npm run dev:app
 npm run dev:web
 ```
 
-Variables d'entorn de l'app: `apps/app/.env.local`
+Variables d'entorn:
+- App: `apps/app/.env.local`
+- Web: `apps/web/.env` (copia des de `apps/web/.env.example`)
 
 ## Desplegament Vercel
 

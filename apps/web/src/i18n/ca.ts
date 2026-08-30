@@ -1,0 +1,232 @@
+import type { Translations } from './types'
+
+const features = [
+  {
+    id: 'agenda',
+    icon: '🍼',
+    color: 'from-teal-500 to-emerald-600',
+    title: 'Agenda diària',
+    description: 'Menjars, migdiada, bolquer, estat d\'ànim, notes i fotos del dia — tot en un sol lloc per a cada infant.',
+  },
+  {
+    id: 'nota',
+    icon: '💬',
+    color: 'from-sky-400 to-blue-500',
+    title: 'Nota del dia de l\'aula',
+    description: 'Un missatge (i foto opcional) per a tota l\'aula, visible per a totes les famílies del grup.',
+  },
+  {
+    id: 'bulk',
+    icon: '⚡',
+    color: 'from-amber-400 to-orange-500',
+    title: 'Registre ràpid per educadores',
+    description: 'Marca el dinar com a «Tot», publica la foto grupal i la nota del dia en un sol clic.',
+  },
+  {
+    id: 'avisos',
+    icon: '📌',
+    color: 'from-rose-400 to-pink-500',
+    title: 'Avisos i circulars',
+    description: 'Comunicats generals o per aula, amb opció de fixar-los com a destacats al tauler familiar.',
+  },
+  {
+    id: 'missatges',
+    icon: '✉️',
+    color: 'from-violet-400 to-purple-500',
+    title: 'Missatges privats',
+    description: 'La direcció contacta famílies concretes amb indicador de lectura i resposta.',
+  },
+  {
+    id: 'galeria',
+    icon: '📸',
+    color: 'from-emerald-400 to-teal-500',
+    title: 'Galeria per dies',
+    description: 'Fotos individuals i grupals agrupades per data. Les famílies poden descarregar-les en ZIP.',
+  },
+  {
+    id: 'calendari',
+    icon: '📅',
+    color: 'from-indigo-400 to-blue-600',
+    title: 'Calendari escolar',
+    description: 'Esdeveniments, festius i activitats del centre o de l\'aula, sempre a mà.',
+  },
+  {
+    id: 'menu',
+    icon: '🍽️',
+    color: 'from-lime-400 to-green-500',
+    title: 'Menú del menjador',
+    description: 'Puja el menú mensual en imatge, PDF o text. Les famílies el consulten des de l\'app.',
+  },
+  {
+    id: 'direccio',
+    icon: '📊',
+    color: 'from-cyan-400 to-teal-600',
+    title: 'Panell de direcció',
+    description: 'Mètriques del dia: agendes pendents, baixes del personal i alertes d\'al·lèrgies.',
+  },
+  {
+    id: 'gestio',
+    icon: '🏫',
+    color: 'from-stone-400 to-stone-600',
+    title: 'Gestió del centre',
+    description: 'Alumnes, famílies, aules, equip docent i enviament massiu d\'accessos per correu.',
+  },
+  {
+    id: 'pwa',
+    icon: '📱',
+    color: 'from-pd-teal to-pd-teal-light',
+    title: 'App instal·lable (PWA)',
+    description: 'Funciona com una app al mòbil de famílies i educadores, sense passar per les botigues.',
+  },
+  {
+    id: 'i18n',
+    icon: '🌍',
+    color: 'from-amber-300 to-yellow-400',
+    title: 'Multilingüe i marca pròpia',
+    description: 'CA, ES, EN i FR. Cada centre mostra el seu logo i nom a l\'app familiar.',
+  },
+]
+
+const galleryItems = [
+  { id: 'agenda', label: 'Agenda', caption: 'El dia d\'en Marc, explicat amb carinyo', rotate: -4, color: 'bg-teal-50' },
+  { id: 'foto', label: 'Fotos', caption: 'Moments del pati compartits amb les famílies', rotate: 3, color: 'bg-amber-50' },
+  { id: 'menu', label: 'Menú', caption: 'El menú del mes, sempre accessible', rotate: -2, color: 'bg-lime-50' },
+  { id: 'avis', label: 'Avisos', caption: 'Circulars i comunicats destacats', rotate: 5, color: 'bg-rose-50' },
+  { id: 'calendari', label: 'Calendari', caption: 'Festius i activitats del curs', rotate: -3, color: 'bg-indigo-50' },
+  { id: 'missatge', label: 'Missatges', caption: 'Canal directe amb la direcció', rotate: 2, color: 'bg-violet-50' },
+]
+
+export const ca: Translations = {
+  meta: {
+    title: 'Petit Diari — Agenda digital per escoles bressol',
+    description: 'El dia a dia a l\'escola bressol, a prop de la família. Agenda digital per a centres 0-3.',
+  },
+  nav: {
+    features: 'Funcionalitats',
+    gallery: 'Galeria',
+    pricing: 'Preus',
+    faq: 'FAQ',
+    contact: 'Contacte',
+    enterApp: 'Entrar a l\'App',
+  },
+  hero: {
+    badge: 'Escoles bressol 0-3',
+    title: 'El dia a dia a l\'escola,',
+    titleHighlight: 'a prop de la família',
+    subtitle: 'Petit Diari connecta educadores i famílies amb una agenda digital pensada per al ritme dels més petits.',
+    ctaPrimary: 'Demana una demo',
+    ctaSecondary: 'Descobreix com funciona',
+    scrollHint: 'Desplaça\'t per explorar',
+  },
+  features: {
+    label: 'Funcionalitats',
+    title: 'Tot el que necessites, com en un quadern',
+    subtitle: 'Cada pàgina del diari cobreix una part del dia a dia del centre.',
+    scrollHint: '← Desplaça\'t horitzontalment →',
+    items: features,
+  },
+  gallery: {
+    label: 'Experiència',
+    title: 'Una app que sembla un diari',
+    subtitle: 'Interfície càlida, intuïtiva i pensada per al mòbil de les famílies.',
+    items: galleryItems,
+  },
+  languages: {
+    label: 'Idiomes',
+    title: 'Parlem el teu idioma',
+    subtitle: 'Interfície disponible en quatre llengües per adaptar-se a famílies i equip.',
+    langs: [
+      { code: 'CA', name: 'Català' },
+      { code: 'ES', name: 'Castellà' },
+      { code: 'EN', name: 'Anglès' },
+      { code: 'FR', name: 'Francès' },
+    ],
+  },
+  pricing: {
+    label: 'Preus',
+    title: 'Plans per mida de centre',
+    subtitle: 'Preus orientatius. Contacta\'ns per un pressupost a mida.',
+    note: 'Tots els plans inclouen suport, actualitzacions i formació inicial.',
+    plans: [
+      {
+        id: 'petit',
+        name: 'Petit',
+        price: '~250',
+        unit: '€/any',
+        description: 'Centres fins a 2 aules',
+        sticker: '⭐',
+        features: ['Agenda diària il·limitada', 'Galeria i avisos', 'App PWA per famílies', 'Suport per correu'],
+      },
+      {
+        id: 'mitja',
+        name: 'Mitjà',
+        price: '~350',
+        unit: '€/any',
+        description: 'Centres de 3 a 5 aules',
+        highlight: true,
+        sticker: '🌟',
+        features: ['Tot el del pla Petit', 'Missatges privats', 'Panell de direcció', 'Prioritat al suport'],
+      },
+      {
+        id: 'gran',
+        name: 'Gran',
+        price: 'A mida',
+        unit: '',
+        description: 'Centres grans o xarxes',
+        sticker: '🏫',
+        features: ['Tot el del pla Mitjà', 'Múltiples centres', 'Importació de dades', 'Acord personalitzat'],
+      },
+    ],
+  },
+  faq: {
+    label: 'FAQ',
+    title: 'Preguntes freqüents',
+    items: [
+      {
+        q: 'Cal instal·lar alguna cosa?',
+        a: 'No. Petit Diari és una app web que es pot instal·lar al mòbil com a PWA, però funciona perfectament des del navegador.',
+      },
+      {
+        q: 'Les famílies poden veure fotos de tots els nens?',
+        a: 'No. Cada família només veu la informació del seu fill o filla, excepte les fotos grupals de l\'aula.',
+      },
+      {
+        q: 'Quant triga posar-ho en marxa?',
+        a: 'Amb la formació inicial inclosa, un centre petit pot estar operatiu en menys d\'una setmana.',
+      },
+      {
+        q: 'Es poden exportar les dades?',
+        a: 'Sí. Les famílies poden descarregar les fotos en ZIP i el centre pot sol·licitar exportacions.',
+      },
+      {
+        q: 'Funciona en més d\'un idioma?',
+        a: 'Sí. Català, castellà, anglès i francès. Cada usuari tria el seu idioma.',
+      },
+      {
+        q: 'Què passa si una educadora està de baixa?',
+        a: 'La direcció gestiona l\'assistència de l\'equip i pot reassignar aules des del panell de configuració.',
+      },
+    ],
+  },
+  contact: {
+    label: 'Contacte',
+    title: 'Parlem del teu centre?',
+    subtitle: 'Explica\'ns la teva escola bressol i t\'enviarem una demo personalitzada.',
+    name: 'Nom',
+    email: 'Correu electrònic',
+    school: 'Nom del centre',
+    message: 'Missatge',
+    submit: 'Enviar missatge',
+    sending: 'Enviant...',
+    success: 'Missatge enviat! Et contactarem aviat.',
+    error: 'No s\'ha pogut enviar. Torna-ho a provar.',
+    errorNoKey: 'Formulari no configurat. Contacta per correu directament.',
+  },
+  footer: {
+    tagline: 'El dia a dia a l\'escola, a prop de la família.',
+    rights: 'Tots els drets reservats.',
+    madeIn: 'Fet amb carinyo per escoles bressol',
+  },
+}
+
+export { features, galleryItems }

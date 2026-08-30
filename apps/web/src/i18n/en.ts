@@ -1,0 +1,181 @@
+import type { Translations } from './types'
+import { features, galleryItems } from './ca'
+
+const enFeatureTitles: Record<string, string> = {
+  agenda: 'Daily diary',
+  nota: 'Classroom day note',
+  bulk: 'Quick logging for educators',
+  avisos: 'Announcements & circulars',
+  missatges: 'Private messages',
+  galeria: 'Photo gallery by day',
+  calendari: 'School calendar',
+  menu: 'Canteen menu',
+  direccio: 'Director dashboard',
+  gestio: 'Centre management',
+  pwa: 'Installable app (PWA)',
+  i18n: 'Multilingual & custom branding',
+}
+
+const enFeatureDescs: Record<string, string> = {
+  agenda: 'Meals, nap, nappy, mood, notes and photos — all in one place for each child.',
+  nota: 'A message (and optional photo) for the whole classroom, visible to all families.',
+  bulk: 'Mark lunch as «All done», publish group photo and day note in one click.',
+  avisos: 'General or classroom announcements, with option to pin as featured.',
+  missatges: 'Management contacts specific families with read receipts.',
+  galeria: 'Individual and group photos grouped by date. Families can download as ZIP.',
+  calendari: 'Events, holidays and activities — always at hand.',
+  menu: 'Upload monthly menu as image, PDF or text. Families view from the app.',
+  direccio: 'Daily metrics: pending diaries, staff absences and allergy alerts.',
+  gestio: 'Students, families, classrooms, staff and bulk access emails.',
+  pwa: 'Works like an app on mobile for families and staff, no app store needed.',
+  i18n: 'CA, ES, EN & FR. Each centre shows its own logo and name.',
+}
+
+const enGalleryCaptions: Record<string, string> = {
+  agenda: 'Marc\'s day, explained with care',
+  foto: 'Playground moments shared with families',
+  menu: 'This month\'s menu, always accessible',
+  avis: 'Circulars and featured announcements',
+  calendari: 'Holidays and course activities',
+  missatge: 'Direct channel with management',
+}
+
+export const en: Translations = {
+  meta: {
+    title: 'Petit Diari — Digital diary for nurseries',
+    description: 'Daily life at nursery school, close to family. Digital agenda for 0-3 centres.',
+  },
+  nav: {
+    features: 'Features',
+    gallery: 'Gallery',
+    pricing: 'Pricing',
+    faq: 'FAQ',
+    contact: 'Contact',
+    enterApp: 'Enter the App',
+  },
+  hero: {
+    badge: 'Nursery schools 0-3',
+    title: 'Daily life at school,',
+    titleHighlight: 'close to family',
+    subtitle: 'Petit Diari connects educators and families with a digital diary designed for little ones\' rhythm.',
+    ctaPrimary: 'Request a demo',
+    ctaSecondary: 'See how it works',
+    scrollHint: 'Scroll to explore',
+  },
+  features: {
+    label: 'Features',
+    title: 'Everything you need, like a notebook',
+    subtitle: 'Each diary page covers part of the centre\'s daily routine.',
+    scrollHint: '← Scroll horizontally →',
+    items: features.map((f) => ({
+      ...f,
+      title: enFeatureTitles[f.id] ?? f.title,
+      description: enFeatureDescs[f.id] ?? f.description,
+    })),
+  },
+  gallery: {
+    label: 'Experience',
+    title: 'An app that feels like a diary',
+    subtitle: 'Warm, intuitive interface designed for families\' mobile phones.',
+    items: galleryItems.map((g) => ({
+      ...g,
+      caption: enGalleryCaptions[g.id] ?? g.caption,
+    })),
+  },
+  languages: {
+    label: 'Languages',
+    title: 'We speak your language',
+    subtitle: 'Interface available in four languages for families and staff.',
+    langs: [
+      { code: 'CA', name: 'Catalan' },
+      { code: 'ES', name: 'Spanish' },
+      { code: 'EN', name: 'English' },
+      { code: 'FR', name: 'French' },
+    ],
+  },
+  pricing: {
+    label: 'Pricing',
+    title: 'Plans by centre size',
+    subtitle: 'Indicative prices. Contact us for a custom quote.',
+    note: 'All plans include support, updates and initial training.',
+    plans: [
+      {
+        id: 'petit',
+        name: 'Small',
+        price: '~250',
+        unit: '€/year',
+        description: 'Centres up to 2 classrooms',
+        sticker: '⭐',
+        features: ['Unlimited daily diary', 'Gallery & announcements', 'PWA app for families', 'Email support'],
+      },
+      {
+        id: 'mitja',
+        name: 'Medium',
+        price: '~350',
+        unit: '€/year',
+        description: 'Centres with 3-5 classrooms',
+        highlight: true,
+        sticker: '🌟',
+        features: ['Everything in Small', 'Private messages', 'Director dashboard', 'Priority support'],
+      },
+      {
+        id: 'gran',
+        name: 'Large',
+        price: 'Custom',
+        unit: '',
+        description: 'Large centres or networks',
+        sticker: '🏫',
+        features: ['Everything in Medium', 'Multiple centres', 'Data import', 'Custom agreement'],
+      },
+    ],
+  },
+  faq: {
+    label: 'FAQ',
+    title: 'Frequently asked questions',
+    items: [
+      {
+        q: 'Do I need to install anything?',
+        a: 'No. Petit Diari is a web app that can be installed on mobile as a PWA, but works perfectly in the browser.',
+      },
+      {
+        q: 'Can families see photos of all children?',
+        a: 'No. Each family only sees their own child\'s information, except classroom group photos.',
+      },
+      {
+        q: 'How long to get started?',
+        a: 'With included initial training, a small centre can be operational in less than a week.',
+      },
+      {
+        q: 'Can data be exported?',
+        a: 'Yes. Families can download photos as ZIP and the centre can request exports.',
+      },
+      {
+        q: 'Does it work in multiple languages?',
+        a: 'Yes. Catalan, Spanish, English and French. Each user chooses their language.',
+      },
+      {
+        q: 'What if an educator is on sick leave?',
+        a: 'Management handles staff attendance and can reassign classrooms from the settings panel.',
+      },
+    ],
+  },
+  contact: {
+    label: 'Contact',
+    title: 'Let\'s talk about your centre?',
+    subtitle: 'Tell us about your nursery and we\'ll send you a personalised demo.',
+    name: 'Name',
+    email: 'Email',
+    school: 'Centre name',
+    message: 'Message',
+    submit: 'Send message',
+    sending: 'Sending...',
+    success: 'Message sent! We\'ll contact you soon.',
+    error: 'Could not send. Please try again.',
+    errorNoKey: 'Form not configured. Contact us by email directly.',
+  },
+  footer: {
+    tagline: 'Daily life at school, close to family.',
+    rights: 'All rights reserved.',
+    madeIn: 'Made with care for nursery schools',
+  },
+}
