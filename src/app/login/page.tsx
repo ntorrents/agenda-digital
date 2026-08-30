@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Shield, GraduationCap, Heart, Loader2, ArrowRight, Baby, Crown } from 'lucide-react'
+import { Sparkles, Shield, GraduationCap, Heart, Loader2, ArrowRight, Baby } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { Locale } from '@/i18n'
@@ -206,13 +206,6 @@ export default function LoginPage() {
                 >
                   <Shield className="h-5 w-5 text-teal-600 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-bold text-stone-700">{t('demoAdmin')}</span>
-                </button>
-                <button
-                  onClick={() => handleQuickDemo('superadmin@bressol.cat')}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white border border-stone-200/60 shadow-xs hover:border-violet-200 hover:bg-violet-50/50 transition-all group"
-                >
-                  <Crown className="h-5 w-5 text-violet-500 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-bold text-stone-700">{t('demoSuperAdmin')}</span>
                 </button>
               </div>
             </div>
