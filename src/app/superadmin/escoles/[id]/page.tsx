@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getSuperadminDb } from '@/lib/superadmin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Building, Users, GraduationCap, ChevronLeft, LayoutGrid, AlertTriangle } from 'lucide-react'
@@ -7,7 +7,7 @@ export default async function SuperadminSchoolDetail(props: { params: Promise<{ 
   const params = await props.params
   const schoolId = params.id
 
-  const supabase = await createClient()
+  const supabase = await getSuperadminDb()
 
   const { data: school } = await supabase
     .from('schools')

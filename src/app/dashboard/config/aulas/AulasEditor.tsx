@@ -13,6 +13,7 @@ type Classroom = {
   level: string
   capacity: number | string | null
   teacher_id: string | null
+  auxiliary_teacher_ids?: string[]
   _isNew?: boolean
   _isArchived?: boolean
 }
@@ -70,6 +71,7 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
       level: 'I0',
       capacity: 10,
       teacher_id: null,
+      auxiliary_teacher_ids: [],
       _isNew: true
     }])
     setExpandedIds(prev => ({ ...prev, [newId]: true }))
@@ -233,6 +235,37 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
                           <option key={t.id} value={t.id}>{t.full_name}</option>
                         ))}
                       </select>
+                    </div>
+
+                    <div className="col-span-1 sm:col-span-2">
+                      <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
+                        Equip Auxiliar (Múltiple)
+                      </label>
+                      <div className="space-y-2 max-h-[150px] overflow-y-auto bg-stone-50 p-3 rounded-xl border border-stone-200">
+                        {teachers.map(t => (
+                          <label key={t.id} className="flex items-center gap-2 cursor-pointer hover:bg-stone-100 p-1 rounded-md transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={(aula.auxiliary_teacher_ids || []).includes(t.id)}
+                              onChange={(e) => {
+                                const currentIds = aula.auxiliary_teacher_ids || [];
+                                let newIds;
+                                if (e.target.checked) {
+                                  newIds = [...currentIds, t.id];
+                                } else {
+                                  newIds = currentIds.filter(id => id !== t.id);
+                                }
+                                updateClassroom(aula.id, 'auxiliary_teacher_ids', newIds);
+                              }}
+                              className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600"
+                            />
+                            <span className="text-sm font-medium text-stone-700">{t.full_name}</span>
+                          </label>
+                        ))}
+                        {teachers.length === 0 && (
+                          <span className="text-sm text-stone-400">Cap educadora disponible</span>
+                        )}
+                      </div>
                     </div>
 
                   </div>

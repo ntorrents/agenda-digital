@@ -18,8 +18,16 @@ export default function HomePage() {
         return
       }
 
-      const role = user.app_metadata?.role
-      if (role === 'admin') {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const role = profile?.role || user.app_metadata?.role
+      if (role === 'superadmin') {
+        window.location.replace('/superadmin')
+      } else if (role === 'admin') {
         router.replace('/dashboard')
       } else if (role === 'teacher') {
         router.replace('/dashboard')

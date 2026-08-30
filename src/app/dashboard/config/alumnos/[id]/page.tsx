@@ -39,6 +39,27 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
     .eq('school_id', profile.school_id)
     .order('level', { ascending: true })
 
+  // Fetch guardians + profiles (join anidat sovint torna buit per RLS)
+  const { data: guardianRows } = await supabase
+    .from('student_guardians')
+    .select('guardian_id, relation')
+    .eq('student_id', resolvedParams.id)
+
+  const guardianIds = (guardianRows || []).map(r => r.guardian_id)
+  const { data: guardianProfiles } = guardianIds.length
+    ? await supabase
+        .from('profiles')
+        .select('id, full_name, email, phone, welcome_email_sent')
+        .in('id', guardianIds)
+    : { data: [] as any[] }
+
+  const profileById = new Map((guardianProfiles || []).map(p => [p.id, p]))
+  const guardians = (guardianRows || []).map(row => ({
+    guardian_id: row.guardian_id,
+    relation: row.relation,
+    profiles: profileById.get(row.guardian_id) || null,
+  }))
+
   const t = await getTranslations('dashboardAlumnos')
 
   return (
@@ -58,7 +79,7 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      <StudentDetailForm classrooms={classrooms || []} initialData={student} />
+      <StudentDetailForm classrooms={classrooms || []} initialData={student} guardians={guardians} />
     </div>
   )
 }

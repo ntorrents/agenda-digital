@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Smile, Utensils, Droplets, Moon, CheckCircle2, XCircle, ArrowLeft, Camera, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { Smile, Utensils, Droplets, Moon, CheckCircle2, XCircle, ArrowLeft, Image as ImageIcon, Loader2, X } from 'lucide-react'
 import { upsertDailyLog } from '@/app/actions/daily-logs'
 import { useTranslations, useLocale } from 'next-intl'
+import { CameraCapture } from '@/components/media/CameraCapture'
 
 interface DailyLogFormProps {
   studentId: string
@@ -34,6 +35,33 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
   const [napEnd, setNapEnd] = useState<string>(initialData?.nap_end || '14:30')
   
   const [notes, setNotes] = useState<string>(initialData?.notes || '')
+  const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>(
+    initialData?.photos?.filter(Boolean) || []
+  )
+  const galleryRef = useRef<HTMLInputElement>(null)
+
+  const addPhotoFiles = (files: File[]) => {
+    if (files.length === 0) return
+    const remaining = Math.max(0, 5 - photoFiles.length - photoPreviews.length)
+    const selected = files.slice(0, remaining)
+    setPhotoFiles(prev => [...prev, ...selected])
+    setPhotoPreviews(prev => [...prev, ...selected.map(f => URL.createObjectURL(f))])
+  }
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    addPhotoFiles(Array.from(e.target.files || []))
+    e.target.value = ''
+  }
+
+  const removePhoto = (index: number) => {
+    const existingCount = (initialData?.photos?.filter(Boolean) || []).length
+    if (index < existingCount) return
+
+    const fileIndex = index - existingCount
+    setPhotoFiles(prev => prev.filter((_, i) => i !== fileIndex))
+    setPhotoPreviews(prev => prev.filter((_, i) => i !== index))
+  }
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -52,6 +80,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
         formData.append('nap_end', napEnd)
       }
       if (notes) formData.append('notes', notes)
+      photoFiles.forEach(file => formData.append('photos', file))
 
       await upsertDailyLog(formData)
       
@@ -317,12 +346,39 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
               onChange={(e) => setNotes(e.target.value)}
               className="w-full h-24 bg-stone-50 border border-stone-200/80 rounded-[20px] p-4 text-sm font-medium text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all resize-none"
             />
-            
+
+            <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoSelect} />
+
+            {photoPreviews.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {photoPreviews.map((url, i) => (
+                  <div key={`${url}-${i}`} className="relative">
+                    <img src={url} alt="" className="h-20 w-20 object-cover rounded-xl border border-stone-200" />
+                    {i >= (initialData?.photos?.filter(Boolean) || []).length && (
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(i)}
+                        className="absolute -top-1.5 -right-1.5 bg-white border border-stone-200 rounded-full h-5 w-5 flex items-center justify-center text-stone-500 hover:text-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="flex gap-2">
-              <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer">
-                <Camera className="h-4 w-4" /> {t('btnCamera')}
-              </button>
-              <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer">
+              <CameraCapture
+                label={t('btnCamera')}
+                onCapture={(file) => addPhotoFiles([file])}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer"
+              />
+              <button
+                type="button"
+                onClick={() => galleryRef.current?.click()}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer"
+              >
                 <ImageIcon className="h-4 w-4" /> {t('btnGallery')}
               </button>
             </div>

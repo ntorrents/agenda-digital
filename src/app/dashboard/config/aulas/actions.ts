@@ -18,6 +18,7 @@ export async function saveAllClassrooms(classrooms: any[], schoolId: string) {
       level: c.level,
       capacity: c.capacity ? parseInt(c.capacity) : null,
       teacher_id: c.teacher_id || null,
+      auxiliary_teacher_ids: c.auxiliary_teacher_ids || [],
       status: 'active'
     }
   })

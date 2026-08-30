@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, Home, Building, FileSpreadsheet, Settings, Crown, Database } from 'lucide-react'
-import { headers } from 'next/headers'
+import { Home, Building, Crown, Database } from 'lucide-react'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
+import { SuperadminLogout } from '@/components/superadmin/SuperadminLogout'
 import { Locale } from '@/i18n'
 
 export default async function SuperadminLayout({ children }: { children: React.ReactNode }) {
@@ -14,24 +14,25 @@ export default async function SuperadminLayout({ children }: { children: React.R
   const tCommon = await getTranslations('common')
   const locale = await getLocale() as Locale
 
-  // TEMPORARY DEMO BYPASS: We disable the auth check so you can view the UI without the DB migration
-  /*
   if (!user) {
     redirect('/login')
   }
 
-  // Ensure role is superadmin
+  const metaRole = user.app_metadata?.role as string | undefined
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, force_password_reset')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
-  if (profile?.role !== 'superadmin') {
-    // If not superadmin, kick them back to login or their normal dashboard
+  const role = profile?.role || metaRole
+  if (role !== 'superadmin') {
     redirect('/login')
   }
-  */
+
+  if (profile?.force_password_reset) {
+    redirect('/force-password-reset')
+  }
 
   // We could use headers to check the active route, but for simplicity we'll just style all links the same for now, 
   // or build a tiny client component for the active state later.
@@ -73,11 +74,7 @@ export default async function SuperadminLayout({ children }: { children: React.R
 
         {/* User / Logout */}
         <div className="p-4 border-t border-stone-800">
-          <form action="/auth/signout" method="post">
-            <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors">
-              <LogOut className="h-4 w-4" /> {tCommon('logout')}
-            </button>
-          </form>
+          <SuperadminLogout label={tCommon('logout')} />
         </div>
       </aside>
 

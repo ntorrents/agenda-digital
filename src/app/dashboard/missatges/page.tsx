@@ -26,13 +26,36 @@ export default async function DashboardMissatgesPage() {
     )
   }
 
-  // Fetch all families in the school
-  const { data: families } = await supabase
-    .from('profiles')
-    .select('id, full_name, email')
-    .eq('school_id', profile.school_id)
-    .eq('role', 'guardian')
-    .order('full_name')
+  // Fetch all families in the school, along with their students and classrooms
+  const { data: guardiansData } = await supabase
+    .from('student_guardians')
+    .select(`
+      guardian_id,
+      relation,
+      profiles:guardian_id(id, full_name, email, role, school_id),
+      students(first_name, last_name, classrooms(name))
+    `)
+  
+  // Filter for guardians belonging to this school and format them
+  const familiesMap = new Map()
+  
+  guardiansData?.forEach(g => {
+    const p = g.profiles as any
+    if (p && p.role === 'guardian' && p.school_id === profile.school_id) {
+      const student = g.students as any
+      const classroomName = student?.classrooms ? (Array.isArray(student.classrooms) ? student.classrooms[0]?.name : student.classrooms.name) : 'Sin Aula'
+      
+      const displayName = `${p.full_name} - ${g.relation} de ${student?.first_name} ${student?.last_name} (${classroomName})`
+      
+      familiesMap.set(p.id, {
+        id: p.id,
+        full_name: displayName,
+        email: p.email
+      })
+    }
+  })
+  
+  const families = Array.from(familiesMap.values()).sort((a, b) => a.full_name.localeCompare(b.full_name))
 
   // Fetch sent messages
   const { data: sentMessages } = await supabase

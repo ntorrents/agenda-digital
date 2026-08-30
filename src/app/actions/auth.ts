@@ -33,6 +33,12 @@ export async function resetForcedPassword(formData: FormData) {
 
   if (profileError) throw new Error(profileError.message)
 
-  // Retornar el rol para redirigir
-  return { success: true, role: user.app_metadata?.role }
+  // Retornar el rol per redirigir
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  return { success: true, role: profile?.role || user.app_metadata?.role }
 }

@@ -3,6 +3,32 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+async function uploadLogPhotos(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  files: File[],
+  schoolId: string,
+  studentId: string,
+  dateStr: string
+): Promise<string[]> {
+  const urls: string[] = []
+
+  for (const file of files) {
+    if (!(file instanceof File) || file.size === 0) continue
+
+    const fileExt = file.name.split('.').pop() || 'jpg'
+    const fileName = `${schoolId}/daily-logs/${studentId}/${dateStr}-${Math.random().toString(36).slice(2)}.${fileExt}`
+
+    const { error } = await supabase.storage.from('media').upload(fileName, file)
+
+    if (!error) {
+      const { data } = supabase.storage.from('media').getPublicUrl(fileName)
+      urls.push(data.publicUrl)
+    }
+  }
+
+  return urls
+}
+
 export async function upsertDailyLog(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -39,13 +65,23 @@ export async function upsertDailyLog(formData: FormData) {
   const nap_end = getNullIfEmpty(formData.get('nap_end') as string | null)
   const notes = getNullIfEmpty(formData.get('notes') as string | null)
 
+  const photoFiles = formData.getAll('photos').filter(
+    (f): f is File => f instanceof File && f.size > 0
+  )
+
   // Check if daily log already exists to get its ID, otherwise insert
   const { data: existingLog } = await supabase
     .from('daily_logs')
-    .select('id')
+    .select('id, photos')
     .eq('student_id', student_id)
     .eq('date', dateStr)
     .maybeSingle()
+
+  let photoUrls: string[] = existingLog?.photos || []
+  if (photoFiles.length > 0) {
+    const uploaded = await uploadLogPhotos(supabase, photoFiles, classroom.school_id, student_id, dateStr)
+    photoUrls = [...photoUrls, ...uploaded]
+  }
 
   const payload = {
     student_id,
@@ -61,7 +97,8 @@ export async function upsertDailyLog(formData: FormData) {
     diaper_changes,
     nap_start,
     nap_end,
-    notes
+    notes,
+    ...(photoUrls.length > 0 ? { photos: photoUrls } : {}),
   }
 
   if (existingLog) {

@@ -37,10 +37,17 @@ export async function updateFamilyProfile(formData: FormData) {
 
   // Actualizar Contraseña (si se provee antigua y nueva)
   if (oldPassword && newPassword) {
-    // Para cambiar la contraseña se requiere login previo si no está forzado, pero Supabase auth
-    // proporciona `updateUser` que en Auth v2 requiere estar autenticado
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: oldPassword,
+    })
+
+    if (signInError) {
+      throw new Error('La contrasenya actual no és correcta.')
+    }
+
     const { error: passwordError } = await supabase.auth.updateUser({
-      password: newPassword
+      password: newPassword,
     })
     
     if (passwordError) {

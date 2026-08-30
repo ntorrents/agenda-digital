@@ -27,6 +27,7 @@ export default async function DashboardConfigAulasPage() {
       level, 
       capacity,
       teacher_id,
+      auxiliary_teacher_ids,
       status
     `)
     .eq('school_id', profile.school_id)

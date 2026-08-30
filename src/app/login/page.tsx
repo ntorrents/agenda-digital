@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,7 +10,6 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { Locale } from '@/i18n'
 
 export default function LoginPage() {
-  const router = useRouter()
   const t = useTranslations('login')
   const locale = useLocale() as Locale
   const [email, setEmail] = useState('')
@@ -46,44 +44,35 @@ export default function LoginPage() {
         return
       }
 
-      // Comprobar force_password_reset
+      // Comprobar force_password_reset y rol desde profiles
       const { data: profile } = await supabase
         .from('profiles')
-        .select('force_password_reset')
+        .select('force_password_reset, role')
         .eq('id', data.user.id)
-        .single()
+        .maybeSingle()
 
       if (profile?.force_password_reset) {
-        router.push('/force-password-reset')
-        router.refresh()
+        window.location.assign('/force-password-reset')
         return
       }
 
-      // Redirigir según el rol del usuario
-      const role = data.user.app_metadata?.role
+      const role = profile?.role || data.user.app_metadata?.role
+      let dest = '/dashboard'
+      if (role === 'superadmin') dest = '/superadmin'
+      else if (role === 'guardian') dest = '/mi-hijo'
 
-      if (role === 'superadmin') {
-        router.push('/superadmin')
-      } else if (role === 'admin') {
-        router.push('/dashboard')
-      } else if (role === 'teacher') {
-        router.push('/dashboard')
-      } else if (role === 'guardian') {
-        router.push('/mi-hijo')
-      } else {
-        router.push('/dashboard')
-      }
-      router.refresh()
+      window.location.assign(dest)
+      return
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : t('errorUnexpected'))
       setIsLoading(false)
     }
   }
 
-  const handleQuickDemo = (demoEmail: string) => {
+  const handleQuickDemo = (demoEmail: string, demoPassword = '123456') => {
     setEmail(demoEmail)
-    setPassword('123456')
-    handleLogin(undefined, demoEmail, '123456')
+    setPassword(demoPassword)
+    handleLogin(undefined, demoEmail, demoPassword)
   }
 
   return (
@@ -177,21 +166,21 @@ export default function LoginPage() {
               </h2>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => handleQuickDemo('familia@bressol.cat')}
+                  onClick={() => handleQuickDemo('f1@cole.cat')}
                   className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white border border-stone-200/60 shadow-xs hover:border-pink-200 hover:bg-pink-50/50 transition-all group"
                 >
                   <Heart className="h-5 w-5 text-pink-500 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-bold text-stone-700">{t('demoFamily')}</span>
                 </button>
                 <button
-                  onClick={() => handleQuickDemo('educadora@bressol.cat')}
+                  onClick={() => handleQuickDemo('p1@cole.cat')}
                   className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white border border-stone-200/60 shadow-xs hover:border-orange-200 hover:bg-orange-50/50 transition-all group"
                 >
                   <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-bold text-stone-700">{t('demoTeacher')}</span>
                 </button>
                 <button
-                  onClick={() => handleQuickDemo('admin@bressol.cat')}
+                  onClick={() => handleQuickDemo('d@cole.cat')}
                   className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white border border-stone-200/60 shadow-xs hover:border-teal-200 hover:bg-teal-50/50 transition-all group"
                 >
                   <Shield className="h-5 w-5 text-teal-600 group-hover:scale-110 transition-transform" />

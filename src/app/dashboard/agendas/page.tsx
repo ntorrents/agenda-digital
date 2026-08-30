@@ -3,11 +3,13 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, AlertCircle, Baby, ChevronRight } from 'lucide-react'
 import { BulkActionsWidget } from '@/components/agenda/BulkActionsWidget'
+import { AgendaFilters } from '@/components/agenda/AgendaFilters'
 import { getTranslations, getLocale } from 'next-intl/server'
 
-export default async function AgendasIndexPage(props: { searchParams: Promise<{ date?: string }> }) {
+export default async function AgendasIndexPage(props: { searchParams: Promise<{ date?: string, classroom_id?: string }> }) {
   const searchParams = await props.searchParams
   const dateStr = searchParams.date || new Date().toISOString().split('T')[0]
+  const queryClassroomId = searchParams.classroom_id
   
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -17,12 +19,40 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
   const t = await getTranslations('dashboardAgendas')
   const locale = await getLocale()
 
-  // Find the teacher's classroom
-  const { data: classroom } = await supabase
-    .from('classrooms')
-    .select('id, name')
-    .eq('teacher_id', user.id)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('school_id, role')
+    .eq('id', user.id)
     .single()
+
+  if (!profile) redirect('/login')
+
+  // Get all classrooms for the school
+  const { data: classrooms } = await supabase
+    .from('classrooms')
+    .select('id, name, level, teacher_id')
+    .eq('school_id', profile.school_id)
+    .order('name', { ascending: true })
+
+  if (!classrooms || classrooms.length === 0) {
+    return (
+      <div className="p-8 text-center bg-amber-50 rounded-2xl m-6">
+        <AlertCircle className="mx-auto h-8 w-8 text-amber-600 mb-3" />
+        <p className="font-bold text-amber-800">{t('noClassroom')}</p>
+      </div>
+    )
+  }
+
+  // Determine the active classroom
+  let classroom = queryClassroomId ? classrooms.find(c => c.id === queryClassroomId) : null
+  
+  if (!classroom) {
+    if (profile.role === 'teacher') {
+      classroom = classrooms.find(c => c.teacher_id === user.id) || classrooms[0]
+    } else {
+      classroom = classrooms[0]
+    }
+  }
 
   if (!classroom) {
     return (
@@ -66,12 +96,17 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-stone-800">{t('title')}</h2>
           <p className="text-sm font-medium text-stone-500 mt-1">{t('subtitle', { name: classroom.name, date: formattedDate })}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-end gap-3">
+          <AgendaFilters 
+            classrooms={classrooms}
+            currentClassroomId={classroom.id}
+            currentDate={dateStr}
+          />
           <BulkActionsWidget dateStr={dateStr} />
         </div>
       </div>

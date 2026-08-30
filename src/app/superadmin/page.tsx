@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+import { getSuperadminDb } from '@/lib/superadmin'
 import { Building, Users, GraduationCap, TrendingUp, Activity } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function SuperadminDashboard() {
-  const supabase = await createClient()
+  const supabase = await getSuperadminDb()
 
   // 1. Fetch total schools
   const { count: schoolsCount } = await supabase

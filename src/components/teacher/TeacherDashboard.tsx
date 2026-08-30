@@ -86,7 +86,7 @@ export async function TeacherDashboard({ schoolId, userId }: { schoolId: string,
                 <Building2 className="h-6 w-6 text-indigo-600" />
               </div>
             </div>
-            <Link href="/dashboard/aula" className="mt-6 flex items-center justify-center w-full bg-stone-50 hover:bg-stone-100 text-stone-700 text-sm font-bold py-2.5 rounded-xl border border-stone-200 transition-colors">
+            <Link href="/dashboard/config/alumnos" className="mt-6 flex items-center justify-center w-full bg-stone-50 hover:bg-stone-100 text-stone-700 text-sm font-bold py-2.5 rounded-xl border border-stone-200 transition-colors">
               Veure els meus alumnes
             </Link>
           </div>

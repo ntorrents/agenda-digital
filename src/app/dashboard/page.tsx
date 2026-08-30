@@ -195,23 +195,32 @@ export default async function DashboardSummaryPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         {/* Agendas Pendientes */}
-        <div className="bg-white border border-stone-200/80 rounded-[24px] p-5 shadow-xs">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-8 w-8 bg-amber-50 text-amber-600 flex items-center justify-center rounded-xl">
-              <Calendar className="h-4 w-4" />
+        <Link 
+          href="/dashboard/agendas"
+          className="group block bg-white border border-stone-200/80 rounded-[24px] p-5 shadow-xs hover:shadow-xl hover:shadow-stone-200/50 hover:border-stone-300 transition-all cursor-pointer relative overflow-hidden"
+        >
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 bg-amber-50 text-amber-600 flex items-center justify-center rounded-xl">
+                  <Calendar className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-black text-stone-800">{t('alerts.agendas.title')}</h3>
+              </div>
+              <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-stone-900 group-hover:translate-x-1 transition-all" />
             </div>
-            <h3 className="text-sm font-black text-stone-800">{t('alerts.agendas.title')}</h3>
+            <div className="flex items-end gap-2">
+              <h4 className="text-3xl font-black text-stone-900 leading-none">{missingLogs}</h4>
+              <span className="text-xs font-bold text-stone-500 mb-1">{t('alerts.agendas.pending')}</span>
+            </div>
+            {missingLogs === 0 && totalS > 0 ? (
+               <p className="text-[11px] text-emerald-600 font-bold mt-2">{t('alerts.agendas.allDone')}</p>
+            ) : (
+               <p className="text-[11px] text-amber-600 font-bold mt-2">{t('alerts.agendas.needReview')}</p>
+            )}
           </div>
-          <div className="flex items-end gap-2">
-            <h4 className="text-3xl font-black text-stone-900 leading-none">{missingLogs}</h4>
-            <span className="text-xs font-bold text-stone-500 mb-1">{t('alerts.agendas.pending')}</span>
-          </div>
-          {missingLogs === 0 && totalS > 0 ? (
-             <p className="text-[11px] text-emerald-600 font-bold mt-2">{t('alerts.agendas.allDone')}</p>
-          ) : (
-             <p className="text-[11px] text-amber-600 font-bold mt-2">{t('alerts.agendas.needReview')}</p>
-          )}
-        </div>
+        </Link>
 
         {/* Absences */}
         <div className="bg-white border border-stone-200/80 rounded-[24px] p-5 shadow-xs">

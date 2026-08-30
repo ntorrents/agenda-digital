@@ -19,22 +19,18 @@ export default async function DashboardEquipoPage() {
   if (!profile) redirect('/login')
 
   // Fetch only active and paused staff members (exclude inactive/archived)
-  const { data: staff } = await supabase
+  const { data: staff, error: staffError } = await supabase
     .from('profiles')
-    .select(`
-      id, 
-      school_id,
-      full_name, 
-      role, 
-      email,
-      phone,
-      status
-    `)
+    .select('*')
     .eq('school_id', profile.school_id)
     .in('role', ['admin', 'teacher'])
-    .neq('status', 'inactive') // Traemos active y paused
     .order('role', { ascending: true })
     .order('full_name', { ascending: true })
+
+  if (staffError) {
+    console.error('STAFF FETCH ERROR:', staffError)
+  }
+  console.log('FETCHED STAFF:', staff?.length)
 
   const t = await getTranslations('dashboardEquipo')
 

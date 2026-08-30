@@ -29,6 +29,7 @@
     "calendar": "Calendar",
     "gallery": "Gallery",
     "settings": "School Settings",
+    "personalSettings": "Settings",
     "dailySummary": "Daily Summary",
     "myClassroom": "My Classroom",
     "agendas": "Agendas",
@@ -260,8 +261,12 @@
     "tutor1": "Tutor 1 (Required)",
     "tutor2": "Tutor 2 (Optional)",
     "fullName": "Full Name",
-    "relation": "Relationship (e.g., Mother, Father...)",
+    "relation": "Relationship",
     "relationShort": "Relationship",
+    "relationMother": "Mother",
+    "relationFather": "Father",
+    "relationTutor": "Guardian",
+    "relationOther": "Other",
     "email": "Email (for the App)",
     "phone": "Phone",
     "authorized": "Authorized people (Pickup) - Other relatives",
@@ -325,6 +330,10 @@
     "subtitle": "General configuration of {name}",
     "activeStudents": "Active Students",
     "activeTeam": "Active Team"
+  },
+  "dashboardParametres": {
+    "title": "Settings",
+    "subtitle": "Manage your profile, password and personal preferences"
   },
   "dashboardCalendar": {
     "today": "Today",
@@ -407,6 +416,8 @@
     "formPlaceholderNote": "Today we did finger painting, they had a great time...",
     "formLabelPhoto": "Group Photo (Optional)",
     "formUploadPhoto": "Upload photo",
+    "btnCamera": "Take photo",
+    "btnGallery": "Gallery",
     "btnPublishing": "Processing and sending...",
     "btnPublish": "Save and Publish to all"
   },

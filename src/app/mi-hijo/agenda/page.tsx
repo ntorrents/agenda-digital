@@ -53,14 +53,21 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
     let globalNote = null
     if (log && student?.classroom_id) {
       const { data: gn } = await supabase
-        .from('classroom_daily_notes')
-        .select('note, photo_url')
+        .from('events_announcements')
+        .select('description')
         .eq('classroom_id', student.classroom_id)
-        .eq('date', dateStr)
+        .eq('event_date', dateStr)
+        .eq('title', 'NOTAGLOBAL')
         .maybeSingle()
       if (gn) {
-        globalNote = gn.note
-        dailyLog.globalNotePhoto = gn.photo_url
+        // Extraemos la foto de la descripción si la hay (el Markdown de Foto Grupal)
+        const match = gn.description.match(/\[Foto Grupal\]\((.*?)\)/)
+        if (match) {
+          dailyLog.globalNotePhoto = match[1]
+          globalNote = gn.description.replace(match[0], '').trim()
+        } else {
+          globalNote = gn.description.trim()
+        }
       }
     }
 

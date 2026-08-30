@@ -7,23 +7,49 @@ import { createStudent, updateStudent } from '@/app/actions/admin'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
+import { SendAccessButton } from '@/components/admin/SendAccessButton'
+
 interface Classroom {
   id: string
   name: string
   level: string
 }
 
+interface GuardianProfile {
+  id: string
+  full_name: string
+  email: string
+  phone: string
+  welcome_email_sent: boolean
+}
+
+interface GuardianRelation {
+  guardian_id: string
+  relation: string
+  profiles: GuardianProfile | null
+}
+
 interface StudentDetailFormProps {
   classrooms: Classroom[]
   initialData?: any
+  guardians?: GuardianRelation[]
 }
 
-export function StudentDetailForm({ classrooms, initialData }: StudentDetailFormProps) {
+export function StudentDetailForm({ classrooms, initialData, guardians = [] }: StudentDetailFormProps) {
   const isEditing = !!initialData
   const [isSaving, setIsSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const router = useRouter()
   const t = useTranslations('studentForm')
+
+  const getProfile = (guardian?: GuardianRelation) => {
+    if (!guardian) return null
+    if (Array.isArray(guardian.profiles)) return guardian.profiles[0]
+    return guardian.profiles
+  }
+
+  const p1 = getProfile(guardians[0])
+  const p2 = getProfile(guardians[1])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -36,11 +62,12 @@ export function StudentDetailForm({ classrooms, initialData }: StudentDetailForm
       if (isEditing) {
         formData.append('id', initialData.id)
         await updateStudent(formData)
+        router.refresh()
+        setIsSaving(false)
       } else {
         await createStudent(formData)
+        router.push('/dashboard/config/alumnos')
       }
-      
-      router.push('/dashboard/config/alumnos')
     } catch (err: any) {
       setErrorMsg(err.message || t('errorTitle'))
       setIsSaving(false)
@@ -138,45 +165,80 @@ export function StudentDetailForm({ classrooms, initialData }: StudentDetailForm
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="space-y-4 col-span-2">
-              <h5 className="font-bold text-sm text-blue-700 pb-2 border-b border-blue-100">{t('tutor1')}</h5>
+              <div className="flex items-center justify-between pb-2 border-b border-blue-100">
+                <h5 className="font-bold text-sm text-blue-700">{t('tutor1')}</h5>
+                {guardians[0] && p1 && (
+                  <>
+                    <input type="hidden" name="guardian_1_id" value={p1.id} />
+                    <SendAccessButton 
+                      userId={p1.id} 
+                      email={p1.email} 
+                      alreadySent={p1.welcome_email_sent} 
+                    />
+                  </>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-500 pl-1">{t('fullName')}</label>
-                  <input name="guardian_1_name" type="text" required placeholder={t('fullName')} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                  <input name="guardian_1_name" type="text" required placeholder={t('fullName')} defaultValue={p1?.full_name || ''} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-500 pl-1">{t('relation')}</label>
-                  <input name="guardian_1_relation" type="text" required placeholder={t('relationShort')} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                  <select name="guardian_1_relation" required defaultValue={guardians[0]?.relation || 'father'} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="mother">{t('relationMother')}</option>
+                    <option value="father">{t('relationFather')}</option>
+                    <option value="tutor">{t('relationTutor')}</option>
+                    <option value="other">{t('relationOther')}</option>
+                  </select>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-500 pl-1">{t('email')}</label>
-                  <input name="guardian_1_email" type="email" required placeholder="correu@ejemplo.com" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                  <input name="guardian_1_email" type="email" required placeholder="correu@ejemplo.com" defaultValue={p1?.email || ''} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-500 pl-1">{t('phone')}</label>
-                  <input name="guardian_1_phone" type="text" required placeholder="600 000 000" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                  <input name="guardian_1_phone" type="text" placeholder="600 000 000" defaultValue={p1?.phone || ''} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
                 </div>
               </div>
             </div>
 
             <div className="space-y-4 col-span-2 pt-4">
-              <h5 className="font-bold text-sm text-blue-700 pb-2 border-b border-blue-100">{t('tutor2')}</h5>
+              <div className="flex items-center justify-between pb-2 border-b border-blue-100">
+                <h5 className="font-bold text-sm text-blue-700">{t('tutor2')}</h5>
+                {guardians[1] && p2 && (
+                  <>
+                    <input type="hidden" name="guardian_2_id" value={p2.id} />
+                    <SendAccessButton 
+                      userId={p2.id} 
+                      email={p2.email} 
+                      alreadySent={p2.welcome_email_sent} 
+                    />
+                  </>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-500 pl-1">{t('fullName')}</label>
-                  <input name="guardian_2_name" type="text" placeholder={t('fullName')} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                  <input name="guardian_2_name" type="text" placeholder={t('fullName')} defaultValue={p2?.full_name || ''} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-500 pl-1">{t('relationShort')}</label>
-                  <input name="guardian_2_relation" type="text" placeholder={t('relationShort')} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                  <select name="guardian_2_relation" defaultValue={guardians[1]?.relation || ''} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="">{t('genderNone')}</option>
+                    <option value="mother">{t('relationMother')}</option>
+                    <option value="father">{t('relationFather')}</option>
+                    <option value="tutor">{t('relationTutor')}</option>
+                    <option value="other">{t('relationOther')}</option>
+                  </select>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-500 pl-1">{t('email')}</label>
-                  <input name="guardian_2_email" type="email" placeholder="correu2@ejemplo.com" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                  <input name="guardian_2_email" type="email" placeholder="correu2@ejemplo.com" defaultValue={p2?.email || ''} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-stone-500 pl-1">{t('phone')}</label>
-                  <input name="guardian_2_phone" type="text" placeholder="600 000 000" className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                  <input name="guardian_2_phone" type="text" placeholder="600 000 000" defaultValue={p2?.phone || ''} className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
                 </div>
               </div>
             </div>

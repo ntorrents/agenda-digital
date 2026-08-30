@@ -49,11 +49,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('school_id, role')
+        .select('school_id, role, force_password_reset')
         .eq('id', user.id)
         .single()
         
       if (profile) {
+        if (profile.force_password_reset) {
+          router.push('/force-password-reset')
+          return
+        }
         setRole(profile.role)
       }
       
@@ -85,11 +89,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const adminNavItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: tNav('metrics') },
+    { href: '/dashboard/agendas', icon: MessageSquare, label: tNav('agendas') },
     { href: '/dashboard/config/aulas', icon: Building2, label: tNav('classrooms') },
     { href: '/dashboard/config/alumnos', icon: Baby, label: tNav('students') },
     { href: '/dashboard/equipo', icon: Users, label: tNav('team') },
     { href: '/dashboard/menus', icon: Utensils, label: tNav('menus') },
-    { href: '/dashboard/comunicacion', icon: MessageSquare, label: tNav('communication') },
+    { href: '/dashboard/comunicacion', icon: Bell, label: tNav('communication') },
     { href: '/dashboard/calendario', icon: CalendarIcon, label: tNav('calendar') },
     { href: '/dashboard/galeria', icon: ImageIcon, label: tNav('gallery') },
     { href: '/dashboard/config/centro', icon: Settings, label: tNav('settings') },
@@ -102,7 +107,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: '/dashboard/agendas', icon: MessageSquare, label: tNav('agendas') },
     { href: '/dashboard/calendario', icon: CalendarIcon, label: tNav('calendar') },
     { href: '/dashboard/comunicacion', icon: Bell, label: tNav('communication') },
-    { href: '/dashboard/config/centro', icon: Settings, label: tNav('settings') },
+    { href: '/dashboard/config/parametres', icon: Settings, label: tNav('personalSettings') },
   ]
 
   const navItems = role === 'admin' ? adminNavItems : teacherNavItems

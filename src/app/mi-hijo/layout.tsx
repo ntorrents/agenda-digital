@@ -26,7 +26,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = e.target.value
     if (newDate) {
-      router.push(`${pathname}?date=${newDate}`)
+      router.replace(`${pathname}?date=${newDate}`, { scroll: false })
     }
   }
 
@@ -36,6 +36,18 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         router.push('/login')
+        return
+      }
+
+      // Fetch profile to check force_password_reset
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('force_password_reset, school_id')
+        .eq('id', user.id)
+        .single()
+        
+      if (profile?.force_password_reset) {
+        router.push('/force-password-reset')
         return
       }
 
@@ -97,6 +109,16 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
 
   const isHome = pathname === '/mi-hijo'
 
+  const getBackHref = (path: string): string => {
+    if (path === '/mi-hijo' || path === '/mi-hijo/') return '/mi-hijo'
+    // Siempre volver al menú principal de familia, no al historial del navegador
+    return '/mi-hijo'
+  }
+
+  const handleBack = () => {
+    router.push(getBackHref(pathname))
+  }
+
   const navItems = [
     { href: '/mi-hijo', icon: Home, label: tNav('home') },
     { href: '/mi-hijo/agenda', icon: Calendar, label: tNav('dailyAgenda') },
@@ -105,7 +127,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
     { href: '/mi-hijo/mensajes', icon: MessageCircle, label: tNav('messages') },
     { href: '/mi-hijo/galeria', icon: ImageIcon, label: tNav('photos') },
     { href: '/mi-hijo/avisos', icon: Bell, label: tNav('notices') },
-    { href: '#', icon: HelpCircle, label: tNav('help') },
+    { href: '/mi-hijo/ayuda', icon: HelpCircle, label: tNav('help') },
   ]
 
   // Close menu when route changes
@@ -178,7 +200,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
         </div>
       </aside>
 
-      {/* Top Navbar */}
+      {/* Top Navbar — mòbil */}
       <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md px-2 py-2 flex items-center justify-between shadow-xs h-16 lg:hidden">
         
         <div className="flex items-center gap-1">
@@ -195,7 +217,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => router.back()}
+              onClick={handleBack}
               className="rounded-full text-stone-600 hover:text-stone-900 active:bg-stone-100 h-10 w-10"
             >
               <ArrowLeft className="h-6 w-6" />
@@ -235,7 +257,6 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
         )}
 
         <div className="flex items-center gap-2 pr-2">
-          {/* Avatar / Perfil */}
           {isHome && (
             <Link 
               href="/mi-hijo/perfil"
@@ -245,6 +266,53 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
             </Link>
           )}
         </div>
+      </header>
+
+      {/* Top Navbar — escriptori */}
+      <header className="hidden lg:flex sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md px-6 py-3 items-center justify-between shadow-xs h-16">
+        <div className="flex items-center gap-3 min-w-0">
+          {!isHome && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className="rounded-full text-stone-600 hover:text-stone-900 hover:bg-stone-100 h-10 w-10 shrink-0"
+              title="Tornar al menú"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          )}
+          <div className="min-w-0">
+            <h1 className="text-sm font-black text-stone-900 truncate">
+              {isHome ? (schoolInfo?.name || 'Agenda Digital') : studentName}
+            </h1>
+            <p className="text-xs text-stone-500 font-medium capitalize truncate">
+              {isHome ? todayFormatted : classroomName}
+            </p>
+          </div>
+        </div>
+
+        {!isHome ? (
+          <div className="flex items-center gap-2">
+            <label htmlFor="family-date-desktop" className="text-xs font-bold text-stone-500 uppercase tracking-wide">
+              Dia
+            </label>
+            <input
+              id="family-date-desktop"
+              type="date"
+              value={currentDate}
+              onChange={handleDateChange}
+              className="bg-stone-100 border border-stone-200 text-stone-700 text-sm font-bold rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+        ) : (
+          <Link
+            href="/mi-hijo/perfil"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20 hover:scale-105 transition-all"
+          >
+            {studentName.charAt(0)}
+          </Link>
+        )}
       </header>
 
       {/* Main Content Area */}

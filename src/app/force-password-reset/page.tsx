@@ -39,7 +39,8 @@ export default function ForcePasswordResetPage() {
       const result = await resetForcedPassword(formData)
       
       if (result.success) {
-        if (result.role === 'admin') router.push('/dashboard')
+        if (result.role === 'superadmin') router.push('/superadmin')
+        else if (result.role === 'admin') router.push('/dashboard')
         else if (result.role === 'teacher') router.push('/dashboard')
         else if (result.role === 'guardian') router.push('/mi-hijo')
         else router.push('/login')

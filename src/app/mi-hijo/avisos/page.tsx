@@ -34,6 +34,7 @@ export default async function TaulerPage() {
     .from('events_announcements')
     .select('*')
     .eq('event_type', 'announcement')
+    .neq('title', 'NOTAGLOBAL')
     .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false })
 

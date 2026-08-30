@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePlus, MessageSquare, Loader2, X } from 'lucide-react'
 import { saveGlobalNoteAndPhoto } from '@/app/actions/aula'
 import { useTranslations } from 'next-intl'
+import { CameraCapture } from '@/components/media/CameraCapture'
 
 export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId: string, schoolId: string, dateStr: string }) {
   const router = useRouter()
+  const galleryRef = useRef<HTMLInputElement>(null)
   const [note, setNote] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -19,9 +21,9 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
     const selected = e.target.files?.[0]
     if (selected) {
       setFile(selected)
-      const url = URL.createObjectURL(selected)
-      setPreviewUrl(url)
+      setPreviewUrl(URL.createObjectURL(selected))
     }
+    e.target.value = ''
   }
 
   const handleRemoveFile = () => {
@@ -32,10 +34,10 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!note.trim() && !file) return
-    
+
     setIsLoading(true)
     setSuccess(false)
-    
+
     try {
       const formData = new FormData()
       formData.append('classroomId', classroomId)
@@ -45,7 +47,7 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
       if (file) formData.append('file', file)
 
       const result = await saveGlobalNoteAndPhoto(formData)
-      
+
       if (result.success) {
         setSuccess(true)
         setNote('')
@@ -70,7 +72,7 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
           {t('successMsg')}
         </div>
       )}
-      
+
       <div>
         <label className="text-[10px] font-black uppercase text-stone-500 tracking-wider mb-2 flex items-center gap-1.5">
           <MessageSquare className="h-3.5 w-3.5" /> {t('formLabelNote')}
@@ -88,12 +90,14 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
         <label className="text-[10px] font-black uppercase text-stone-500 tracking-wider mb-2 flex items-center gap-1.5">
           <ImagePlus className="h-3.5 w-3.5" /> {t('formLabelPhoto')}
         </label>
-        
+
+        <input ref={galleryRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+
         {previewUrl ? (
           <div className="relative inline-block">
             <img src={previewUrl} alt="Preview" className="h-32 w-32 object-cover rounded-xl border border-stone-200 shadow-sm" />
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleRemoveFile}
               className="absolute -top-2 -right-2 bg-white border border-stone-200 text-stone-500 hover:text-red-600 rounded-full h-6 w-6 flex items-center justify-center shadow-sm"
             >
@@ -101,11 +105,23 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center h-24 w-full border-2 border-dashed border-stone-200 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer text-stone-400 hover:text-stone-600">
-            <ImagePlus className="h-6 w-6 mb-1" />
-            <span className="text-xs font-bold">{t('formUploadPhoto')}</span>
-            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-          </label>
+          <div className="flex gap-2">
+            <CameraCapture
+              label={t('btnCamera')}
+              onCapture={(selected) => {
+                setFile(selected)
+                setPreviewUrl(URL.createObjectURL(selected))
+              }}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer"
+            />
+            <button
+              type="button"
+              onClick={() => galleryRef.current?.click()}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer"
+            >
+              <ImagePlus className="h-4 w-4" /> {t('btnGallery')}
+            </button>
+          </div>
         )}
       </div>
 

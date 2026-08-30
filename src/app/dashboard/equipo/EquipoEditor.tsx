@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { saveAllStaff, archiveStaffMember } from './actions'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { SendAccessButton } from '@/components/admin/SendAccessButton'
 
 type StaffMember = {
   id: string
@@ -15,6 +16,7 @@ type StaffMember = {
   email: string
   phone?: string | null
   status?: string
+  welcome_email_sent?: boolean
   _isNew?: boolean
 }
 
@@ -181,6 +183,15 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
               {/* Contenido (Expandible) */}
               {isExpanded && (
                 <div className="p-4 sm:p-6 bg-stone-50/30">
+                  <div className="mb-4">
+                    {!member._isNew && member.email && (
+                      <SendAccessButton 
+                        userId={member.id} 
+                        email={member.email} 
+                        alreadySent={!!member.welcome_email_sent} 
+                      />
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 opacity-80 hover:opacity-100 transition-opacity duration-300">
                     
                     <div>

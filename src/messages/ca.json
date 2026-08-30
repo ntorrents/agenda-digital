@@ -29,6 +29,7 @@
     "calendar": "Calendari",
     "gallery": "Galeria",
     "settings": "Paràmetres del Centre",
+    "personalSettings": "Paràmetres",
     "dailySummary": "Resum del dia",
     "myClassroom": "La meva Aula",
     "agendas": "Agendes",
@@ -260,8 +261,12 @@
     "tutor1": "Tutor/a 1 (Obligatori)",
     "tutor2": "Tutor/a 2 (Opcional)",
     "fullName": "Nom complet",
-    "relation": "Parentiu (Ex: Mare, Pare...)",
+    "relation": "Parentiu",
     "relationShort": "Parentiu",
+    "relationMother": "Mare",
+    "relationFather": "Pare",
+    "relationTutor": "Tutor/a",
+    "relationOther": "Altre",
     "email": "Correu (per a l'App)",
     "phone": "Telèfon",
     "authorized": "Persones autoritzades (Recollida) - Altres familiars",
@@ -325,6 +330,10 @@
     "subtitle": "Configuració general de {name}",
     "activeStudents": "Alumnes Actius",
     "activeTeam": "Equip Actiu"
+  },
+  "dashboardParametres": {
+    "title": "Paràmetres",
+    "subtitle": "Gestiona el teu perfil, contrasenya i preferències personals"
   },
   "dashboardCalendar": {
     "today": "Avui",
@@ -407,6 +416,8 @@
     "formPlaceholderNote": "Avui hem fet pintura de dits, s'ho han passat genial...",
     "formLabelPhoto": "Foto Grupal (Opcional)",
     "formUploadPhoto": "Pujar foto",
+    "btnCamera": "Fer foto",
+    "btnGallery": "Galeria",
     "btnPublishing": "Processant i enviant...",
     "btnPublish": "Desar i Publicar a tots"
   },
