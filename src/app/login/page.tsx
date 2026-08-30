@@ -6,9 +6,14 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Shield, GraduationCap, Heart, Loader2, ArrowRight, Baby, Crown } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
+import { Locale } from '@/i18n'
 
 export default function LoginPage() {
   const router = useRouter()
+  const t = useTranslations('login')
+  const locale = useLocale() as Locale
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -31,7 +36,7 @@ export default function LoginPage() {
 
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
-          setErrorMessage('Credencials incorrectes. Si us plau, revisa el correu i la contrasenya.')
+          setErrorMessage(t('errorCredentials'))
         } else if (error.message.includes('querying schema') || error.status === 500) {
           setErrorMessage('Error de base de dades. Si us plau, executa el nou script "supabase/seed.sql" al SQL Editor de Supabase.')
         } else {
@@ -70,7 +75,7 @@ export default function LoginPage() {
       }
       router.refresh()
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : 'Error inesperat en iniciar sessió.')
+      setErrorMessage(err instanceof Error ? err.message : t('errorUnexpected'))
       setIsLoading(false)
     }
   }
@@ -86,15 +91,18 @@ export default function LoginPage() {
       <div className="w-full mx-auto space-y-6" style={{ maxWidth: '420px' }}>
         
         {/* Header Branding */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2 relative">
+          <div className="absolute top-0 right-0">
+            <LanguageSwitcher currentLocale={locale} />
+          </div>
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#0f766e] text-white shadow-xl shadow-[#0f766e]/20 mb-1 ring-8 ring-[#0f766e]/10">
             <Baby className="h-8 w-8" />
           </div>
           <h1 className="text-2xl font-black tracking-tight text-stone-800">
-            Agenda Bressol
+            {t('title')}
           </h1>
           <p className="text-xs text-stone-500 max-w-[280px] mx-auto">
-            El dia a dia dels infants amb calidesa, senzillesa i tranquil·litat.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -115,106 +123,89 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={(e) => handleLogin(e)} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-stone-600">
-                Correu electrònic
+              <label className="text-xs font-bold tracking-wide text-stone-600 uppercase">
+                {t('emailLabel')}
               </label>
               <input
                 type="email"
-                required
-                placeholder="nom@escola.cat"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50/50 px-3.5 py-3 text-sm text-stone-800 placeholder:text-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]/30 focus:border-[#0f766e] transition-all"
+                className="w-full bg-[#f8f6f3] border-none text-stone-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 transition-all font-medium"
+                placeholder={t('emailPlaceholder')}
+                required
               />
             </div>
-
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-stone-600">
-                  Contrasenya
-                </label>
-                <span className="text-[11px] text-[#0f766e] font-medium hover:underline cursor-pointer">
-                  Has oblidat?
-                </span>
-              </div>
+              <label className="text-xs font-bold tracking-wide text-stone-600 uppercase">
+                {t('passwordLabel')}
+              </label>
               <input
                 type="password"
-                required
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50/50 px-3.5 py-3 text-sm text-stone-800 placeholder:text-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0f766e]/30 focus:border-[#0f766e] transition-all"
+                className="w-full bg-[#f8f6f3] border-none text-stone-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 transition-all font-medium"
+                placeholder={t('passwordPlaceholder')}
+                required
               />
             </div>
 
-            <Button
-              type="submit"
+            <Button 
+              type="submit" 
               disabled={isLoading}
-              className="w-full h-12 rounded-2xl bg-[#0f766e] hover:bg-[#0d665f] active:scale-[0.98] text-white font-bold text-sm shadow-lg shadow-[#0f766e]/25 transition-all cursor-pointer"
+              className="w-full bg-[#0f766e] hover:bg-[#0f766e]/90 text-white font-bold py-6 rounded-xl shadow-lg shadow-[#0f766e]/20 transition-all active:scale-[0.98] mt-2 group"
             >
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <span className="flex items-center justify-center gap-2">
-                  Entrar a l&apos;Agenda <ArrowRight className="h-4 w-4" />
-                </span>
+                <>
+                  {t('button')}
+                  <ArrowRight className="ml-2 h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
+                </>
               )}
             </Button>
           </form>
 
           {/* Quick Demo Access Pills */}
           <div className="pt-4 border-t border-stone-100 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">
-                Prova ràpida en 1 clic
-              </span>
-              <span className="text-[10px] text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full font-medium">
-                Demo
-              </span>
+            <div className="space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-stone-400 text-center flex items-center justify-center gap-2">
+                <span className="h-px bg-stone-200 w-8"></span>
+                {t('demoTitle')}
+                <span className="h-px bg-stone-200 w-8"></span>
+              </h2>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleQuickDemo('familia@bressol.cat')}
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white border border-stone-200/60 shadow-xs hover:border-pink-200 hover:bg-pink-50/50 transition-all group"
+                >
+                  <Heart className="h-5 w-5 text-pink-500 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-bold text-stone-700">{t('demoFamily')}</span>
+                </button>
+                <button
+                  onClick={() => handleQuickDemo('educadora@bressol.cat')}
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white border border-stone-200/60 shadow-xs hover:border-orange-200 hover:bg-orange-50/50 transition-all group"
+                >
+                  <Sparkles className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-bold text-stone-700">{t('demoTeacher')}</span>
+                </button>
+                <button
+                  onClick={() => handleQuickDemo('admin@bressol.cat')}
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white border border-stone-200/60 shadow-xs hover:border-teal-200 hover:bg-teal-50/50 transition-all group"
+                >
+                  <Shield className="h-5 w-5 text-teal-600 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-bold text-stone-700">{t('demoAdmin')}</span>
+                </button>
+                <button
+                  onClick={() => handleQuickDemo('superadmin@bressol.cat')}
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-white border border-stone-200/60 shadow-xs hover:border-violet-200 hover:bg-violet-50/50 transition-all group"
+                >
+                  <Crown className="h-5 w-5 text-violet-500 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-bold text-stone-700">{t('demoSuperAdmin')}</span>
+                </button>
+              </div>
             </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin@bressol.cat')}
-                disabled={isLoading}
-                className="flex flex-col items-center justify-center py-3 px-2 rounded-2xl bg-teal-50/80 border border-teal-100 hover:bg-teal-100 hover:border-teal-200 text-[#0f766e] transition-all active:scale-95 cursor-pointer shadow-xs"
-              >
-                <Shield className="h-4 w-4 mb-1 text-[#0f766e]" />
-                <span className="text-xs font-bold">Direcció</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('educadora@bressol.cat')}
-                disabled={isLoading}
-                className="flex flex-col items-center justify-center py-3 px-2 rounded-2xl bg-orange-50/80 border border-orange-100 hover:bg-orange-100 hover:border-orange-200 text-orange-800 transition-all active:scale-95 cursor-pointer shadow-xs"
-              >
-                <GraduationCap className="h-4 w-4 mb-1 text-orange-600" />
-                <span className="text-xs font-bold">Educadora</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('familia@bressol.cat')}
-                disabled={isLoading}
-                className="flex flex-col items-center justify-center py-3 px-2 rounded-2xl bg-amber-50/80 border border-amber-100 hover:bg-amber-100 hover:border-amber-200 text-amber-900 transition-all active:scale-95 cursor-pointer shadow-xs"
-              >
-                <Heart className="h-4 w-4 mb-1 text-amber-600" />
-                <span className="text-xs font-bold">Família</span>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => { window.location.href = '/superadmin' }}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-stone-900 border border-stone-800 hover:bg-stone-800 hover:border-stone-700 text-stone-300 transition-all active:scale-95 cursor-pointer shadow-xs mt-2"
-            >
-              <Crown className="h-4 w-4 text-violet-400" />
-              <span className="text-xs font-bold tracking-wide">Súper Admin (Demo UI)</span>
-            </button>
           </div>
         </Card>
 

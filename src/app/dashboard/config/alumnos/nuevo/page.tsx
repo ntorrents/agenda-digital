@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { ArrowLeft, Baby } from 'lucide-react'
 import Link from 'next/link'
 import { StudentDetailForm } from '@/components/admin/StudentDetailForm'
+import { getTranslations } from 'next-intl/server'
 
 export default async function NewStudentPage() {
   const supabase = await createClient()
@@ -25,6 +26,8 @@ export default async function NewStudentPage() {
     .eq('school_id', profile.school_id)
     .order('level', { ascending: true })
 
+  const t = await getTranslations('dashboardAlumnos')
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
@@ -36,9 +39,9 @@ export default async function NewStudentPage() {
         </Link>
         <div>
           <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
-            <Baby className="h-5 w-5 text-teal-600" /> Matricular Nou Alumne
+            <Baby className="h-5 w-5 text-teal-600" /> {t('titleNew')}
           </h3>
-          <p className="text-xs text-stone-500">Omple tots els detalls necessaris per a la fitxa</p>
+          <p className="text-xs text-stone-500">{t('descNew')}</p>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Smile, Utensils, Droplets, Moon, CheckCircle2, XCircle, ArrowLeft, Camera, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { upsertDailyLog } from '@/app/actions/daily-logs'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface DailyLogFormProps {
   studentId: string
@@ -17,6 +18,8 @@ interface DailyLogFormProps {
 export function DailyLogForm({ studentId, studentName, dateStr, initialData, settings = {} }: DailyLogFormProps) {
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
+  const t = useTranslations('dailyLogForm')
+  const locale = useLocale()
   
   const [mood, setMood] = useState<string | null>(initialData?.mood || null)
   const [breakfast, setBreakfast] = useState<string | null>(initialData?.meal_breakfast || null)
@@ -57,7 +60,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
       
     } catch (error) {
       console.error('Error saving log:', error)
-      alert('Error en desar les dades')
+      alert(t('errorSaving'))
     } finally {
       setIsSaving(false)
     }
@@ -65,17 +68,26 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
 
   // Helper arrays for options
   const mealOptions = [
-    { value: 'all', label: 'Tot', color: 'emerald' },
-    { value: 'most', label: 'Molt', color: 'teal' },
-    { value: 'little', label: 'Poc', color: 'amber' },
-    { value: 'none', label: 'Res', color: 'red' },
+    { value: 'all', label: t('mealAll'), color: 'emerald' },
+    { value: 'most', label: t('mealMost'), color: 'teal' },
+    { value: 'little', label: t('mealLittle'), color: 'amber' },
+    { value: 'none', label: t('mealNone'), color: 'red' },
   ]
   const diaperOptions = [
-    { value: 'pee', label: 'Pipí', color: 'amber' },
-    { value: 'poo', label: 'Caca', color: 'amber' },
-    { value: 'both', label: 'Els dos', color: 'orange' },
-    { value: 'dry', label: 'Sec', color: 'stone' },
+    { value: 'pee', label: t('diaperPee'), color: 'amber' },
+    { value: 'poo', label: t('diaperPoo'), color: 'amber' },
+    { value: 'both', label: t('diaperBoth'), color: 'orange' },
+    { value: 'dry', label: t('diaperDry'), color: 'stone' },
   ]
+
+  const dateLocaleMap: Record<string, string> = {
+    ca: 'ca-ES',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    en: 'en-US'
+  }
+  const dateLocale = dateLocaleMap[locale] || 'ca-ES'
+  const formattedDate = new Date(dateStr).toLocaleDateString(dateLocale, { weekday: 'long', day: 'numeric', month: 'short' })
 
   return (
     <div className="bg-white rounded-[32px] p-4 sm:p-6 shadow-sm border border-stone-200/80 mb-20 animate-in slide-in-from-bottom-4 duration-300">
@@ -93,7 +105,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
             {studentName}
           </h2>
           <p className="text-xs font-semibold text-stone-400 capitalize">
-            Agenda del {new Date(dateStr).toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'short' })}
+            {t('agendaOf', { date: formattedDate })}
           </p>
         </div>
       </div>
@@ -105,14 +117,14 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
           <section className="space-y-3">
             <div className="flex items-center gap-2 text-teal-700">
             <Smile className="h-5 w-5" />
-            <h3 className="font-bold text-sm tracking-wide">Estat d&apos;ànim</h3>
+            <h3 className="font-bold text-sm tracking-wide">{t('moodTitle')}</h3>
           </div>
           <div className="grid grid-cols-4 gap-2">
             {[
-              { id: 'happy', label: 'Feliç' },
-              { id: 'calm', label: 'Tranquil' },
-              { id: 'sad', label: 'Trist' },
-              { id: 'irritable', label: 'Irritable' },
+              { id: 'happy', label: t('moodHappy') },
+              { id: 'calm', label: t('moodCalm') },
+              { id: 'sad', label: t('moodSad') },
+              { id: 'irritable', label: t('moodIrritable') },
             ].map((m) => (
               <button
                 key={m.id}
@@ -137,12 +149,12 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
         <section className="space-y-3 pt-4 border-t border-stone-100">
           <div className="flex items-center gap-2 text-orange-600">
             <Utensils className="h-5 w-5" />
-            <h3 className="font-bold text-sm tracking-wide">Alimentació</h3>
+            <h3 className="font-bold text-sm tracking-wide">{t('mealTitle')}</h3>
           </div>
           
           <div className="space-y-3">
             <div className="bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
-              <label className="text-xs font-bold text-stone-600 mb-2 block">Esmorzar</label>
+              <label className="text-xs font-bold text-stone-600 mb-2 block">{t('mealBreakfast')}</label>
               <div className="flex bg-white rounded-xl overflow-hidden border border-stone-200/80 p-1">
                 {mealOptions.map((opt) => (
                   <button
@@ -161,7 +173,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
             </div>
 
             <div className="bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
-              <label className="text-xs font-bold text-stone-600 mb-2 block">Dinar</label>
+              <label className="text-xs font-bold text-stone-600 mb-2 block">{t('mealLunch')}</label>
               <div className="flex bg-white rounded-xl overflow-hidden border border-stone-200/80 p-1">
                 {mealOptions.map((opt) => (
                   <button
@@ -180,7 +192,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
             </div>
 
             <div className="bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
-              <label className="text-xs font-bold text-stone-600 mb-2 block">Berenar</label>
+              <label className="text-xs font-bold text-stone-600 mb-2 block">{t('mealSnack')}</label>
               <div className="flex bg-white rounded-xl overflow-hidden border border-stone-200/80 p-1">
                 {mealOptions.map((opt) => (
                   <button
@@ -206,12 +218,12 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
         <section className="space-y-3 pt-4 border-t border-stone-100">
           <div className="flex items-center gap-2 text-amber-600">
             <Droplets className="h-5 w-5" />
-            <h3 className="font-bold text-sm tracking-wide">Control d&apos;esfínters</h3>
+            <h3 className="font-bold text-sm tracking-wide">{t('diaperTitle')}</h3>
           </div>
           
           <div className="grid grid-cols-12 gap-3">
             <div className="col-span-8 bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
-              <label className="text-xs font-bold text-stone-600 mb-2 block">Tipus de deposició</label>
+              <label className="text-xs font-bold text-stone-600 mb-2 block">{t('diaperType')}</label>
               <div className="grid grid-cols-2 gap-1.5">
                 {diaperOptions.map((opt) => (
                   <button
@@ -230,7 +242,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
             </div>
             
             <div className="col-span-4 bg-stone-50/50 rounded-[20px] p-3 border border-stone-100 flex flex-col justify-between">
-              <label className="text-xs font-bold text-stone-600 text-center">Canvis</label>
+              <label className="text-xs font-bold text-stone-600 text-center">{t('diaperChanges')}</label>
               <div className="flex items-center justify-between bg-white rounded-xl border border-stone-200/80 p-1">
                 <button 
                   onClick={() => setDiaperChanges(Math.max(0, diaperChanges - 1))}
@@ -252,7 +264,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
         <section className="space-y-3 pt-4 border-t border-stone-100">
           <div className="flex items-center gap-2 text-emerald-600">
             <Moon className="h-5 w-5" />
-            <h3 className="font-bold text-sm tracking-wide">Descans / Siesta</h3>
+            <h3 className="font-bold text-sm tracking-wide">{t('napTitle')}</h3>
           </div>
           
           <div className="flex items-center gap-3">
@@ -260,20 +272,20 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
               onClick={() => setDidNap(true)}
               className={`flex-1 py-3 rounded-[16px] text-xs font-bold border-2 transition-colors flex items-center justify-center gap-2 cursor-pointer ${didNap ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-stone-100 bg-white text-stone-400 hover:border-emerald-200'}`}
             >
-              <CheckCircle2 className={`h-4 w-4 ${didNap ? 'text-emerald-500' : 'text-stone-300'}`} /> Ha dormit
+              <CheckCircle2 className={`h-4 w-4 ${didNap ? 'text-emerald-500' : 'text-stone-300'}`} /> {t('napYes')}
             </button>
             <button
               onClick={() => setDidNap(false)}
               className={`flex-1 py-3 rounded-[16px] text-xs font-bold border-2 transition-colors flex items-center justify-center gap-2 cursor-pointer ${!didNap ? 'border-red-400 bg-red-50 text-red-800' : 'border-stone-100 bg-white text-stone-400 hover:border-red-200'}`}
             >
-              <XCircle className={`h-4 w-4 ${!didNap ? 'text-red-400' : 'text-stone-300'}`} /> No ha dormit
+              <XCircle className={`h-4 w-4 ${!didNap ? 'text-red-400' : 'text-stone-300'}`} /> {t('napNo')}
             </button>
           </div>
 
           {didNap && (
             <div className="flex items-center gap-2 animate-in slide-in-from-top-2">
               <div className="flex-1 bg-stone-50 rounded-2xl p-2 border border-stone-100">
-                <label className="text-[10px] font-bold text-stone-500 block mb-1 px-1">Inici</label>
+                <label className="text-[10px] font-bold text-stone-500 block mb-1 px-1">{t('napStart')}</label>
                 <input 
                   type="time" 
                   value={napStart}
@@ -283,7 +295,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
               </div>
               <div className="text-stone-300 font-bold">-</div>
               <div className="flex-1 bg-stone-50 rounded-2xl p-2 border border-stone-100">
-                <label className="text-[10px] font-bold text-stone-500 block mb-1 px-1">Fi</label>
+                <label className="text-[10px] font-bold text-stone-500 block mb-1 px-1">{t('napEnd')}</label>
                 <input 
                   type="time" 
                   value={napEnd}
@@ -300,7 +312,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
         <section className="space-y-3 pt-4 border-t border-stone-100">
           <div className="flex flex-col gap-3">
             <textarea
-              placeholder="Escriu una nota per a la família... (opcional)"
+              placeholder={t('notesPlaceholder')}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full h-24 bg-stone-50 border border-stone-200/80 rounded-[20px] p-4 text-sm font-medium text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all resize-none"
@@ -308,10 +320,10 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
             
             <div className="flex gap-2">
               <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer">
-                <Camera className="h-4 w-4" /> Fer foto
+                <Camera className="h-4 w-4" /> {t('btnCamera')}
               </button>
               <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer">
-                <ImageIcon className="h-4 w-4" /> Galeria
+                <ImageIcon className="h-4 w-4" /> {t('btnGallery')}
               </button>
             </div>
           </div>
@@ -330,7 +342,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
             {isSaving ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              'Desar Agenda'
+              t('btnSave')
             )}
           </Button>
         </div>

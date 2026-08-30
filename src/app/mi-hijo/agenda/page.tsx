@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { getTranslations } from 'next-intl/server'
 
 export default async function FamilyAgendaPage(props: { searchParams: Promise<{ date?: string }> }) {
   const searchParams = await props.searchParams
@@ -24,7 +25,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
 
   let dailyLog = null
   let studentName = ''
-  let settings = {}
+  let settings: any = {}
 
   if (guardianRel) {
     const studentId = guardianRel.student_id
@@ -88,25 +89,27 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
   
   const isFuture = selectedDate.getTime() > today.getTime()
 
+  const t = await getTranslations('agenda')
+
   const mealMap: Record<string, string> = {
-    all: 'Tot',
-    most: 'Gairebé tot',
-    little: 'Poc',
-    none: 'Res'
+    all: t('meals.all'),
+    most: t('meals.most'),
+    little: t('meals.little'),
+    none: t('meals.none')
   }
   
   const moodMap: Record<string, string> = {
-    happy: 'Content/a',
-    calm: 'Tranquil/a',
-    sad: 'Trist/a',
-    irritable: 'Irritable'
+    happy: t('mood.happy'),
+    calm: t('mood.calm'),
+    sad: t('mood.sad'),
+    irritable: t('mood.irritable')
   }
 
   const diaperMap: Record<string, string> = {
-    pee: 'Pipí',
-    poo: 'Caca',
-    both: 'Pipí + Caca',
-    dry: 'Sec'
+    pee: t('diaper.pee'),
+    poo: t('diaper.poo'),
+    both: t('diaper.both'),
+    dry: t('diaper.dry')
   }
 
   return (
@@ -118,16 +121,16 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-100 text-stone-400 mb-3">
               <Calendar className="h-6 w-6" />
             </div>
-            <h3 className="text-sm font-bold text-stone-800">No hi ha dades</h3>
-            <p className="text-xs text-stone-500 mt-1">Aquest dia encara no ha arribat.</p>
+            <h3 className="text-sm font-bold text-stone-800">{t('noData')}</h3>
+            <p className="text-xs text-stone-500 mt-1">{t('futureDay')}</p>
           </div>
         ) : !dailyLog ? (
            <div className="rounded-[28px] border border-stone-200/80 bg-stone-50 p-8 text-center shadow-xs">
              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-stone-400 mb-3 shadow-sm">
                <Calendar className="h-6 w-6" />
              </div>
-             <h3 className="text-sm font-bold text-stone-800">L&apos;agenda encara no s&apos;ha omplert</h3>
-             <p className="text-xs text-stone-500 mt-1">L&apos;educadora encara no ha guardat les dades per a aquest dia.</p>
+             <h3 className="text-sm font-bold text-stone-800">{t('notFilled')}</h3>
+             <p className="text-xs text-stone-500 mt-1">{t('notFilledDesc')}</p>
            </div>
         ) : (
           <>
@@ -136,10 +139,10 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
               <div className="bg-white border border-stone-200/60 rounded-[28px] p-4 shadow-xs">
                 <div className="flex items-center justify-between mb-3 px-1">
                   <h3 className="text-[11px] font-black uppercase text-stone-400 flex items-center gap-1.5 tracking-wider">
-                    <ImageIcon className="h-3.5 w-3.5" /> Galeria del dia
+                    <ImageIcon className="h-3.5 w-3.5" /> {t('galleryOfDay')}
                   </h3>
                   <Link href={`/mi-hijo/galeria`} className="text-[11px] text-teal-600 font-bold flex items-center">
-                    Veure tot <ChevronRight className="h-3.5 w-3.5" />
+                    {t('seeAll')} <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar snap-x">
@@ -148,7 +151,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                       <div className="relative h-16 w-16 rounded-[16px] overflow-hidden border border-stone-100">
                         {/* Placeholder visual por ahora. En produccion usariamos next/image con el src real */}
                         <div className="absolute inset-0 bg-stone-200 flex items-center justify-center text-[10px] text-stone-400">
-                          Foto {index + 1}
+                          {t('photo')} {index + 1}
                         </div>
                       </div>
                     </Link>
@@ -164,13 +167,13 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 <div className="bg-[#8cc63f] text-white p-1.5 rounded-xl">
                   <Utensils className="h-4 w-4" />
                 </div>
-                <h3 className="text-sm font-black text-[#6b992f] uppercase tracking-wider">Alimentació</h3>
+                <h3 className="text-sm font-black text-[#6b992f] uppercase tracking-wider">{t('food')}</h3>
               </div>
 
               <div className="space-y-3">
                 {dailyLog.meal_breakfast && (
                   <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl border border-white">
-                    <span className="text-xs font-bold text-stone-700">Esmorzar</span>
+                    <span className="text-xs font-bold text-stone-700">{t('breakfast')}</span>
                     <span className="text-xs font-black bg-white px-3 py-1 rounded-full text-[#6b992f] shadow-sm">
                       {mealMap[dailyLog.meal_breakfast]}
                     </span>
@@ -178,7 +181,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 )}
                 {dailyLog.meal_lunch && (
                   <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl border border-white">
-                    <span className="text-xs font-bold text-stone-700">Dinar</span>
+                    <span className="text-xs font-bold text-stone-700">{t('lunch')}</span>
                     <span className="text-xs font-black bg-white px-3 py-1 rounded-full text-[#6b992f] shadow-sm">
                       {mealMap[dailyLog.meal_lunch]}
                     </span>
@@ -186,7 +189,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 )}
                 {dailyLog.meal_snack && (
                   <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl border border-white">
-                    <span className="text-xs font-bold text-stone-700">Berenar</span>
+                    <span className="text-xs font-bold text-stone-700">{t('snack')}</span>
                     <span className="text-xs font-black bg-white px-3 py-1 rounded-full text-[#6b992f] shadow-sm">
                       {mealMap[dailyLog.meal_snack]}
                     </span>
@@ -203,14 +206,14 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
               <div className="bg-emerald-50/80 border border-emerald-100 rounded-[24px] p-4 shadow-xs">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Moon className="h-4 w-4 text-emerald-600" />
-                  <span className="text-[11px] font-black uppercase text-emerald-700 tracking-wider">Migdiada</span>
+                  <span className="text-[11px] font-black uppercase text-emerald-700 tracking-wider">{t('sleep')}</span>
                 </div>
                 <p className="text-sm font-black text-stone-800">
-                  {dailyLog.nap_start && dailyLog.nap_end ? 'Ha dormit' : 'No ha dormit'}
+                  {dailyLog.nap_start && dailyLog.nap_end ? t('slept') : t('didnSlept')}
                 </p>
                 {dailyLog.nap_start && dailyLog.nap_end && (
                   <p className="text-xs font-medium text-stone-500 mt-1">
-                    De {dailyLog.nap_start.substring(0,5)} a {dailyLog.nap_end.substring(0,5)}
+                    {t('from')} {dailyLog.nap_start.substring(0,5)} {t('to')} {dailyLog.nap_end.substring(0,5)}
                   </p>
                 )}
               </div>
@@ -221,10 +224,10 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
               <div className="bg-amber-50/80 border border-amber-100 rounded-[24px] p-4 shadow-xs">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Droplets className="h-4 w-4 text-amber-600" />
-                  <span className="text-[11px] font-black uppercase text-amber-700 tracking-wider">Bolquer</span>
+                  <span className="text-[11px] font-black uppercase text-amber-700 tracking-wider">{t('diaperTitle')}</span>
                 </div>
                 <p className="text-sm font-black text-stone-800">
-                  {dailyLog.diaper_changes} canvis
+                  {dailyLog.diaper_changes} {t('changes')}
                 </p>
                 {dailyLog.diaper_type && (
                   <p className="text-xs font-medium text-stone-500 mt-1">
@@ -238,7 +241,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
             {/* Anotaciones Específicas */}
             <div className="bg-white border border-orange-200/50 rounded-[28px] overflow-hidden shadow-xs">
               <div className="bg-orange-400/90 px-4 py-2.5">
-                <h3 className="text-[11px] font-black uppercase text-white tracking-wider">Anotacions de l&apos;Educadora</h3>
+                <h3 className="text-[11px] font-black uppercase text-white tracking-wider">{t('specificNotes')}</h3>
               </div>
               <div className="p-5 bg-orange-50/30">
                 {dailyLog.notes && dailyLog.notes.trim() ? (
@@ -246,11 +249,11 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                     "{dailyLog.notes.trim()}"
                   </p>
                 ) : (
-                  <p className="text-sm text-stone-400 italic">Sense anotacions avui.</p>
+                  <p className="text-sm text-stone-400 italic">{t('noNotes')}</p>
                 )}
                 
                 <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
-                  <span className="font-medium text-stone-600">{dailyLog.teacher?.full_name || 'Educadora'}</span>
+                  <span className="font-medium text-stone-600">{dailyLog.teacher?.full_name || t('teacher')}</span>
                   {dailyLog.mood && settings.agenda_mood !== false && (
                     <span className="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-stone-100 font-bold text-stone-700">
                       <Smile className="h-3.5 w-3.5 text-amber-500" /> {moodMap[dailyLog.mood]}
@@ -265,7 +268,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
               <div className="bg-white border border-blue-200/50 rounded-[28px] overflow-hidden shadow-xs mt-4">
                 <div className="bg-blue-500/90 px-4 py-2.5 flex items-center gap-2">
                   <MessageCircle className="h-3.5 w-3.5 text-white" />
-                  <h3 className="text-[11px] font-black uppercase text-white tracking-wider">Nota Global de l'Aula</h3>
+                  <h3 className="text-[11px] font-black uppercase text-white tracking-wider">{t('globalNotes')}</h3>
                 </div>
                 <div className="p-5 bg-blue-50/30">
                   <div className="text-sm font-bold text-stone-800 leading-relaxed italic whitespace-pre-wrap">

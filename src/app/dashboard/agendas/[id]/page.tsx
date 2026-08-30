@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { DailyLogForm } from '@/components/agenda/DailyLogForm'
 import { CheckCircle2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 export default async function StudentLogPage(props: { params: Promise<{ id: string }>, searchParams: Promise<{ date?: string, success?: string }> }) {
   const params = await props.params
@@ -68,6 +69,8 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
     `)
     .eq('student_id', studentId)
 
+  const t = await getTranslations('dashboardAgendas')
+
   return (
     <main className="px-4 sm:px-6 pt-4 pb-8 w-full max-w-2xl mx-auto space-y-6">
       
@@ -75,12 +78,12 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
         href="/dashboard/agendas"
         className="inline-flex items-center text-sm font-bold text-stone-500 hover:text-stone-800 transition-colors"
       >
-        <ArrowLeft className="h-4 w-4 mr-1" /> Tornar a les agendes
+        <ArrowLeft className="h-4 w-4 mr-1" /> {t('backToList')}
       </Link>
 
       {guardiansData && guardiansData.length > 0 && (
         <div className="bg-white border border-stone-200/80 rounded-[28px] p-5 shadow-xs">
-          <h3 className="text-[11px] font-black uppercase text-stone-400 tracking-wider mb-4">Dades de Contacte Família</h3>
+          <h3 className="text-[11px] font-black uppercase text-stone-400 tracking-wider mb-4">{t('guardianTitle')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {guardiansData.map((g: any, i: number) => {
               const prof = Array.isArray(g.profiles) ? g.profiles[0] : g.profiles
@@ -111,7 +114,7 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
       {showSuccess && (
         <div className="mb-4 p-4 rounded-[20px] bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 shadow-sm animate-in fade-in">
           <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-          Agenda desada correctament a la base de dades!
+          {t('successMsg')}
         </div>
       )}
 

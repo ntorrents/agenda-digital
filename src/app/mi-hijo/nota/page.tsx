@@ -54,6 +54,8 @@ export default async function NotaPage() {
             const dateObj = new Date(note.date)
             const dateStr = dateObj.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'short' })
 
+            const teacher = Array.isArray(note.teacher) ? note.teacher[0] : note.teacher
+
             return (
               <div key={note.id} className="bg-white border border-stone-200/80 rounded-[28px] p-5 shadow-xs flex flex-col gap-3 relative overflow-hidden">
                 <div className="flex items-center justify-between border-b border-stone-100 pb-3">
@@ -73,12 +75,12 @@ export default async function NotaPage() {
                   <div className="mt-2 bg-blue-50 border border-blue-100 rounded-xl p-3">
                     <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider mb-1">Nota General de l'Aula</p>
                     <p className="text-sm font-medium text-stone-700 italic">
-                      "{note.notes.split('\n\nNota General: ')[1].trim()}"
+                       "{note.notes.split('\n\nNota General: ')[1].trim()}"
                     </p>
                   </div>
                 )}
                 <div className="flex items-center justify-between pt-1 text-xs font-bold text-stone-400">
-                  <span>— {note.teacher?.full_name || 'Educadora'}</span>
+                  <span>— {teacher?.full_name || 'Educadora'}</span>
                 </div>
                 
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-purple-300"></div>

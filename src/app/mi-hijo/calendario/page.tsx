@@ -1,12 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 export default async function CalendariPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  const t = await getTranslations('calendar')
 
   // Get student's classroom to fetch relevant events
   const { data: guardianRel } = await supabase
@@ -49,15 +52,15 @@ export default async function CalendariPage() {
           <CalendarIcon className="h-6 w-6 text-purple-500" />
         </div>
         <div>
-          <h2 className="text-xl font-black text-stone-800 tracking-tight">Calendari</h2>
-          <p className="text-sm font-medium text-stone-500">Esdeveniments, festius i menú mensual</p>
+          <h2 className="text-xl font-black text-stone-800 tracking-tight">{t('title')}</h2>
+          <p className="text-sm font-medium text-stone-500">{t('subtitle')}</p>
         </div>
       </div>
 
       <div className="space-y-4">
         {!events || events.length === 0 ? (
           <div className="text-center p-8 bg-stone-50 rounded-2xl border border-stone-100">
-            <p className="text-stone-500 font-medium">No hi ha cap esdeveniment pròxim.</p>
+            <p className="text-stone-500 font-medium">{t('noEvents')}</p>
           </div>
         ) : (
           events.map(event => (
@@ -81,7 +84,7 @@ export default async function CalendariPage() {
                       ? 'bg-blue-100 text-blue-700' 
                       : 'bg-emerald-100 text-emerald-700'
                   }`}>
-                    {event.audience === 'school' ? 'Festiu / General' : 'Aula'}
+                    {event.audience === 'school' ? t('general') : t('classroom')}
                   </span>
                 </div>
                 <h3 className="text-base font-bold text-stone-800 leading-tight">

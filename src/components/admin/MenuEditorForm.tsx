@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Save, Loader2, Image as ImageIcon, Upload, FileText } from 'lucide-react'
 import { upsertMenu } from '@/app/actions/menu'
+import { useTranslations, useLocale } from 'next-intl'
 
 export function MenuEditorForm({ currentMonth, currentYear, existingMenu }: { currentMonth: number, currentYear: number, existingMenu: any }) {
   const [isSaving, setIsSaving] = useState(false)
@@ -10,13 +11,15 @@ export function MenuEditorForm({ currentMonth, currentYear, existingMenu }: { cu
   const [successMsg, setSuccessMsg] = useState(false)
   
   const [filePreview, setFilePreview] = useState<string | null>(null)
+  const t = useTranslations('menuEditor')
+  const locale = useLocale()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     if (file.size > 10 * 1024 * 1024) {
-      setErrorMsg('L\'arxiu és massa gran. El límit és 10MB.')
+      setErrorMsg(t('fileTooBig'))
       return
     }
 
@@ -47,11 +50,13 @@ export function MenuEditorForm({ currentMonth, currentYear, existingMenu }: { cu
       setSuccessMsg(true)
       setTimeout(() => setSuccessMsg(false), 3000)
     } catch (err: any) {
-      setErrorMsg(err.message || 'Error guardant el menú')
+      setErrorMsg(err.message || t('errorSaving'))
     } finally {
       setIsSaving(false)
     }
   }
+
+  const currentMonthName = new Date(currentYear, currentMonth - 1).toLocaleString(locale, { month: 'long' })
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -62,34 +67,34 @@ export function MenuEditorForm({ currentMonth, currentYear, existingMenu }: { cu
       )}
       {successMsg && (
         <div className="p-4 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-bold border border-emerald-200">
-          Menú desat correctament
+          {t('successMsg')}
         </div>
       )}
 
       <div className="bg-white border border-stone-200 rounded-[28px] p-6 shadow-sm space-y-6">
         <div className="space-y-4">
-          <label className="text-sm font-bold text-stone-700">Títol (Opcional)</label>
+          <label className="text-sm font-bold text-stone-700">{t('labelTitle')}</label>
           <input 
             type="text"
             name="title"
-            defaultValue={existingMenu?.title || `Menú de ${new Date(currentYear, currentMonth - 1).toLocaleString('ca', { month: 'long' })}`}
+            defaultValue={existingMenu?.title || t('defaultMenuTitle', { month: currentMonthName })}
             className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm font-semibold text-stone-800 focus:outline-none focus:border-teal-500"
           />
         </div>
 
         <div className="space-y-4">
-          <label className="text-sm font-bold text-stone-700">Descripció o Detalls (Opcional)</label>
+          <label className="text-sm font-bold text-stone-700">{t('labelDesc')}</label>
           <textarea 
             name="description"
             rows={4}
             defaultValue={existingMenu?.description || ''}
             className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm font-medium text-stone-800 focus:outline-none focus:border-teal-500 resize-none"
-            placeholder="Escriu aquí el menú si no vols pujar cap imatge..."
+            placeholder={t('descPlaceholder')}
           />
         </div>
 
         <div className="space-y-4">
-          <label className="text-sm font-bold text-stone-700">Imatge o PDF del menú (Opcional)</label>
+          <label className="text-sm font-bold text-stone-700">{t('labelFile')}</label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 rounded-2xl bg-stone-50 border border-stone-200 border-dashed">
             
             <div className="relative h-24 w-24 sm:h-32 sm:w-32 rounded-xl bg-white border border-stone-200 flex items-center justify-center overflow-hidden shrink-0">
@@ -120,10 +125,10 @@ export function MenuEditorForm({ currentMonth, currentYear, existingMenu }: { cu
                 className="inline-flex items-center justify-center h-10 px-4 rounded-xl border border-stone-200 bg-white text-stone-700 text-sm font-bold cursor-pointer hover:bg-stone-50 transition-colors w-full sm:w-auto"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                Pujar Arxiu
+                {t('btnUpload')}
               </label>
               <p className="text-xs text-stone-500 leading-relaxed">
-                Pots pujar una imatge (JPG, PNG) o un document PDF. Aquest serà visible per totes les famílies de l'escola durant aquest mes.
+                {t('fileHelp')}
               </p>
             </div>
 
@@ -137,7 +142,7 @@ export function MenuEditorForm({ currentMonth, currentYear, existingMenu }: { cu
         className="w-full h-14 rounded-2xl bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-bold text-base shadow-md shadow-teal-600/20 cursor-pointer flex items-center justify-center gap-2 transition-all"
       >
         {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} 
-        Desar Menú del Mes
+        {t('btnSave')}
       </button>
 
     </form>

@@ -1,12 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { MessageCircle, Mail } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 export default async function MissatgesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  const t = await getTranslations('messages')
 
   // Fetch messages where this family is the receiver
   const { data: messages } = await supabase
@@ -31,15 +34,15 @@ export default async function MissatgesPage() {
           <MessageCircle className="h-6 w-6 text-cyan-500" />
         </div>
         <div>
-          <h2 className="text-xl font-black text-stone-800 tracking-tight">Missatges Privats</h2>
-          <p className="text-sm font-medium text-stone-500">Comunicació directa amb la direcció</p>
+          <h2 className="text-xl font-black text-stone-800 tracking-tight">{t('title')}</h2>
+          <p className="text-sm font-medium text-stone-500">{t('subtitle')}</p>
         </div>
       </div>
 
       <div className="space-y-4">
         {!messages || messages.length === 0 ? (
           <div className="text-center p-8 bg-stone-50 rounded-2xl border border-stone-100">
-            <p className="text-stone-500 font-medium">No tens cap missatge nou.</p>
+            <p className="text-stone-500 font-medium">{t('noMessages')}</p>
           </div>
         ) : (
           messages.map((message: any) => (
@@ -59,7 +62,7 @@ export default async function MissatgesPage() {
                   <Mail className="h-5 w-5 text-stone-400" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-stone-800">{message.sender?.full_name || 'Direcció'}</h4>
+                  <h4 className="text-sm font-bold text-stone-800">{message.sender?.full_name || t('direction')}</h4>
                   <p className="text-[11px] font-medium text-stone-400 uppercase tracking-wide">
                     {new Date(message.created_at).toLocaleString('ca-ES')}
                   </p>

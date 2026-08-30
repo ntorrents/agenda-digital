@@ -2,12 +2,15 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Image as ImageIcon, Download, Calendar } from 'lucide-react'
 import Image from 'next/image'
+import { getTranslations } from 'next-intl/server'
 
 export default async function GaleriaPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  const t = await getTranslations('gallery')
 
   // 1. Get student and classroom info
   const { data: guardianRel } = await supabase
@@ -18,7 +21,7 @@ export default async function GaleriaPage() {
     .single()
 
   if (!guardianRel?.student_id) {
-    return <div>No s'ha trobat l'alumne associat.</div>
+    return <div>{t('noStudent')}</div>
   }
 
   const { data: student } = await supabase
@@ -63,14 +66,14 @@ export default async function GaleriaPage() {
           <ImageIcon className="h-6 w-6 text-emerald-500" />
         </div>
         <div>
-          <h2 className="text-xl font-black text-stone-800 tracking-tight">Galeria de Fotos</h2>
-          <p className="text-sm font-medium text-stone-500">Tots els records guardats</p>
+          <h2 className="text-xl font-black text-stone-800 tracking-tight">{t('title')}</h2>
+          <p className="text-sm font-medium text-stone-500">{t('subtitle')}</p>
         </div>
       </div>
 
       {allPhotos.length === 0 ? (
         <div className="text-center p-8 bg-stone-50 rounded-2xl border border-stone-100">
-          <p className="text-stone-500 font-medium">Encara no hi ha fotos a la galeria.</p>
+          <p className="text-stone-500 font-medium">{t('noPhotos')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -78,7 +81,7 @@ export default async function GaleriaPage() {
             <div key={index} className="group relative aspect-square rounded-2xl overflow-hidden bg-stone-100 border border-stone-200/60">
               <Image 
                 src={photo.photo_url} 
-                alt={`Foto del ${photo.date}`}
+                alt={`${t('photoOf')} ${photo.date}`}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -95,7 +98,7 @@ export default async function GaleriaPage() {
                 <span className={`text-[9px] uppercase font-black px-2 py-1 rounded-md shadow-sm ${
                   photo.type === 'individual' ? 'bg-white/90 text-stone-700' : 'bg-emerald-500/90 text-white'
                 }`}>
-                  {photo.type === 'individual' ? 'Individual' : 'Grup'}
+                  {photo.type === 'individual' ? t('individual') : t('group')}
                 </span>
               </div>
               

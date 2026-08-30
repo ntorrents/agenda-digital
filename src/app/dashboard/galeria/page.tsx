@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Image as ImageIcon, Download, Calendar, Users } from 'lucide-react'
 import Image from 'next/image'
+import { getTranslations, getLocale } from 'next-intl/server'
 
 export default async function DashboardGaleriaPage() {
   const supabase = await createClient()
@@ -16,6 +17,9 @@ export default async function DashboardGaleriaPage() {
     .single()
 
   if (!profile) redirect('/login')
+
+  const t = await getTranslations('dashboardGaleria')
+  const locale = await getLocale()
 
   let allPhotos = []
 
@@ -49,17 +53,24 @@ export default async function DashboardGaleriaPage() {
     ...(classNotes || []).map((p: any) => ({
       date: p.date,
       photo_url: p.photo_url,
-      type: 'Grupal',
-      context: p.classrooms?.name || 'Aula'
+      type: t('typeGroup'),
+      context: p.classrooms?.name || t('classroomFallback')
     })),
     ...(dailyLogs || []).map((p: any) => ({
       date: p.date,
       photo_url: p.photo_url,
-      type: 'Individual',
-      context: `${p.students?.first_name} ${p.students?.last_name?.charAt(0) || ''}. - ${p.students?.classrooms?.name || 'Aula'}`
+      type: t('typeIndividual'),
+      context: `${p.students?.first_name} ${p.students?.last_name?.charAt(0) || ''}. - ${p.students?.classrooms?.name || t('classroomFallback')}`
     }))
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
+  const dateLocaleMap: Record<string, string> = {
+    ca: 'ca-ES',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    en: 'en-US'
+  }
+  const dateLocale = dateLocaleMap[locale] || 'ca-ES'
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -70,8 +81,8 @@ export default async function DashboardGaleriaPage() {
           <ImageIcon className="h-6 w-6 text-emerald-600" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-stone-800 tracking-tight">Galeria Global</h2>
-          <p className="text-stone-500 font-medium text-sm mt-0.5">Totes les fotos del centre o aula, ordenades per data</p>
+          <h2 className="text-2xl font-black text-stone-800 tracking-tight">{t('title')}</h2>
+          <p className="text-stone-500 font-medium text-sm mt-0.5">{t('desc')}</p>
         </div>
       </div>
 
@@ -81,8 +92,8 @@ export default async function DashboardGaleriaPage() {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-stone-50 text-stone-400 mb-4">
             <ImageIcon className="h-8 w-8" />
           </div>
-          <h3 className="text-lg font-bold text-stone-800">No hi ha fotos</h3>
-          <p className="text-stone-500 mt-2">No s'han trobat fotos pujades a les agendes.</p>
+          <h3 className="text-lg font-bold text-stone-800">{t('emptyTitle')}</h3>
+          <p className="text-stone-500 mt-2">{t('emptyDesc')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -99,7 +110,7 @@ export default async function DashboardGaleriaPage() {
               {/* Type Badge */}
               <div className="absolute top-3 right-3">
                 <span className={`text-[10px] uppercase font-black tracking-wider px-2.5 py-1 rounded-lg shadow-sm backdrop-blur-md ${
-                  photo.type === 'Individual' 
+                  photo.type === t('typeIndividual') 
                     ? 'bg-white/90 text-stone-700' 
                     : 'bg-emerald-500/90 text-white'
                 }`}>
@@ -118,7 +129,7 @@ export default async function DashboardGaleriaPage() {
                 <div className="flex items-center gap-1.5 text-emerald-300">
                   <Calendar className="h-3.5 w-3.5" />
                   <span className="text-[11px] font-bold tracking-wider">
-                    {new Date(photo.date).toLocaleDateString('ca-ES', { day: 'numeric', month: 'long' })}
+                    {new Date(photo.date).toLocaleDateString(dateLocale, { day: 'numeric', month: 'long' })}
                   </span>
                 </div>
               </div>

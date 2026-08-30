@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { MessageCircle, Mail } from 'lucide-react'
 import MessageForm from '@/components/dashboard/MessageForm'
+import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardMissatgesPage() {
   const supabase = await createClient()
@@ -15,10 +16,12 @@ export default async function DashboardMissatgesPage() {
     .eq('id', user.id)
     .single()
 
+  const t = await getTranslations('dashboardMensajes')
+
   if (!profile || profile.role !== 'admin') {
     return (
       <div className="p-8 text-center text-stone-500">
-        Aquesta secció només està disponible per a la direcció del centre.
+        {t('adminOnly')}
       </div>
     )
   }
@@ -53,8 +56,8 @@ export default async function DashboardMissatgesPage() {
           <MessageCircle className="h-6 w-6 text-cyan-600" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-stone-800 tracking-tight">Missatges a Famílies</h2>
-          <p className="text-stone-500 font-medium text-sm mt-0.5">Envia comunicats privats directament a una família</p>
+          <h2 className="text-2xl font-black text-stone-800 tracking-tight">{t('title')}</h2>
+          <p className="text-stone-500 font-medium text-sm mt-0.5">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -66,11 +69,11 @@ export default async function DashboardMissatgesPage() {
 
         {/* Historial */}
         <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-lg font-bold text-stone-800">Historial d'enviaments</h3>
+          <h3 className="text-lg font-bold text-stone-800">{t('history')}</h3>
           
           {(!sentMessages || sentMessages.length === 0) ? (
             <div className="text-center p-8 bg-white rounded-2xl border border-stone-200 shadow-xs">
-              <p className="text-stone-500 font-medium">No has enviat cap missatge encara.</p>
+              <p className="text-stone-500 font-medium">{t('empty')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -82,7 +85,7 @@ export default async function DashboardMissatgesPage() {
                         <Mail className="h-4 w-4 text-stone-400" />
                       </div>
                       <span className="text-sm font-bold text-stone-800">
-                        Per a: {msg.receiver?.full_name}
+                        {t('to', { name: msg.receiver?.full_name })}
                       </span>
                     </div>
                     <span className="text-xs font-medium text-stone-400">
@@ -96,7 +99,7 @@ export default async function DashboardMissatgesPage() {
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md ${
                       msg.is_read ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500'
                     }`}>
-                      {msg.is_read ? 'Llegit per la família' : 'Pendent de lectura'}
+                      {msg.is_read ? t('read') : t('unread')}
                     </span>
                   </div>
                 </div>

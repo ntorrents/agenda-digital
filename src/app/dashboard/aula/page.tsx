@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { GlobalNoteForm } from '@/components/aula/GlobalNoteForm'
 import { Building2 } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 export default async function AulaPage() {
   const supabase = await createClient()
@@ -16,10 +17,12 @@ export default async function AulaPage() {
     .eq('teacher_id', user.id)
     .single()
 
+  const t = await getTranslations('dashboardAula')
+
   if (!classroom) {
     return (
       <div className="p-8 text-center bg-amber-50 rounded-2xl m-6 max-w-4xl mx-auto">
-        <p className="font-bold text-amber-800">No tens cap aula assignada. Contacta amb direcció.</p>
+        <p className="font-bold text-amber-800">{t('noClassroom')}</p>
       </div>
     )
   }
@@ -33,16 +36,16 @@ export default async function AulaPage() {
           <Building2 className="h-6 w-6" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-stone-900">Gestió de l'Aula: {classroom.name}</h2>
-          <p className="text-sm font-medium text-stone-500">Resum i accions globals del dia</p>
+          <h2 className="text-2xl font-black text-stone-900">{t('title', { name: classroom.name })}</h2>
+          <p className="text-sm font-medium text-stone-500">{t('subtitle')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Formulari Global */}
         <div className="bg-white border border-stone-200/80 rounded-[28px] p-6 shadow-sm">
-          <h3 className="text-lg font-black text-stone-800 mb-1">Nota i Foto Global</h3>
-          <p className="text-xs font-semibold text-stone-500 mb-6">El que publiquis aquí s'afegirà a l'agenda de TOTS els nens de l'aula i al taulell de comunicació d'avui.</p>
+          <h3 className="text-lg font-black text-stone-800 mb-1">{t('cardTitle')}</h3>
+          <p className="text-xs font-semibold text-stone-500 mb-6">{t('cardDesc')}</p>
           
           <GlobalNoteForm classroomId={classroom.id} schoolId={classroom.school_id} dateStr={todayStr} />
         </div>
@@ -50,12 +53,12 @@ export default async function AulaPage() {
         {/* Informació / Stats */}
         <div className="space-y-4">
           <div className="bg-stone-50 border border-stone-200/80 rounded-[28px] p-6 text-center shadow-sm">
-            <h4 className="text-sm font-bold text-stone-600 uppercase tracking-wider mb-2">Com funciona?</h4>
+            <h4 className="text-sm font-bold text-stone-600 uppercase tracking-wider mb-2">{t('infoTitle')}</h4>
             <p className="text-sm text-stone-500 mb-4 leading-relaxed font-medium">
-              Aquesta nota s'afegirà al camp d'observacions de l'agenda de cada alumne automàticament. A més, es crearà un avís al <b>Taulell</b> de l'aula perquè les famílies ho vegin només entrar.
+              {t('infoDesc1')}
             </p>
             <p className="text-sm text-stone-500 leading-relaxed font-medium">
-              Si puges una foto grupal, aquesta apareixerà juntament amb la nota del dia.
+              {t('infoDesc2')}
             </p>
           </div>
         </div>

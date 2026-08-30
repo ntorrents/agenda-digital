@@ -7,10 +7,15 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { LogOut, Home, Calendar, Image as ImageIcon, Bell, Menu, X, ArrowLeft, MessageCircle, HelpCircle, Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslations, useLocale } from 'next-intl'
+import { Locale } from '@/i18n'
 
 export default function FamilyLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const tNav = useTranslations('navigation')
+  const tCommon = useTranslations('common')
+  const locale = useLocale() as Locale
   const [studentName, setStudentName] = useState<string>('Infant')
   const [classroomName, setClassroomName] = useState<string>('')
   const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
@@ -93,14 +98,14 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
   const isHome = pathname === '/mi-hijo'
 
   const navItems = [
-    { href: '/mi-hijo', icon: Home, label: 'Inici' },
-    { href: '/mi-hijo/agenda', icon: Calendar, label: 'Agenda Diària' },
-    { href: '/mi-hijo/calendario', icon: Calendar, label: 'Calendari Mensual' },
-    { href: '/mi-hijo/menus', icon: Utensils, label: 'Menú' },
-    { href: '/mi-hijo/mensajes', icon: MessageCircle, label: 'Missatges' },
-    { href: '/mi-hijo/galeria', icon: ImageIcon, label: 'Fotos i Galeria' },
-    { href: '/mi-hijo/avisos', icon: Bell, label: 'Tauler i Avisos' },
-    { href: '/mi-hijo/ayuda', icon: HelpCircle, label: 'Ajuda i Centre' },
+    { href: '/mi-hijo', icon: Home, label: tNav('home') },
+    { href: '/mi-hijo/agenda', icon: Calendar, label: tNav('dailyAgenda') },
+    { href: '/mi-hijo/calendario', icon: Calendar, label: tNav('monthlyCalendar') },
+    { href: '/mi-hijo/menus', icon: Utensils, label: tNav('menu') },
+    { href: '/mi-hijo/mensajes', icon: MessageCircle, label: tNav('messages') },
+    { href: '/mi-hijo/galeria', icon: ImageIcon, label: tNav('photos') },
+    { href: '/mi-hijo/avisos', icon: Bell, label: tNav('notices') },
+    { href: '#', icon: HelpCircle, label: tNav('help') },
   ]
 
   // Close menu when route changes
@@ -109,32 +114,34 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
   }, [pathname])
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-stone-800 font-sans flex flex-col relative">
+    <div className="min-h-screen bg-[#faf8f5] text-stone-800 font-sans flex flex-col relative lg:pl-72">
       
       {/* Drawer Overlay */}
       {isMenuOpen && (
         <div 
-          className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 transition-opacity"
+          className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 transition-opacity lg:hidden"
           onClick={() => setIsMenuOpen(false)}
         />
       )}
 
-      {/* Mobile Sidebar (Drawer) */}
+      {/* Desktop/Mobile Sidebar */}
       <aside className={cn(
-        "fixed top-0 bottom-0 left-0 z-50 w-72 bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col",
+        "fixed top-0 bottom-0 left-0 z-50 w-72 bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col lg:translate-x-0",
         isMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-5 flex items-center justify-between border-b border-stone-100 bg-stone-50/50">
+        
+        {/* User Info Header */}
+        <div className="p-6 border-b border-stone-100 flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400 text-amber-950 font-black text-base shadow-md shadow-amber-400/20">
-              {studentName.charAt(0)}
+            <div className="h-12 w-12 rounded-[1.2rem] bg-[#0f766e] flex items-center justify-center shadow-lg shadow-[#0f766e]/20 shrink-0">
+              <span className="text-lg font-black text-white">{studentName.charAt(0)}</span>
             </div>
-            <div>
-              <h2 className="text-sm font-black text-stone-900">{studentName}</h2>
-              <p className="text-[10px] font-bold text-stone-500">{classroomName}</p>
+            <div className="overflow-hidden">
+              <h1 className="text-xl font-black text-stone-800 tracking-tight truncate">{studentName}</h1>
+              <p className="text-sm font-bold text-[#0f766e] truncate">{classroomName}</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)} className="rounded-full text-stone-400">
+          <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)} className="lg:hidden absolute top-4 right-4 rounded-full text-stone-400">
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -160,20 +167,19 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
           })}
         </nav>
 
-        <div className="p-4 border-t border-stone-100">
-          <Button
-            variant="ghost"
+        {/* Logout */}
+        <div className="p-4 border-t border-stone-100 bg-stone-50/50 mt-auto">
+          <button
             onClick={handleLogout}
-            className="w-full justify-start gap-3 rounded-2xl text-red-600 hover:text-red-700 hover:bg-red-50 font-bold px-4 py-6"
+            className="flex w-full items-center justify-center gap-2 py-3 px-4 rounded-xl text-stone-500 hover:text-red-600 hover:bg-red-50 font-bold transition-all"
           >
-            <LogOut className="h-5 w-5" />
-            Tancar Sessió
-          </Button>
+            <LogOut className="h-4 w-4" /> {tCommon('logout')}
+          </button>
         </div>
       </aside>
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md px-2 py-2 flex items-center justify-between shadow-xs h-16">
+      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md px-2 py-2 flex items-center justify-between shadow-xs h-16 lg:hidden">
         
         <div className="flex items-center gap-1">
           {isHome ? (

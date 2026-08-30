@@ -3,10 +3,16 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { LogOut, Home, Building, FileSpreadsheet, Settings, Crown, Database } from 'lucide-react'
 import { headers } from 'next/headers'
+import { getTranslations, getLocale } from 'next-intl/server'
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
+import { Locale } from '@/i18n'
 
 export default async function SuperadminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const tNav = await getTranslations('navigation')
+  const tCommon = await getTranslations('common')
+  const locale = await getLocale() as Locale
 
   // TEMPORARY DEMO BYPASS: We disable the auth check so you can view the UI without the DB migration
   /*
@@ -36,7 +42,7 @@ export default async function SuperadminLayout({ children }: { children: React.R
       <aside className="w-64 bg-stone-900 border-r border-stone-800 flex flex-col fixed inset-y-0 left-0 z-50">
         
         {/* Branding */}
-        <div className="h-20 flex items-center px-6 border-b border-stone-800">
+        <div className="h-20 flex items-center justify-between px-6 border-b border-stone-800">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
               <Crown className="h-5 w-5 text-white" />
@@ -46,21 +52,22 @@ export default async function SuperadminLayout({ children }: { children: React.R
               <p className="text-[10px] font-bold text-violet-400 tracking-widest uppercase">Super Admin</p>
             </div>
           </div>
+          <LanguageSwitcher currentLocale={locale} />
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
           <Link href="/superadmin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-stone-800 hover:text-white transition-colors group">
             <Home className="h-4 w-4 text-stone-400 group-hover:text-violet-400 transition-colors" />
-            Dashboard
+            {tNav('dashboard')}
           </Link>
           <Link href="/superadmin/escoles" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-stone-800 hover:text-white transition-colors group">
             <Building className="h-4 w-4 text-stone-400 group-hover:text-violet-400 transition-colors" />
-            Escoles (Clients)
+            {tNav('schools')}
           </Link>
           <Link href="/superadmin/importar" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-stone-800 hover:text-white transition-colors group">
             <Database className="h-4 w-4 text-stone-400 group-hover:text-violet-400 transition-colors" />
-            Importació Massiva
+            {tNav('import')}
           </Link>
         </nav>
 
@@ -68,7 +75,7 @@ export default async function SuperadminLayout({ children }: { children: React.R
         <div className="p-4 border-t border-stone-800">
           <form action="/auth/signout" method="post">
             <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors">
-              <LogOut className="h-4 w-4" /> Sortir
+              <LogOut className="h-4 w-4" /> {tCommon('logout')}
             </button>
           </form>
         </div>

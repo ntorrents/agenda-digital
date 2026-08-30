@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
+import { useTranslations, useLocale } from 'next-intl'
+import { Locale } from '@/i18n'
 import { 
   LogOut, 
   LayoutDashboard, 
@@ -25,6 +27,9 @@ import { cn } from '@/lib/utils'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const tNav = useTranslations('navigation')
+  const tCommon = useTranslations('common')
+  const locale = useLocale() as Locale
   const [userName, setUserName] = useState<string>('Marta Rovira')
   const [role, setRole] = useState<string>('teacher')
   const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
@@ -79,24 +84,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [pathname])
 
   const adminNavItems = [
-    { href: '/dashboard', icon: LayoutDashboard, label: 'Mètriques' },
-    { href: '/dashboard/config/aulas', icon: Building2, label: 'Aules' },
-    { href: '/dashboard/config/alumnos', icon: Baby, label: 'Alumnes' },
-    { href: '/dashboard/equipo', icon: Users, label: 'Equip' },
-    { href: '/dashboard/menus', icon: Utensils, label: 'Menú Menjador' },
-    { href: '/dashboard/comunicacion', icon: MessageSquare, label: 'Comunicació' },
-    { href: '/dashboard/calendario', icon: CalendarIcon, label: 'Calendari' },
-    { href: '/dashboard/galeria', icon: ImageIcon, label: 'Galeria' },
-    { href: '/dashboard/config/centro', icon: Settings, label: 'Ajustes del Centre' },
+    { href: '/dashboard', icon: LayoutDashboard, label: tNav('metrics') },
+    { href: '/dashboard/config/aulas', icon: Building2, label: tNav('classrooms') },
+    { href: '/dashboard/config/alumnos', icon: Baby, label: tNav('students') },
+    { href: '/dashboard/equipo', icon: Users, label: tNav('team') },
+    { href: '/dashboard/menus', icon: Utensils, label: tNav('menus') },
+    { href: '/dashboard/comunicacion', icon: MessageSquare, label: tNav('communication') },
+    { href: '/dashboard/calendario', icon: CalendarIcon, label: tNav('calendar') },
+    { href: '/dashboard/galeria', icon: ImageIcon, label: tNav('gallery') },
+    { href: '/dashboard/config/centro', icon: Settings, label: tNav('settings') },
   ]
 
   const teacherNavItems = [
-    { href: '/dashboard', icon: LayoutDashboard, label: 'Resum del dia' },
-    { href: '/dashboard/aula', icon: Building2, label: 'La meva Aula' },
-    { href: '/dashboard/config/alumnos', icon: Baby, label: 'Alumnes' },
-    { href: '/dashboard/agendas', icon: MessageSquare, label: 'Agendes' },
-    { href: '/dashboard/calendario', icon: CalendarIcon, label: 'Calendari' },
-    { href: '/dashboard/comunicacion', icon: Bell, label: 'Comunicació' },
+    { href: '/dashboard', icon: LayoutDashboard, label: tNav('dailySummary') },
+    { href: '/dashboard/aula', icon: Building2, label: tNav('myClassroom') },
+    { href: '/dashboard/config/alumnos', icon: Baby, label: tNav('students') },
+    { href: '/dashboard/agendas', icon: MessageSquare, label: tNav('agendas') },
+    { href: '/dashboard/calendario', icon: CalendarIcon, label: tNav('calendar') },
+    { href: '/dashboard/comunicacion', icon: Bell, label: tNav('communication') },
+    { href: '/dashboard/config/centro', icon: Settings, label: tNav('settings') },
   ]
 
   const navItems = role === 'admin' ? adminNavItems : teacherNavItems
@@ -116,7 +122,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {schoolInfo?.name || 'Escola'}
           </h1>
           <p className="text-xs text-stone-500 font-medium">
-            {role === 'admin' ? 'Panell de Direcció' : 'Panell Educador/a'}
+            {role === 'admin' ? tNav('panelAdmin') : tNav('panelTeacher')}
           </p>
         </div>
       </div>
@@ -148,21 +154,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <div className="p-4 border-t border-stone-100 bg-stone-50/50">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-bold text-stone-800 truncate">{userName}</span>
-            <span className="text-[10px] text-teal-700 font-semibold uppercase tracking-wider">
-              {role === 'admin' ? 'Directora' : 'Educador/a'}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full bg-stone-200 border border-stone-300 flex items-center justify-center shrink-0">
+              <span className="text-xs font-bold text-stone-600">
+                {userName.charAt(0)}
+              </span>
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold text-stone-900 truncate">{userName}</p>
+              <p className="text-xs font-medium text-stone-500 capitalize">{role}</p>
+            </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
+          <button 
             onClick={handleLogout}
-            className="shrink-0 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 cursor-pointer h-9 w-9 transition-colors"
-            title="Tancar sessió"
+            className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+            title={tCommon('logout')}
           >
             <LogOut className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
       </div>
     </div>

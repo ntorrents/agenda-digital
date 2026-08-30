@@ -5,6 +5,7 @@ import { Users, Plus, ChevronDown, ChevronUp, Trash2, Save, AlertTriangle } from
 import { Button } from '@/components/ui/button'
 import { saveAllStaff, archiveStaffMember } from './actions'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 type StaffMember = {
   id: string
@@ -30,6 +31,7 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
   
   const [memberToArchive, setMemberToArchive] = useState<StaffMember | null>(null)
   const [isArchiving, setIsArchiving] = useState(false)
+  const t = useTranslations('dashboardEquipo')
 
   // Initialize expanded state based on desktop/mobile
   useEffect(() => {
@@ -77,7 +79,7 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
   const handleSaveAll = async () => {
     // Validar emails de los nuevos
     if (staff.some(s => s._isNew && !s.email)) {
-      alert("Tots els nous membres han de tenir un correu electrònic per poder entrar.")
+      alert(t('validationEmailRequired'))
       return
     }
 
@@ -123,14 +125,14 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         {hasChanges ? (
           <p className="text-sm font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">
-            Tens canvis sense desar
+            {t('unsavedChanges')}
           </p>
         ) : (
-          <p className="text-sm text-stone-500 font-medium">Equip guardat correctament</p>
+          <p className="text-sm text-stone-500 font-medium">{t('allSaved')}</p>
         )}
         
         <Button onClick={addNewMember} variant="outline" className="rounded-xl border-stone-200 font-bold bg-white text-stone-600 hover:bg-stone-50">
-          <Plus className="h-4 w-4 mr-2" /> Afegir Membre
+          <Plus className="h-4 w-4 mr-2" /> {t('addMember')}
         </Button>
       </div>
 
@@ -155,10 +157,10 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
                   </div>
                   <div>
                     <h4 className="font-black text-stone-900 text-lg">
-                      {member.full_name || 'Sense nom'}
+                      {member.full_name || t('noName')}
                     </h4>
                     <p className="text-xs font-bold text-stone-400">
-                      {member.role === 'admin' ? 'Direcció' : 'Educador/a'} {member.email ? `· ${member.email}` : ''}
+                      {member.role === 'admin' ? t('roleAdmin') : t('roleTeacher')} {member.email ? `· ${member.email}` : ''}
                     </p>
                   </div>
                 </div>
@@ -183,34 +185,34 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
                     
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Nom Complet
+                        {t('labelFullName')}
                       </label>
                       <input
                         type="text"
                         value={member.full_name}
                         onChange={(e) => updateMember(member.id, 'full_name', e.target.value)}
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 text-stone-600"
-                        placeholder="Ex: Clara Soler"
+                        placeholder={t('placeholderName')}
                       />
                     </div>
 
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Rol
+                        {t('labelRole')}
                       </label>
                       <select
                         value={member.role}
                         onChange={(e) => updateMember(member.id, 'role', e.target.value)}
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 text-stone-600"
                       >
-                        <option value="teacher">Educador/a</option>
-                        <option value="admin">Direcció (Admin)</option>
+                        <option value="teacher">{t('roleTeacher')}</option>
+                        <option value="admin">{t('roleAdminSelect')}</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Correu (Accés)
+                        {t('labelEmail')}
                       </label>
                       <input
                         type="email"
@@ -218,41 +220,41 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
                         onChange={(e) => updateMember(member.id, 'email', e.target.value)}
                         disabled={!member._isNew} // Solo se puede cambiar al crearlo
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 text-stone-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-stone-100"
-                        placeholder="correu@centre.cat"
+                        placeholder={t('emailPlaceholder')}
                       />
                       {!member._isNew && (
-                        <p className="text-[9px] text-stone-400 mt-1">El correu no es pot modificar un cop creat per seguretat.</p>
+                        <p className="text-[9px] text-stone-400 mt-1">{t('emailNote')}</p>
                       )}
                       {member._isNew && (
-                        <p className="text-[9px] text-indigo-600 font-bold mt-1">Contrasenya per defecte: agenda-digital-pwd</p>
+                        <p className="text-[9px] text-indigo-600 font-bold mt-1">{t('defaultPwdNote')}</p>
                       )}
                     </div>
 
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Telèfon
+                        {t('labelPhone')}
                       </label>
                       <input
                         type="text"
                         value={member.phone || ''}
                         onChange={(e) => updateMember(member.id, 'phone', e.target.value)}
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 text-stone-600"
-                        placeholder="Ex: 600 000 000"
+                        placeholder={t('placeholderPhone')}
                       />
                     </div>
 
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Estat
+                        {t('labelStatus')}
                       </label>
                       <select
                         value={member.status || 'active'}
                         onChange={(e) => updateMember(member.id, 'status', e.target.value)}
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 text-stone-600"
                       >
-                        <option value="active">Actiu</option>
-                        <option value="paused">Inhabilitat / De Baixa</option>
-                        <option value="inactive">Arxivat (S'eliminarà de la vista)</option>
+                        <option value="active">{t('statusActive')}</option>
+                        <option value="paused">{t('statusPaused')}</option>
+                        <option value="inactive">{t('statusInactive')}</option>
                       </select>
                     </div>
 
@@ -268,13 +270,13 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
       {hasChanges && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-8 fade-in duration-300">
           <div className="bg-stone-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-4">
-            <span className="text-sm font-bold pl-2">Tens canvis pendents</span>
+            <span className="text-sm font-bold pl-2">{t('pendingChanges')}</span>
             <Button 
               onClick={handleSaveAll}
               disabled={isSaving} 
               className="bg-indigo-500 hover:bg-indigo-400 text-stone-900 rounded-xl font-black shadow-none border-none h-9"
             >
-              {isSaving ? 'Guardant...' : 'Guardar Tot'}
+              {isSaving ? t('saving') : t('saveAll')}
             </Button>
           </div>
         </div>
@@ -289,10 +291,10 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
             </div>
             
             <h3 className="text-xl font-black text-center text-stone-900 mb-2">
-              Arxivar Perfil?
+              {t('archiveTitle')}
             </h3>
             <p className="text-sm text-center text-stone-500 mb-8 leading-relaxed">
-              Estàs a punt d'arxivar el perfil de <strong>{memberToArchive.full_name}</strong>. Això <strong>revocarà el seu accés</strong> a la plataforma i el desvincularà de les aules que tingui assignades. No obstant això, el seu historial es mantindrà.
+              {t('archiveDesc1')} <strong>{memberToArchive.full_name}</strong>. {t('archiveDesc2')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -302,14 +304,14 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
                 onClick={() => setMemberToArchive(null)}
                 disabled={isArchiving}
               >
-                Cancel·lar
+                {t('cancel')}
               </Button>
               <Button 
                 onClick={handleArchive} 
                 className="w-full sm:flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold h-12 order-1 sm:order-2"
                 disabled={isArchiving}
               >
-                {isArchiving ? 'Arxivant...' : 'Sí, Arxivar'}
+                {isArchiving ? t('archiving') : t('archiveConfirm')}
               </Button>
             </div>
           </div>

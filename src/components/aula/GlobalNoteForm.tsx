@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePlus, MessageSquare, Loader2, X } from 'lucide-react'
 import { saveGlobalNoteAndPhoto } from '@/app/actions/aula'
+import { useTranslations } from 'next-intl'
 
 export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId: string, schoolId: string, dateStr: string }) {
   const router = useRouter()
@@ -12,6 +13,7 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const t = useTranslations('dashboardAula')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0]
@@ -51,11 +53,11 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
         setPreviewUrl(null)
         router.refresh()
       } else {
-        alert(result.error || 'Error en desar la nota')
+        alert(result.error || t('errorSaving'))
       }
     } catch (err) {
       console.error(err)
-      alert('Error de connexió')
+      alert(t('errorConnection'))
     } finally {
       setIsLoading(false)
     }
@@ -65,26 +67,26 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
     <form onSubmit={handleSubmit} className="space-y-4">
       {success && (
         <div className="p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-200">
-          Nota global i fotos desades i enviades correctament!
+          {t('successMsg')}
         </div>
       )}
       
       <div>
         <label className="text-[10px] font-black uppercase text-stone-500 tracking-wider mb-2 flex items-center gap-1.5">
-          <MessageSquare className="h-3.5 w-3.5" /> Text del dia
+          <MessageSquare className="h-3.5 w-3.5" /> {t('formLabelNote')}
         </label>
         <textarea
           value={note}
           onChange={e => setNote(e.target.value)}
           rows={4}
           className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none resize-none font-medium"
-          placeholder="Avui hem fet pintura de dits, s'ho han passat genial..."
+          placeholder={t('formPlaceholderNote')}
         />
       </div>
 
       <div>
         <label className="text-[10px] font-black uppercase text-stone-500 tracking-wider mb-2 flex items-center gap-1.5">
-          <ImagePlus className="h-3.5 w-3.5" /> Foto Grupal (Opcional)
+          <ImagePlus className="h-3.5 w-3.5" /> {t('formLabelPhoto')}
         </label>
         
         {previewUrl ? (
@@ -101,7 +103,7 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
         ) : (
           <label className="flex flex-col items-center justify-center h-24 w-full border-2 border-dashed border-stone-200 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors cursor-pointer text-stone-400 hover:text-stone-600">
             <ImagePlus className="h-6 w-6 mb-1" />
-            <span className="text-xs font-bold">Pujar foto</span>
+            <span className="text-xs font-bold">{t('formUploadPhoto')}</span>
             <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           </label>
         )}
@@ -114,10 +116,10 @@ export function GlobalNoteForm({ classroomId, schoolId, dateStr }: { classroomId
       >
         {isLoading ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" /> Processant i enviant...
+            <Loader2 className="h-4 w-4 animate-spin" /> {t('btnPublishing')}
           </>
         ) : (
-          'Desar i Publicar a tots'
+          t('btnPublish')
         )}
       </button>
     </form>

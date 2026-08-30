@@ -5,6 +5,7 @@ import { Building2, Plus, ChevronDown, ChevronUp, Trash2, Save, X, AlertTriangle
 import { Button } from '@/components/ui/button'
 import { saveAllClassrooms, archiveClassroom } from './actions'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 type Classroom = {
   id: string
@@ -31,6 +32,7 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
   // Archiving states
   const [classroomToArchive, setClassroomToArchive] = useState<Classroom | null>(null)
   const [isArchiving, setIsArchiving] = useState(false)
+  const t = useTranslations('dashboardAulas')
 
   // Initialize expanded state based on desktop/mobile
   useEffect(() => {
@@ -117,14 +119,14 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         {hasChanges ? (
           <p className="text-sm font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">
-            Tens canvis sense desar
+            {t('unsavedChanges')}
           </p>
         ) : (
-          <p className="text-sm text-stone-500 font-medium">Totes les aules desades</p>
+          <p className="text-sm text-stone-500 font-medium">{t('allSaved')}</p>
         )}
         
         <Button onClick={addNewClassroom} variant="outline" className="rounded-xl border-stone-200 font-bold bg-white text-stone-600 hover:bg-stone-50">
-          <Plus className="h-4 w-4 mr-2" /> Afegir Aula
+          <Plus className="h-4 w-4 mr-2" /> {t('add')}
         </Button>
       </div>
 
@@ -150,10 +152,10 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
                   </div>
                   <div>
                     <h4 className="font-black text-stone-900 text-lg">
-                      {aula.name || 'Aula sense nom'}
+                      {aula.name || t('untitled')}
                     </h4>
                     <p className="text-xs font-bold text-stone-400">
-                      Nivell {aula.level} {aula.capacity ? `· ${aula.capacity} places` : ''}
+                      {t('level')} {aula.level} {aula.capacity ? `· ${aula.capacity} ${t('places')}` : ''}
                     </p>
                   </div>
                 </div>
@@ -178,20 +180,20 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
                     
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Nom de l'aula
+                        {t('nameLabel')}
                       </label>
                       <input
                         type="text"
                         value={aula.name}
                         onChange={(e) => updateClassroom(aula.id, 'name', e.target.value)}
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 text-stone-600"
-                        placeholder="Ex: P2 Ossets"
+                        placeholder={t('namePlaceholder')}
                       />
                     </div>
 
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Nivell Educatiu
+                        {t('levelLabel')}
                       </label>
                       <select
                         value={aula.level}
@@ -206,27 +208,27 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
 
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Capacitat (Places)
+                        {t('capacityLabel')}
                       </label>
                       <input
                         type="number"
                         value={aula.capacity || ''}
                         onChange={(e) => updateClassroom(aula.id, 'capacity', e.target.value)}
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 text-stone-600"
-                        placeholder="Ex: 15"
+                        placeholder={t('capacityPlaceholder')}
                       />
                     </div>
 
                     <div>
                       <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 block">
-                        Tutor/a Principal
+                        {t('tutorLabel')}
                       </label>
                       <select
                         value={aula.teacher_id || ''}
                         onChange={(e) => updateClassroom(aula.id, 'teacher_id', e.target.value || null)}
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 text-stone-600"
                       >
-                        <option value="">-- Sense assignar --</option>
+                        <option value="">{t('tutorUnassigned')}</option>
                         {teachers.map(t => (
                           <option key={t.id} value={t.id}>{t.full_name}</option>
                         ))}
@@ -243,10 +245,10 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
         {classrooms.length === 0 && (
           <div className="text-center py-12 bg-white rounded-3xl border border-stone-200 border-dashed">
             <Building2 className="h-10 w-10 text-stone-300 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-stone-800">No hi ha cap aula</h3>
-            <p className="text-sm text-stone-500 mt-1 mb-4">Crea la teva primera aula per començar</p>
+            <h3 className="text-lg font-bold text-stone-800">{t('noAulasTitle')}</h3>
+            <p className="text-sm text-stone-500 mt-1 mb-4">{t('noAulasDesc')}</p>
             <Button onClick={addNewClassroom} className="bg-teal-600 hover:bg-teal-700 font-bold rounded-xl">
-              <Plus className="h-4 w-4 mr-2" /> Crear Aula
+              <Plus className="h-4 w-4 mr-2" /> {t('create')}
             </Button>
           </div>
         )}
@@ -256,13 +258,13 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
       {hasChanges && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-8 fade-in duration-300">
           <div className="bg-stone-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-4">
-            <span className="text-sm font-bold pl-2">Tens canvis pendents</span>
+            <span className="text-sm font-bold pl-2">{t('pendingChanges')}</span>
             <Button 
               onClick={handleSaveAll}
               disabled={isSaving} 
               className="bg-teal-500 hover:bg-teal-400 text-stone-900 rounded-xl font-black shadow-none border-none h-9"
             >
-              {isSaving ? 'Guardant...' : 'Guardar Tot'}
+              {isSaving ? t('saving') : t('saveAll')}
             </Button>
           </div>
         </div>
@@ -277,10 +279,10 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
             </div>
             
             <h3 className="text-xl font-black text-center text-stone-900 mb-2">
-              Arxivar Aula?
+              {t('archiveTitle')}
             </h3>
             <p className="text-sm text-center text-stone-500 mb-8 leading-relaxed">
-              Estàs a punt d'arxivar l'aula <strong>{classroomToArchive.name}</strong>. Aquesta acció <strong>desvincularà a tots els alumnes</strong> d'aquesta aula i els deixarà "Sense aula assignada". No obstant això, <strong>no s'esborrarà el seu historial</strong>.
+              {t('archiveDesc1')} <strong>{classroomToArchive.name}</strong>. {t('archiveDesc2')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -290,14 +292,14 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
                 onClick={() => setClassroomToArchive(null)}
                 disabled={isArchiving}
               >
-                Cancel·lar
+                {t('cancel')}
               </Button>
               <Button 
                 onClick={handleArchive} 
                 className="w-full sm:flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold h-12 order-1 sm:order-2"
                 disabled={isArchiving}
               >
-                {isArchiving ? 'Arxivant...' : 'Sí, Arxivar Aula'}
+                {isArchiving ? t('archiving') : t('archiveConfirm')}
               </Button>
             </div>
           </div>

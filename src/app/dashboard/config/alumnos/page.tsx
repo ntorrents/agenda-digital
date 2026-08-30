@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Baby, Filter, Search, Plus, Eye } from 'lucide-react'
 import { DeleteStudentButton } from '@/components/admin/DeleteStudentButton'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardConfigAlumnosPage() {
   const supabase = await createClient()
@@ -54,12 +55,14 @@ export default async function DashboardConfigAlumnosPage() {
 
   const { data: students } = await query
 
+  const t = await getTranslations('dashboardAlumnos')
+
   const getGenderLabel = (g: string) => {
     switch (g) {
-      case 'boy': return 'Nen'
-      case 'girl': return 'Nena'
-      case 'other': return 'Altre'
-      default: return '-'
+      case 'boy': return t('gender.boy')
+      case 'girl': return t('gender.girl')
+      case 'other': return t('gender.other')
+      default: return t('gender.unknown')
     }
   }
 
@@ -99,9 +102,9 @@ export default async function DashboardConfigAlumnosPage() {
           )}
           <div>
             <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
-              <Baby className="h-5 w-5 text-teal-600" /> {profile.role === 'admin' ? 'Alumnes del Centre' : 'Els meus Alumnes'}
+              <Baby className="h-5 w-5 text-teal-600" /> {profile.role === 'admin' ? t('titleAdmin') : t('titleTeacher')}
             </h3>
-            <p className="text-xs text-stone-500">{profile.role === 'admin' ? 'Gestió completa y llistat' : 'Alumnes de la teva aula'}</p>
+            <p className="text-xs text-stone-500">{profile.role === 'admin' ? t('descAdmin') : t('descTeacher')}</p>
           </div>
         </div>
         
@@ -110,7 +113,7 @@ export default async function DashboardConfigAlumnosPage() {
             href="/dashboard/config/alumnos/nuevo"
             className="inline-flex items-center justify-center rounded-2xl bg-teal-600 text-white hover:bg-teal-700 font-bold text-xs h-9 px-4 shadow-sm transition-all"
           >
-            <Plus className="h-3.5 w-3.5 mr-1" /> Nou Alumne
+            <Plus className="h-3.5 w-3.5 mr-1" /> {t('newStudent')}
           </Link>
         )}
       </div>
@@ -125,18 +128,18 @@ export default async function DashboardConfigAlumnosPage() {
 
           return (
             <div key={level} className="space-y-3">
-              {profile.role === 'admin' && <h4 className="text-sm font-black text-stone-800 ml-2">Nivell {level}</h4>}
+              {profile.role === 'admin' && <h4 className="text-sm font-black text-stone-800 ml-2">{level === 'Sense Aula' ? t('unassignedGroup') : `${t('level')} ${level}`}</h4>}
               <div className="bg-white border border-stone-200/80 rounded-[24px] overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-stone-600">
                     <thead className="bg-stone-50/50 text-xs uppercase font-black text-stone-400 border-b border-stone-100">
                       <tr>
-                        <th className="px-4 py-3">Nom i Cognoms</th>
-                        <th className="px-4 py-3">Aula</th>
-                        <th className="px-4 py-3">Gènere</th>
-                        <th className="px-4 py-3">Data Naix.</th>
-                        <th className="px-4 py-3">Intoleràncies</th>
-                        <th className="px-4 py-3 text-right">Accions</th>
+                        <th className="px-4 py-3">{t('table.name')}</th>
+                        <th className="px-4 py-3">{t('table.classroom')}</th>
+                        <th className="px-4 py-3">{t('table.gender')}</th>
+                        <th className="px-4 py-3">{t('table.birthDate')}</th>
+                        <th className="px-4 py-3">{t('table.intolerances')}</th>
+                        <th className="px-4 py-3 text-right">{t('table.actions')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stone-100">
@@ -151,7 +154,7 @@ export default async function DashboardConfigAlumnosPage() {
                             </td>
                             <td className="px-4 py-3">
                               <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${colorClass}`}>
-                                {classroom ? classroom.name : 'Sense assignar'}
+                                {classroom ? classroom.name : t('unassignedCell')}
                               </span>
                             </td>
                             <td className="px-4 py-3 text-xs font-semibold">
@@ -162,7 +165,7 @@ export default async function DashboardConfigAlumnosPage() {
                             </td>
                             <td className="px-4 py-3 text-xs">
                               {student.intolerances ? (
-                                <span className="text-red-600 font-semibold bg-red-50 px-2 py-0.5 rounded border border-red-100">Sí</span>
+                                <span className="text-red-600 font-semibold bg-red-50 px-2 py-0.5 rounded border border-red-100">{t('table.yes')}</span>
                               ) : (
                                 <span className="text-stone-300">-</span>
                               )}
@@ -173,7 +176,7 @@ export default async function DashboardConfigAlumnosPage() {
                                   href={`/dashboard/config/alumnos/${student.id}`}
                                   className="flex items-center gap-1.5 text-[10px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-2.5 py-1.5 rounded-xl transition-colors border border-teal-200/50"
                                 >
-                                  <Eye className="h-3 w-3" /> Fitxa
+                                  <Eye className="h-3 w-3" /> {t('table.profile')}
                                 </Link>
                                 {profile.role === 'admin' && <DeleteStudentButton studentId={student.id} />}
                               </div>
@@ -190,7 +193,7 @@ export default async function DashboardConfigAlumnosPage() {
         })}
         {students?.length === 0 && (
           <div className="text-center py-12 text-stone-500 text-sm bg-white rounded-[24px] border border-stone-200/80">
-            No s'han trobat alumnes amb aquests filtres.
+            {t('noStudents')}
           </div>
         )}
       </div>

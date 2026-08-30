@@ -1,13 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { Save, Loader2, CheckCircle2 } from 'lucide-react'
 import { updateFamilyProfile } from '@/app/actions/family'
+import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
+import { setLocaleAction } from '@/app/actions/locale'
+import { Locale } from '@/i18n'
+import { cn } from '@/lib/utils'
 
 export function FamilyProfileForm({ profile, email, student }: { profile: any, email: string | undefined, student: any }) {
   const [isSaving, setIsSaving] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState(false)
+  
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const currentLocale = useLocale() as Locale
+  const tProfile = useTranslations('familyProfile')
+
+  const handleLanguageChange = (locale: Locale) => {
+    if (locale === currentLocale) return
+    startTransition(async () => {
+      await setLocaleAction(locale)
+      router.refresh()
+    })
+  }
+
+  const languages = [
+    { code: 'ca', name: 'Català' },
+    { code: 'es', name: 'Castellano' },
+    { code: 'en', name: 'English' },
+    { code: 'fr', name: 'Français' },
+  ]
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -136,6 +161,30 @@ export function FamilyProfileForm({ profile, email, student }: { profile: any, e
             placeholder="Miním 6 caràcters"
             className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
           />
+        </div>
+      </div>
+
+      {/* Idioma */}
+      <div className="bg-white border border-stone-200/80 rounded-[28px] p-5 shadow-xs space-y-4">
+        <h3 className="text-[11px] font-black uppercase text-stone-400 tracking-wider">{tProfile('languageTitle')}</h3>
+        <p className="text-[10px] text-stone-400 pl-1 mb-1">{tProfile('languageDesc')}</p>
+        <div className="grid grid-cols-2 gap-2">
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              type="button"
+              onClick={() => handleLanguageChange(lang.code as Locale)}
+              disabled={isPending}
+              className={cn(
+                "py-3 px-4 text-sm font-bold rounded-2xl border transition-all cursor-pointer text-center",
+                currentLocale === lang.code 
+                  ? "bg-teal-50 border-teal-200 text-teal-700 font-extrabold" 
+                  : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"
+              )}
+            >
+              {lang.name}
+            </button>
+          ))}
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Users } from 'lucide-react'
 import { EquipoEditor } from './EquipoEditor'
+import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardEquipoPage() {
   const supabase = await createClient()
@@ -35,6 +36,8 @@ export default async function DashboardEquipoPage() {
     .order('role', { ascending: true })
     .order('full_name', { ascending: true })
 
+  const t = await getTranslations('dashboardEquipo')
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       
@@ -43,10 +46,10 @@ export default async function DashboardEquipoPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
             <Users className="h-5 w-5" />
           </div>
-          Equip i Personal
+          {t('title')}
         </h3>
         <p className="text-sm text-stone-500 mt-2 max-w-xl">
-          Administra els perfils dels educadors, els seus rols i el seu estat actual (actiu o de baixa).
+          {t('desc')}
         </p>
       </div>
 

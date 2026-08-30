@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { MenuEditorForm } from '@/components/admin/MenuEditorForm'
 import { CalendarDays, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import { getTranslations, getLocale } from 'next-intl/server'
 
 export default async function MenusPage({ searchParams }: { searchParams: { m?: string, y?: string } }) {
   const supabase = await createClient()
@@ -30,17 +31,20 @@ export default async function MenusPage({ searchParams }: { searchParams: { m?: 
     .eq('year', currentYear)
     .single()
 
-  const monthName = new Date(currentYear, currentMonth - 1).toLocaleString('ca', { month: 'long' })
+  const t = await getTranslations('dashboardMenus')
+  const locale = await getLocale()
+
+  const monthName = new Date(currentYear, currentMonth - 1).toLocaleString(locale, { month: 'long' })
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-black text-stone-800 tracking-tight flex items-center gap-2">
           <CalendarDays className="h-6 w-6 text-teal-600" />
-          Menú Comedor
+          {t('title')}
         </h2>
         <p className="text-sm text-stone-500 font-medium">
-          Pots afegir el menú del mes actual pujant un arxiu o escrivint-lo manualment.
+          {t('desc')}
         </p>
       </div>
 
@@ -49,20 +53,20 @@ export default async function MenusPage({ searchParams }: { searchParams: { m?: 
           {monthName} {currentYear}
         </span>
         <div className="flex gap-2">
-          <Link replace={true} href={`?m=${currentMonth === 1 ? 12 : currentMonth - 1}&y=${currentMonth === 1 ? currentYear - 1 : currentYear}`} className="px-3 py-1.5 text-xs font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-lg">Anterior</Link>
-          <Link replace={true} href={`?m=${today.getMonth() + 1}&y=${today.getFullYear()}`} className="px-3 py-1.5 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg">Mes Actual</Link>
-          <Link replace={true} href={`?m=${currentMonth === 12 ? 1 : currentMonth + 1}&y=${currentMonth === 12 ? currentYear + 1 : currentYear}`} className="px-3 py-1.5 text-xs font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-lg">Següent</Link>
+          <Link replace={true} href={`?m=${currentMonth === 1 ? 12 : currentMonth - 1}&y=${currentMonth === 1 ? currentYear - 1 : currentYear}`} className="px-3 py-1.5 text-xs font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-lg">{t('prev')}</Link>
+          <Link replace={true} href={`?m=${today.getMonth() + 1}&y=${today.getFullYear()}`} className="px-3 py-1.5 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg">{t('current')}</Link>
+          <Link replace={true} href={`?m=${currentMonth === 12 ? 1 : currentMonth + 1}&y=${currentMonth === 12 ? currentYear + 1 : currentYear}`} className="px-3 py-1.5 text-xs font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-lg">{t('next')}</Link>
         </div>
       </div>
 
       {existingMenu?.file_url && (
         <div className="bg-teal-50 border border-teal-200 p-4 rounded-2xl flex items-center justify-between">
           <div className="text-sm font-semibold text-teal-800">
-            Ja hi ha un arxiu pujat per aquest mes.
+            {t('alreadyUploaded')}
           </div>
           <a href={existingMenu.file_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs font-bold text-teal-700 hover:text-teal-900 bg-white px-3 py-1.5 rounded-lg border border-teal-200">
             <ExternalLink className="h-3 w-3" />
-            Veure arxiu
+            {t('viewFile')}
           </a>
         </div>
       )}

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Baby, Users, Building2, Settings, ChevronRight, Sparkles, Calendar, ShieldAlert, HeartPulse, Activity, LayoutDashboard, MessageSquare } from 'lucide-react'
 import { TeacherDashboard } from '@/components/teacher/TeacherDashboard'
+import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardSummaryPage() {
   const supabase = await createClient()
@@ -79,35 +80,37 @@ export default async function DashboardSummaryPage() {
     month: 'long',
   })
 
+  const t = await getTranslations('dashboardAdmin')
+
   // Quick Action Config Cards
   const cards = [
     {
-      title: "Alumnes i Famílies",
-      description: "Gestiona les fitxes i els accessos dels pares.",
+      title: t('cards.students.title'),
+      description: t('cards.students.desc'),
       icon: Baby,
       href: '/dashboard/config/alumnos',
       color: 'teal',
-      stat: `${totalS} alumnes`
+      stat: `${totalS} ${t('cards.students.stat')}`
     },
     {
-      title: 'Equip i Educadores',
-      description: "Administra els professors i el personal.",
+      title: t('cards.staff.title'),
+      description: t('cards.staff.desc'),
       icon: Users,
       href: '/dashboard/config/equipo',
       color: 'amber',
-      stat: `${totalTeachers} actius`
+      stat: `${totalTeachers} ${t('cards.staff.stat')}`
     },
     {
-      title: 'Aules del Centre',
-      description: "Crea i edita els grups d'alumnes.",
+      title: t('cards.classrooms.title'),
+      description: t('cards.classrooms.desc'),
       icon: Building2,
       href: '/dashboard/config/aulas',
       color: 'orange',
-      stat: `${totalClassrooms} aules`
+      stat: `${totalClassrooms} ${t('cards.classrooms.stat')}`
     },
     {
-      title: 'Ajustes Generals',
-      description: "Configura el nom, logo i opcions de l'agenda.",
+      title: t('cards.settings.title'),
+      description: t('cards.settings.desc'),
       icon: Settings,
       href: '/dashboard/config/centro',
       color: 'indigo',
@@ -135,10 +138,10 @@ export default async function DashboardSummaryPage() {
               <Sparkles className="h-3.5 w-3.5 text-teal-300" /> {todayFormatted}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Benviguda a Direcció 👋
+              {t('welcome')}
             </h2>
             <p className="text-sm text-teal-100/90 font-medium max-w-lg">
-              Des d'aquí pots administrar tota la teva escola, veure mètriques al dia i configurar l'agenda dels alumnes.
+              {t('welcomeDesc')}
             </p>
           </div>
         </div>
@@ -147,7 +150,7 @@ export default async function DashboardSummaryPage() {
       {/* Main KPIs (Config Cards as requested by user) */}
       <section>
         <h3 className="text-lg font-black text-stone-800 mb-4 flex items-center gap-2">
-          <LayoutDashboard className="h-5 w-5 text-stone-400" /> Accessos i Mètriques Globals
+          <LayoutDashboard className="h-5 w-5 text-stone-400" /> {t('kpiTitle')}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {cards.map((card, idx) => (
@@ -180,7 +183,7 @@ export default async function DashboardSummaryPage() {
                 </p>
                 
                 <div className="mt-4 flex items-center text-[11px] font-bold text-stone-400 group-hover:text-stone-900 transition-colors uppercase tracking-wider">
-                  Configurar <ChevronRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
+                  {t('configure')} <ChevronRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </Link>
@@ -197,16 +200,16 @@ export default async function DashboardSummaryPage() {
             <div className="h-8 w-8 bg-amber-50 text-amber-600 flex items-center justify-center rounded-xl">
               <Calendar className="h-4 w-4" />
             </div>
-            <h3 className="text-sm font-black text-stone-800">Agendes d'Avui</h3>
+            <h3 className="text-sm font-black text-stone-800">{t('alerts.agendas.title')}</h3>
           </div>
           <div className="flex items-end gap-2">
             <h4 className="text-3xl font-black text-stone-900 leading-none">{missingLogs}</h4>
-            <span className="text-xs font-bold text-stone-500 mb-1">pendents</span>
+            <span className="text-xs font-bold text-stone-500 mb-1">{t('alerts.agendas.pending')}</span>
           </div>
           {missingLogs === 0 && totalS > 0 ? (
-             <p className="text-[11px] text-emerald-600 font-bold mt-2">● Totes les aules al dia</p>
+             <p className="text-[11px] text-emerald-600 font-bold mt-2">{t('alerts.agendas.allDone')}</p>
           ) : (
-             <p className="text-[11px] text-amber-600 font-bold mt-2">● Cal revisar aules</p>
+             <p className="text-[11px] text-amber-600 font-bold mt-2">{t('alerts.agendas.needReview')}</p>
           )}
         </div>
 
@@ -216,14 +219,14 @@ export default async function DashboardSummaryPage() {
             <div className="h-8 w-8 bg-rose-50 text-rose-600 flex items-center justify-center rounded-xl">
               <Activity className="h-4 w-4" />
             </div>
-            <h3 className="text-sm font-black text-stone-800">Absències d'Equip</h3>
+            <h3 className="text-sm font-black text-stone-800">{t('alerts.absences.title')}</h3>
           </div>
           <div className="flex items-end gap-2">
             <h4 className="text-3xl font-black text-stone-900 leading-none">{staffAbsences?.length || 0}</h4>
-            <span className="text-xs font-bold text-stone-500 mb-1">baixes avui</span>
+            <span className="text-xs font-bold text-stone-500 mb-1">{t('alerts.absences.today')}</span>
           </div>
           {(staffAbsences?.length || 0) === 0 ? (
-             <p className="text-[11px] text-emerald-600 font-bold mt-2">● Tot l'equip està operatiu</p>
+             <p className="text-[11px] text-emerald-600 font-bold mt-2">{t('alerts.absences.allOk')}</p>
           ) : (
              <p className="text-[11px] text-rose-600 font-bold mt-2 line-clamp-1 truncate">
                ● {staffAbsences?.map((a: any) => Array.isArray(a.profiles) ? a.profiles[0]?.full_name : a.profiles?.full_name).join(', ')}
@@ -238,10 +241,10 @@ export default async function DashboardSummaryPage() {
               <div className="h-8 w-8 bg-blue-50 text-blue-600 flex items-center justify-center rounded-xl">
                 <ShieldAlert className="h-4 w-4" />
               </div>
-              <h3 className="text-sm font-black text-stone-800">Intoleràncies</h3>
+              <h3 className="text-sm font-black text-stone-800">{t('alerts.intolerances.title')}</h3>
             </div>
             <span className="bg-blue-100 text-blue-800 text-[10px] font-black px-2 py-0.5 rounded-lg">
-              {intolerantStudents?.length || 0} ALUMNES
+              {intolerantStudents?.length || 0} {t('alerts.intolerances.students')}
             </span>
           </div>
           <div className="overflow-y-auto no-scrollbar flex-1 pr-2 space-y-2">
@@ -254,7 +257,7 @@ export default async function DashboardSummaryPage() {
               </div>
             ))}
             {intolerantStudents?.length === 0 && (
-              <p className="text-xs text-stone-500 font-medium">Cap registre actiu.</p>
+              <p className="text-xs text-stone-500 font-medium">{t('alerts.intolerances.none')}</p>
             )}
           </div>
         </div>

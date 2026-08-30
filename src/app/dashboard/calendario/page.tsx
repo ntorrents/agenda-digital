@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, X, Users, Baby, Megaphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function CalendarioPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -14,6 +15,8 @@ export default function CalendarioPage() {
   const [schoolId, setSchoolId] = useState<string | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string>('teacher')
+  const t = useTranslations('dashboardCalendar')
+  const locale = useLocale()
   
   // Form state
   const [title, setTitle] = useState('')
@@ -89,7 +92,7 @@ export default function CalendarioPage() {
   }
 
   const handleDeleteEvent = async (id: string) => {
-    if (!confirm('Eliminar aquest esdeveniment?')) return
+    if (!confirm(t('confirmDelete'))) return
     await supabase.from('events_announcements').delete().eq('id', id)
     loadEvents()
   }
@@ -115,6 +118,21 @@ export default function CalendarioPage() {
   const tDay = tDate.getDate().toString().padStart(2, '0')
   const todayStr = `${tYear}-${tMonth}-${tDay}`
 
+  const dateLocaleMap: Record<string, string> = {
+    ca: 'ca-ES',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    en: 'en-US'
+  }
+  const dateLocale = dateLocaleMap[locale] || 'ca-ES'
+
+  // Monday to Sunday weekdays
+  const weekdayNames = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(2026, 0, 5 + i)
+    const name = d.toLocaleDateString(dateLocale, { weekday: 'short' })
+    return name.replace(/\./g, '')
+  })
+
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-73px)] lg:h-screen">
       
@@ -128,7 +146,7 @@ export default function CalendarioPage() {
                 <CalendarIcon className="h-5 w-5" />
               </div>
               <h2 className="text-xl font-black text-stone-800 capitalize">
-                {currentDate.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' })}
+                {currentDate.toLocaleDateString(dateLocale, { month: 'long', year: 'numeric' })}
               </h2>
             </div>
             
@@ -137,7 +155,7 @@ export default function CalendarioPage() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button variant="outline" onClick={() => setCurrentDate(new Date())} className="rounded-xl font-bold h-10">
-                Avui
+                {t('today')}
               </Button>
               <Button variant="outline" size="icon" onClick={nextMonth} className="rounded-xl h-10 w-10">
                 <ChevronRight className="h-4 w-4" />
@@ -147,8 +165,8 @@ export default function CalendarioPage() {
 
           <div className="bg-white rounded-[32px] border border-stone-200/80 shadow-sm overflow-hidden p-6">
             <div className="grid grid-cols-7 gap-2 mb-2">
-              {['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'].map(day => (
-                <div key={day} className="text-center text-xs font-black text-stone-400 uppercase tracking-wider py-2">
+              {weekdayNames.map(day => (
+                <div key={day} className="text-center text-xs font-black text-stone-400 uppercase tracking-wider py-2 capitalize">
                   {day}
                 </div>
               ))}
@@ -165,7 +183,7 @@ export default function CalendarioPage() {
                 const dayEvents = events.filter(e => e.event_date === fullDateStr)
                 const isSelected = selectedDateStr === fullDateStr
                 const isToday = todayStr === fullDateStr
-
+ 
                 return (
                   <button
                     key={date}
@@ -200,7 +218,7 @@ export default function CalendarioPage() {
                       </div>
                       {dayEvents.length > 3 && (
                         <div className="text-[9px] font-bold text-stone-400 pl-1">
-                          +{dayEvents.length - 3} més
+                          {t('moreEvents', { count: dayEvents.length - 3 })}
                         </div>
                       )}
                     </div>
@@ -217,10 +235,10 @@ export default function CalendarioPage() {
       <div className="w-full lg:w-96 bg-white border-l border-stone-200/80 flex flex-col h-full shrink-0">
         <div className="p-6 border-b border-stone-100 bg-stone-50/50">
           <h3 className="text-xl font-black text-stone-800 capitalize">
-            {selectedDate.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+            {selectedDate.toLocaleDateString(dateLocale, { weekday: 'long', day: 'numeric', month: 'long' })}
           </h3>
           <p className="text-sm text-stone-500 font-medium">
-            {selectedEvents.length} esdeveniments programats
+            {t('eventsCount', { count: selectedEvents.length })}
           </p>
         </div>
 
@@ -228,7 +246,7 @@ export default function CalendarioPage() {
           {isCreating ? (
             <form onSubmit={handleCreateEvent} className="bg-stone-50 border border-stone-200 rounded-2xl p-4 space-y-4 animate-in slide-in-from-top-4 fade-in duration-200">
               <div className="flex items-center justify-between">
-                <h4 className="font-bold text-stone-800 text-sm">Nou Esdeveniment</h4>
+                <h4 className="font-bold text-stone-800 text-sm">{t('newEvent')}</h4>
                 <Button type="button" variant="ghost" size="icon" onClick={() => setIsCreating(false)} className="h-6 w-6">
                   <X className="h-4 w-4" />
                 </Button>
@@ -236,30 +254,30 @@ export default function CalendarioPage() {
               
               <div className="space-y-3">
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Títol</label>
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{t('labelTitle')}</label>
                   <input
                     required
                     type="text"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    placeholder="Ex: Excursió al parc"
+                    placeholder={t('placeholderTitle')}
                   />
                 </div>
                 
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Descripció (opcional)</label>
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{t('labelDesc')}</label>
                   <textarea
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     rows={2}
                     className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
-                    placeholder="Detalls curts..."
+                    placeholder={t('placeholderDesc')}
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1 block">Públic</label>
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1 block">{t('labelAudience')}</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
@@ -269,7 +287,7 @@ export default function CalendarioPage() {
                         audience === 'school' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-stone-200 text-stone-500'
                       )}
                     >
-                      <Baby className="h-3.5 w-3.5" /> Tots (Famílies)
+                      <Baby className="h-3.5 w-3.5" /> {t('audienceAll')}
                     </button>
                     <button
                       type="button"
@@ -279,14 +297,14 @@ export default function CalendarioPage() {
                         audience === 'staff' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-white border-stone-200 text-stone-500'
                       )}
                     >
-                      <Users className="h-3.5 w-3.5" /> Només Equip
+                      <Users className="h-3.5 w-3.5" /> {t('audienceStaff')}
                     </button>
                   </div>
                 </div>
               </div>
 
               <Button type="submit" disabled={isSubmitting} className="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-xl h-10 font-bold">
-                {isSubmitting ? 'Guardant...' : 'Crear Esdeveniment'}
+                {isSubmitting ? t('btnSaving') : t('btnCreate')}
               </Button>
             </form>
           ) : (
@@ -296,7 +314,7 @@ export default function CalendarioPage() {
                   <div className="bg-stone-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-3">
                     <CalendarIcon className="h-8 w-8 text-stone-300" />
                   </div>
-                  <p className="text-sm font-medium text-stone-500">No hi ha res planejat per avui.</p>
+                  <p className="text-sm font-medium text-stone-500">{t('emptyDay')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -316,11 +334,11 @@ export default function CalendarioPage() {
                       <div className="flex items-center gap-1.5">
                         {event.audience === 'school' ? (
                           <span className="flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            <Baby className="h-3 w-3" /> Tota l'escola
+                            <Baby className="h-3 w-3" /> {t('audienceAllBadge')}
                           </span>
                         ) : (
                           <span className="flex items-center gap-1 text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            <Users className="h-3 w-3" /> Només Equip
+                            <Users className="h-3 w-3" /> {t('audienceStaffBadge')}
                           </span>
                         )}
                       </div>
@@ -337,7 +355,7 @@ export default function CalendarioPage() {
                 onClick={() => setIsCreating(true)}
                 className="w-full bg-white border-2 border-dashed border-stone-200 text-stone-600 hover:border-teal-500 hover:text-teal-700 hover:bg-teal-50 rounded-2xl h-12 font-bold shadow-none"
               >
-                <Plus className="h-4 w-4 mr-2" /> Afegir Esdeveniment
+                <Plus className="h-4 w-4 mr-2" /> {t('btnAdd')}
               </Button>
             </>
           )}

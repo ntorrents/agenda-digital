@@ -41,6 +41,33 @@ export async function createStaffMember(formData: FormData) {
   return { success: true }
 }
 
+export async function updateStaffMember(formData: FormData) {
+  const { supabase } = await requireAdmin()
+
+  const id = formData.get('id') as string
+  const fullName = formData.get('full_name') as string
+  const role = formData.get('role') as string
+  const phone = formData.get('phone') as string || null
+
+  if (!id || !fullName || !role) {
+    throw new Error('Missing required fields')
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      full_name: fullName,
+      role: role,
+      phone: phone
+    })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/dashboard/personal')
+  return { success: true }
+}
+
 export async function createClassroom(formData: FormData) {
   const { supabase, user } = await requireAdmin()
 

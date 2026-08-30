@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { Save, Loader2, CheckCircle2, Image as ImageIcon, Upload, Building } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { updateSchoolSettings } from '@/app/actions/school'
+import { useTranslations } from 'next-intl'
 
 export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSettings: any, schoolInfo: any }) {
   const [isSaving, setIsSaving] = useState(false)
@@ -12,13 +13,14 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
   
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const t = useTranslations('schoolSettings')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg('L\'arxiu és massa gran. El límit és 5MB.')
+      setErrorMsg(t('fileTooBig'))
       return
     }
 
@@ -73,7 +75,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
       setSuccessMsg(true)
       setTimeout(() => setSuccessMsg(false), 3000)
     } catch (err: any) {
-      setErrorMsg(err.message || "Error a l'operació")
+      setErrorMsg(err.message || t('errorTitle'))
     } finally {
       setIsSaving(false)
     }
@@ -90,7 +92,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
       
       {successMsg && (
         <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4" /> Paràmetres desats correctament
+          <CheckCircle2 className="h-4 w-4" /> {t('successMsg')}
         </div>
       )}
 
@@ -99,7 +101,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
         <div className="space-y-3 pb-4 border-b border-stone-100">
           <label className="text-xs font-bold text-stone-500 pl-1 flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-stone-400" />
-            Logotip del Centre
+            {t('labelLogo')}
           </label>
           
           <div className="flex items-center gap-6">
@@ -131,17 +133,17 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
                 className="rounded-xl h-9 border-stone-200 text-stone-600 hover:text-stone-900 font-bold text-xs bg-white"
               >
                 <Upload className="h-3 w-3 mr-2" />
-                Pujar Nova Imatge
+                {t('btnUpload')}
               </Button>
               <p className="text-[10px] font-medium text-stone-400 leading-tight">
-                Format PNG o JPG quadrat (màx 5MB).
+                {t('logoFormat')}
               </p>
             </div>
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-stone-500 pl-1">Nom del Centre</label>
+          <label className="text-xs font-bold text-stone-500 pl-1">{t('labelName')}</label>
           <input 
             required
             name="name"
@@ -151,7 +153,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
           />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-stone-500 pl-1">Adreça</label>
+          <label className="text-xs font-bold text-stone-500 pl-1">{t('labelAddress')}</label>
           <input 
             name="address"
             defaultValue={schoolInfo?.address}
@@ -161,7 +163,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-stone-500 pl-1">CIF / NIF</label>
+            <label className="text-xs font-bold text-stone-500 pl-1">{t('labelCif')}</label>
             <input 
               name="cif"
               defaultValue={schoolInfo?.cif}
@@ -170,7 +172,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-stone-500 pl-1">Correu de contacte</label>
+            <label className="text-xs font-bold text-stone-500 pl-1">{t('labelContactEmail')}</label>
             <input 
               name="contact_email"
               defaultValue={schoolInfo?.contact_email}
@@ -184,7 +186,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-stone-500 pl-1">Hora d&apos;obertura</label>
+          <label className="text-xs font-bold text-stone-500 pl-1">{t('labelOpeningTime')}</label>
           <input 
             required
             name="opening_time"
@@ -194,7 +196,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
           />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-stone-500 pl-1">Hora de tancament</label>
+          <label className="text-xs font-bold text-stone-500 pl-1">{t('labelClosingTime')}</label>
           <input 
             required
             name="closing_time"
@@ -206,7 +208,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-black text-stone-800 border-b border-stone-100 pb-2">Opcions de l'Agenda</h3>
+        <h3 className="text-sm font-black text-stone-800 border-b border-stone-100 pb-2">{t('agendaOptionsTitle')}</h3>
         
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/80">
@@ -218,7 +220,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
               className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
             />
             <label htmlFor="agenda_food" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
-              Habilitar registre d'Alimentació
+              {t('foodOption')}
             </label>
           </div>
 
@@ -231,7 +233,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
               className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
             />
             <label htmlFor="agenda_nap" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
-              Habilitar registre de Son / Migdiades
+              {t('napOption')}
             </label>
           </div>
 
@@ -244,7 +246,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
               className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
             />
             <label htmlFor="agenda_diaper" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
-              Habilitar registre de Control d'Esfínters
+              {t('diaperOption')}
             </label>
           </div>
 
@@ -257,12 +259,12 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
               className="h-4 w-4 rounded border-stone-300 text-teal-600 focus:ring-teal-600 cursor-pointer"
             />
             <label htmlFor="agenda_mood" className="text-sm font-bold text-stone-800 cursor-pointer select-none">
-              Habilitar registre d'Estat d'Ànim
+              {t('moodOption')}
             </label>
           </div>
         </div>
         <p className="text-[10px] text-stone-500 font-medium pt-1">
-          Nota: Les fotos del dia i la nota global estaran sempre activades.
+          {t('optionsNote')}
         </p>
       </div>
 
@@ -272,7 +274,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
         className="w-full h-12 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md cursor-pointer mt-4 flex items-center justify-center gap-2"
       >
         {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-4 w-4" />} 
-        Desar Configuració
+        {t('btnSave')}
       </Button>
     </form>
   )

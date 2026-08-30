@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Send, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function MessageForm({ families, senderId, schoolId }: { families: any[], senderId: string, schoolId: string }) {
   const router = useRouter()
@@ -11,6 +12,7 @@ export default function MessageForm({ families, senderId, schoolId }: { families
   const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const t = useTranslations('dashboardMensajes')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,14 +46,14 @@ export default function MessageForm({ families, senderId, schoolId }: { families
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-[24px] border border-stone-200/60 shadow-xs p-6 space-y-4">
       <div>
-        <label className="block text-sm font-bold text-stone-700 mb-1.5">Família Destinatària</label>
+        <label className="block text-sm font-bold text-stone-700 mb-1.5">{t('formLabelReceiver')}</label>
         <select
           value={receiverId}
           onChange={(e) => setReceiverId(e.target.value)}
           className="w-full bg-stone-50 border border-stone-200 text-stone-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all"
           required
         >
-          <option value="">Selecciona una família...</option>
+          <option value="">{t('formPlaceholderReceiver')}</option>
           {families.map(f => (
             <option key={f.id} value={f.id}>{f.full_name}</option>
           ))}
@@ -59,12 +61,12 @@ export default function MessageForm({ families, senderId, schoolId }: { families
       </div>
 
       <div>
-        <label className="block text-sm font-bold text-stone-700 mb-1.5">Missatge</label>
+        <label className="block text-sm font-bold text-stone-700 mb-1.5">{t('formLabelMessage')}</label>
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="w-full bg-stone-50 border border-stone-200 text-stone-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all resize-none min-h-[120px]"
-          placeholder="Escriu el missatge aquí..."
+          placeholder={t('formPlaceholderMessage')}
           required
         />
       </div>
@@ -81,11 +83,14 @@ export default function MessageForm({ families, senderId, schoolId }: { families
         className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t('formBtnSending')}
+          </>
         ) : (
           <>
             <Send className="h-4 w-4" />
-            Enviar Missatge
+            {t('formBtnSend')}
           </>
         )}
       </button>

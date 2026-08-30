@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { AulasEditor } from './AulasEditor'
+import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardConfigAulasPage() {
   const supabase = await createClient()
@@ -44,6 +45,8 @@ export default async function DashboardConfigAulasPage() {
     .in('role', ['teacher', 'admin'])
     .order('full_name', { ascending: true })
 
+  const t = await getTranslations('dashboardAulas')
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-4">
       <div className="flex items-center justify-between">
@@ -56,9 +59,9 @@ export default async function DashboardConfigAulasPage() {
           </Link>
           <div>
             <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-teal-600" /> Aules del Centre
+              <Building2 className="h-5 w-5 text-teal-600" /> {t('title')}
             </h3>
-            <p className="text-xs text-stone-500">Afegeix i edita les aules ràpidament</p>
+            <p className="text-xs text-stone-500">{t('desc')}</p>
           </div>
         </div>
       </div>

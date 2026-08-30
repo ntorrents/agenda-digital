@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, AlertCircle, Baby, ChevronRight } from 'lucide-react'
 import { BulkActionsWidget } from '@/components/agenda/BulkActionsWidget'
+import { getTranslations, getLocale } from 'next-intl/server'
 
 export default async function AgendasIndexPage(props: { searchParams: Promise<{ date?: string }> }) {
   const searchParams = await props.searchParams
@@ -12,6 +13,9 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  const t = await getTranslations('dashboardAgendas')
+  const locale = await getLocale()
 
   // Find the teacher's classroom
   const { data: classroom } = await supabase
@@ -24,7 +28,7 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
     return (
       <div className="p-8 text-center bg-amber-50 rounded-2xl m-6">
         <AlertCircle className="mx-auto h-8 w-8 text-amber-600 mb-3" />
-        <p className="font-bold text-amber-800">No tens cap aula assignada.</p>
+        <p className="font-bold text-amber-800">{t('noClassroom')}</p>
       </div>
     )
   }
@@ -49,14 +53,23 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
   const pendingStudents = students?.filter(s => !loggedStudentIds.has(s.id)) || []
   const completedStudents = students?.filter(s => loggedStudentIds.has(s.id)) || []
 
+  const dateLocaleMap: Record<string, string> = {
+    ca: 'ca-ES',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    en: 'en-US'
+  }
+  const dateLocale = dateLocaleMap[locale] || 'ca-ES'
+  const formattedDate = new Date(dateStr).toLocaleDateString(dateLocale)
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-stone-800">Agendes del Dia</h2>
-          <p className="text-sm font-medium text-stone-500 mt-1">Aula: {classroom.name} • Data: {new Date(dateStr).toLocaleDateString('ca-ES')}</p>
+          <h2 className="text-2xl font-black text-stone-800">{t('title')}</h2>
+          <p className="text-sm font-medium text-stone-500 mt-1">{t('subtitle', { name: classroom.name, date: formattedDate })}</p>
         </div>
         <div className="flex items-center gap-2">
           <BulkActionsWidget dateStr={dateStr} />
@@ -69,11 +82,11 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
         <div className="bg-white border border-stone-200 rounded-[24px] p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <AlertCircle className="h-5 w-5 text-amber-500" />
-            <h3 className="font-bold text-stone-800">Pendents ({pendingStudents.length})</h3>
+            <h3 className="font-bold text-stone-800">{t('pending', { count: pendingStudents.length })}</h3>
           </div>
           
           {pendingStudents.length === 0 ? (
-            <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">No hi ha agendes pendents! 🎉</p>
+            <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">{t('noPending')}</p>
           ) : (
             <div className="space-y-2">
               {pendingStudents.map(student => (
@@ -99,11 +112,11 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
         <div className="bg-white border border-stone-200 rounded-[24px] p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-            <h3 className="font-bold text-stone-800">Completades ({completedStudents.length})</h3>
+            <h3 className="font-bold text-stone-800">{t('completed', { count: completedStudents.length })}</h3>
           </div>
           
           {completedStudents.length === 0 ? (
-            <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">Encara no has omplert cap agenda avui.</p>
+            <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">{t('noCompleted')}</p>
           ) : (
             <div className="space-y-2">
               {completedStudents.map(student => (

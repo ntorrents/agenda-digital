@@ -92,7 +92,7 @@ export default function EducatorLayout({ children }: { children: React.ReactNode
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-50 border border-orange-100 overflow-hidden shadow-sm shadow-orange-500/10 shrink-0">
                 {schoolInfo?.logo_url ? (
-                  <img src={schoolInfo.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                  <img src={schoolInfo?.logo_url || undefined} alt="Logo" className="w-full h-full object-cover" />
                 ) : (
                   <Baby className="h-5 w-5 text-orange-500" />
                 )}

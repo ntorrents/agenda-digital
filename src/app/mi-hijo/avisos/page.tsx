@@ -1,12 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Bell, Pin, Clock } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 export default async function TaulerPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  const t = await getTranslations('notices')
 
   // Get student's classroom to fetch relevant announcements
   const { data: guardianRel } = await supabase
@@ -50,15 +53,15 @@ export default async function TaulerPage() {
           <Bell className="h-6 w-6 text-amber-500" />
         </div>
         <div>
-          <h2 className="text-xl font-black text-stone-800 tracking-tight">Tauler de Circulars</h2>
-          <p className="text-sm font-medium text-stone-500">Avisos i notícies importants del centre</p>
+          <h2 className="text-xl font-black text-stone-800 tracking-tight">{t('title')}</h2>
+          <p className="text-sm font-medium text-stone-500">{t('subtitle')}</p>
         </div>
       </div>
 
       <div className="space-y-4">
         {!announcements || announcements.length === 0 ? (
           <div className="text-center p-8 bg-stone-50 rounded-2xl border border-stone-100">
-            <p className="text-stone-500 font-medium">No hi ha cap avís en aquest moment.</p>
+            <p className="text-stone-500 font-medium">{t('noNotices')}</p>
           </div>
         ) : (
           announcements.map(announcement => (
@@ -83,7 +86,7 @@ export default async function TaulerPage() {
                       ? 'bg-blue-100 text-blue-700' 
                       : 'bg-purple-100 text-purple-700'
                   }`}>
-                    {announcement.audience === 'school' ? 'General' : 'Aula'}
+                    {announcement.audience === 'school' ? t('general') : t('classroom')}
                   </span>
                   <div className="flex items-center gap-1 text-xs text-stone-400 font-medium">
                     <Clock className="h-3 w-3" />
