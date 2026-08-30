@@ -81,6 +81,50 @@ function MockMissatge() {
   )
 }
 
+function MockFamilia() {
+  return (
+    <div className="grid grid-cols-2 gap-1.5 p-3">
+      {['📅 Agenda', '📸 Fotos', '📌 Avisos', '🍽️ Menú'].map((label) => (
+        <div key={label} className="bg-white/80 rounded-lg px-1.5 py-2 text-[7px] font-bold text-stone-600 text-center">
+          {label}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function MockEquip() {
+  return (
+    <div className="p-3 space-y-1.5">
+      {['Anna — Educadora', 'Laura — Auxiliar', 'Marta — Direcció'].map((name) => (
+        <div key={name} className="flex items-center gap-1.5 bg-white/80 rounded-lg px-2 py-1.5">
+          <div className="w-4 h-4 rounded-full bg-teal-200 shrink-0" />
+          <p className="text-[8px] font-bold text-stone-600 truncate">{name}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function MockDireccio() {
+  return (
+    <div className="p-3 space-y-1.5">
+      <div className="flex justify-between bg-emerald-50 rounded-lg px-2 py-1.5">
+        <span className="text-[8px] font-bold text-stone-500">Agendes</span>
+        <span className="text-[8px] font-black text-emerald-600">12/15</span>
+      </div>
+      <div className="flex justify-between bg-amber-50 rounded-lg px-2 py-1.5">
+        <span className="text-[8px] font-bold text-stone-500">Al·lèrgies</span>
+        <span className="text-[8px] font-black text-amber-600">2</span>
+      </div>
+      <div className="flex justify-between bg-sky-50 rounded-lg px-2 py-1.5">
+        <span className="text-[8px] font-bold text-stone-500">Baixes</span>
+        <span className="text-[8px] font-black text-sky-600">0</span>
+      </div>
+    </div>
+  )
+}
+
 const mockComponents: Record<string, () => React.ReactNode> = {
   agenda: MockAgenda,
   foto: MockGallery,
@@ -88,6 +132,9 @@ const mockComponents: Record<string, () => React.ReactNode> = {
   avis: MockAvis,
   calendari: MockCalendari,
   missatge: MockMissatge,
+  familia: MockFamilia,
+  equip: MockEquip,
+  direccio: MockDireccio,
 }
 
 export function DiaryGallery() {
@@ -104,16 +151,19 @@ export function DiaryGallery() {
         </div>
 
         {/* Scattered polaroid wall */}
-        <div className="relative min-h-[520px] sm:min-h-[480px]">
+        <div className="relative min-h-[520px] lg:min-h-[620px]">
           {t.gallery.items.map((item, i) => {
             const Mock = mockComponents[item.id]
             const positions = [
               'top-0 left-[5%] sm:left-[8%]',
               'top-8 right-[5%] sm:right-[10%]',
-              'top-[38%] left-[2%] sm:left-[15%]',
-              'top-[32%] right-[2%] sm:right-[12%]',
-              'bottom-8 left-[10%] sm:left-[25%]',
-              'bottom-0 right-[8%] sm:right-[20%]',
+              'top-[38%] left-[2%] sm:left-[12%]',
+              'top-[32%] right-[2%] sm:right-[10%]',
+              'bottom-8 left-[10%] sm:left-[22%]',
+              'bottom-0 right-[8%] sm:right-[18%]',
+              'top-[12%] left-[32%] hidden lg:block',
+              'top-[48%] right-[28%] hidden lg:block',
+              'bottom-[12%] left-[42%] hidden lg:block',
             ]
 
             return (
@@ -124,7 +174,7 @@ export function DiaryGallery() {
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.6, delay: i * 0.08 }}
                 whileHover={{ scale: 1.05, rotate: 0, zIndex: 20 }}
-                className={`absolute w-[140px] sm:w-[170px] ${positions[i]} cursor-default`}
+                className={`absolute w-[140px] sm:w-[170px] ${positions[i] ?? 'hidden'} ${item.desktopOnly ? 'hidden lg:block' : ''} cursor-default`}
               >
                 <div className="polaroid rounded-sm transition-shadow duration-300 hover:shadow-2xl">
                   <div className={`aspect-[4/3] rounded-sm overflow-hidden ${item.color}`}>

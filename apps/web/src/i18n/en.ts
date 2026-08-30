@@ -38,6 +38,9 @@ const enGalleryCaptions: Record<string, string> = {
   avis: 'Circulars and featured announcements',
   calendari: 'Holidays and course activities',
   missatge: 'Direct channel with management',
+  familia: 'Quick access from mobile',
+  equip: 'Educators and assistants connected',
+  direccio: 'Daily summary at a glance',
 }
 
 export const en: Translations = {
@@ -104,16 +107,16 @@ export const en: Translations = {
         name: 'Small',
         price: '~250',
         unit: '€/year',
-        description: 'Centres up to 2 classrooms',
+        description: 'Centres up to 2 classrooms or 30 students',
         sticker: '⭐',
-        features: ['Unlimited daily diary', 'Gallery & announcements', 'PWA app for families', 'Email support'],
+        features: ['Unlimited daily diary', 'Gallery & announcements', 'PWA app for families', 'Initial setup included'],
       },
       {
         id: 'mitja',
         name: 'Medium',
         price: '~350',
         unit: '€/year',
-        description: 'Centres with 3-5 classrooms',
+        description: 'Centres with 3-5 classrooms or 30+ students',
         highlight: true,
         sticker: '🌟',
         features: ['Everything in Small', 'Private messages', 'Director dashboard', 'Priority support'],
@@ -171,7 +174,7 @@ export const en: Translations = {
     sending: 'Sending...',
     success: 'Message sent! We\'ll contact you soon.',
     error: 'Could not send. Please try again.',
-    errorNoKey: 'Form not configured. Contact us by email directly.',
+    errorNoKey: 'Form not configured. Restart local dev (npm run dev:web) or redeploy on Vercel after adding VITE_WEB3FORMS_KEY.',
   },
   footer: {
     tagline: 'Daily life at school, close to family.',

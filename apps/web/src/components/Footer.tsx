@@ -1,10 +1,10 @@
 import { useI18n } from '../i18n'
-
-const APP_URL = 'https://app.petdiari.com'
+import { APP_URL } from '../lib/config'
 
 export function Footer() {
   const { t } = useI18n()
   const year = new Date().getFullYear()
+  const appHost = APP_URL.replace('https://', '')
 
   return (
     <footer className="border-t border-stone-200/60 bg-white/80">
@@ -24,7 +24,7 @@ export function Footer() {
             href={APP_URL}
             className="text-sm font-bold text-pd-teal hover:text-pd-teal-dark transition-colors"
           >
-            app.petitdiari.com →
+            {appHost} →
           </a>
         </div>
 

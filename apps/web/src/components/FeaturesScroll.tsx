@@ -5,7 +5,7 @@ export function FeaturesScroll() {
   const { t } = useI18n()
 
   return (
-    <section id="funcionalitats" className="py-24 relative overflow-hidden">
+    <section id="funcionalitats" className="py-24 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-pd-cream via-pd-cream-dark/50 to-pd-cream pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 mb-10">
@@ -15,7 +15,7 @@ export function FeaturesScroll() {
         <p className="mt-4 text-[11px] font-bold text-stone-400 uppercase tracking-wider">{t.features.scrollHint}</p>
       </div>
 
-      <div className="relative overflow-x-auto no-scrollbar pb-4 px-4 sm:px-6">
+      <div className="relative overflow-x-auto no-scrollbar px-4 sm:px-6 py-8 -my-4">
         <div className="flex gap-5 w-max min-w-full px-2">
           {t.features.items.map((feature, i) => (
             <article
@@ -48,7 +48,7 @@ export function FeaturesScroll() {
         </div>
       </div>
 
-      <div className="mt-12 overflow-hidden border-y border-stone-200/60 bg-white/50 py-3">
+      <div className="relative mt-12 overflow-hidden border-y border-stone-200/60 bg-white/50 py-3">
         <div className="flex animate-marquee whitespace-nowrap">
           {[...Array(2)].map((_, dup) => (
             <div key={dup} className="flex shrink-0">

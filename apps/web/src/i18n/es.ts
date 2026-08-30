@@ -38,6 +38,9 @@ const esGalleryCaptions: Record<string, string> = {
   avis: 'Circulares y comunicados destacados',
   calendari: 'Festivos y actividades del curso',
   missatge: 'Canal directo con la dirección',
+  familia: 'Acceso rápido desde el móvil',
+  equip: 'Educadoras y auxiliares conectadas',
+  direccio: 'Resumen del día de un vistazo',
 }
 
 export const es: Translations = {
@@ -104,16 +107,16 @@ export const es: Translations = {
         name: 'Pequeño',
         price: '~250',
         unit: '€/año',
-        description: 'Centros de hasta 2 aulas',
+        description: 'Centros de hasta 2 aulas o 30 alumnos',
         sticker: '⭐',
-        features: ['Agenda diaria ilimitada', 'Galería y avisos', 'App PWA para familias', 'Soporte por correo'],
+        features: ['Agenda diaria ilimitada', 'Galería y avisos', 'App PWA para familias', 'Configuración inicial incluida'],
       },
       {
         id: 'mitja',
         name: 'Mediano',
         price: '~350',
         unit: '€/año',
-        description: 'Centros de 3 a 5 aulas',
+        description: 'Centros de 3 a 5 aulas o más de 30 alumnos',
         highlight: true,
         sticker: '🌟',
         features: ['Todo lo del plan Pequeño', 'Mensajes privados', 'Panel de dirección', 'Prioridad en soporte'],
@@ -171,7 +174,7 @@ export const es: Translations = {
     sending: 'Enviando...',
     success: '¡Mensaje enviado! Te contactaremos pronto.',
     error: 'No se pudo enviar. Inténtalo de nuevo.',
-    errorNoKey: 'Formulario no configurado. Contacta por correo directamente.',
+    errorNoKey: 'Formulario no configurado. Reinicia el servidor local (npm run dev:web) o vuelve a desplegar en Vercel tras añadir VITE_WEB3FORMS_KEY.',
   },
   footer: {
     tagline: 'El día a día en la escuela, cerca de la familia.',

@@ -14,6 +14,7 @@ export type GalleryItem = {
   caption: string
   rotate: number
   color: string
+  desktopOnly?: boolean
 }
 
 export type PricingPlan = {

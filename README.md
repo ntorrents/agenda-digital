@@ -23,6 +23,8 @@ Variables d'entorn:
 - App: `apps/app/.env.local`
 - Web: `apps/web/.env` (copia des de `apps/web/.env.example`)
 
+Per al formulari web cal **`VITE_WEB3FORMS_KEY`** (amb prefix `VITE_`). A Vercel: afegeix la variable i **torna a desplegar** (Vite l'incrusta en compilació).
+
 ## Desplegament Vercel
 
 - **App**: Root Directory → `apps/app`

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { useI18n, localeLabels, type Locale } from '../i18n'
-
-const APP_URL = 'https://app.petitdiari.com'
+import { APP_URL } from '../lib/config'
 
 const navLinks = [
   { key: 'features' as const, href: '#funcionalitats' },

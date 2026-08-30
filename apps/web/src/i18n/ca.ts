@@ -94,6 +94,9 @@ const galleryItems = [
   { id: 'avis', label: 'Avisos', caption: 'Circulars i comunicats destacats', rotate: 5, color: 'bg-rose-50' },
   { id: 'calendari', label: 'Calendari', caption: 'Festius i activitats del curs', rotate: -3, color: 'bg-indigo-50' },
   { id: 'missatge', label: 'Missatges', caption: 'Canal directe amb la direcció', rotate: 2, color: 'bg-violet-50' },
+  { id: 'familia', label: 'Famílies', caption: 'Accés ràpid des del mòbil', rotate: -5, color: 'bg-orange-50', desktopOnly: true },
+  { id: 'equip', label: 'Equip', caption: 'Educadores i auxiliars connectades', rotate: 4, color: 'bg-cyan-50', desktopOnly: true },
+  { id: 'direccio', label: 'Direcció', caption: 'Resum del dia en un cop d\'ull', rotate: -2, color: 'bg-emerald-50', desktopOnly: true },
 ]
 
 export const ca: Translations = {
@@ -153,16 +156,16 @@ export const ca: Translations = {
         name: 'Petit',
         price: '~250',
         unit: '€/any',
-        description: 'Centres fins a 2 aules',
+        description: 'Centres fins a 2 aules o 30 alumnes',
         sticker: '⭐',
-        features: ['Agenda diària il·limitada', 'Galeria i avisos', 'App PWA per famílies', 'Suport per correu'],
+        features: ['Agenda diària il·limitada', 'Galeria i avisos', 'App PWA per famílies', 'Configuració inicial inclosa'],
       },
       {
         id: 'mitja',
         name: 'Mitjà',
         price: '~350',
         unit: '€/any',
-        description: 'Centres de 3 a 5 aules',
+        description: 'Centres de 3 a 5 aules o més de 30 alumnes',
         highlight: true,
         sticker: '🌟',
         features: ['Tot el del pla Petit', 'Missatges privats', 'Panell de direcció', 'Prioritat al suport'],
@@ -220,7 +223,7 @@ export const ca: Translations = {
     sending: 'Enviant...',
     success: 'Missatge enviat! Et contactarem aviat.',
     error: 'No s\'ha pogut enviar. Torna-ho a provar.',
-    errorNoKey: 'Formulari no configurat. Contacta per correu directament.',
+    errorNoKey: 'Formulari no configurat. Reinicia el servidor local (npm run dev:web) o torna a desplegar a Vercel després d\'afegir VITE_WEB3FORMS_KEY.',
   },
   footer: {
     tagline: 'El dia a dia a l\'escola, a prop de la família.',

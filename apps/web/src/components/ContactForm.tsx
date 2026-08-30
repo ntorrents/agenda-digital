@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { useI18n } from '../i18n'
 import { useMotionSafe } from '../lib/motion-safe'
+import { getWeb3FormsKey } from '../lib/config'
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error' | 'no-key'
 
@@ -13,9 +14,9 @@ export function ContactForm() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const key = import.meta.env.VITE_WEB3FORMS_KEY
+    const key = getWeb3FormsKey()
 
-    if (!key || key === 'your_access_key_here') {
+    if (!key) {
       setStatus('no-key')
       return
     }
