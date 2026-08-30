@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Baby, Filter, Search, Plus, Eye } from 'lucide-react'
 import { DeleteStudentButton } from '@/components/admin/DeleteStudentButton'
 import Link from 'next/link'
+import { getTeacherClassroom } from '@/lib/teacher-classroom'
 import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardConfigAlumnosPage() {
@@ -19,15 +20,10 @@ export default async function DashboardConfigAlumnosPage() {
 
   if (!profile) redirect('/login')
 
-  // If teacher, find their classroom
-  let teacherClassroomId: string | null = null
-  if (profile.role === 'teacher') {
-    const { data: c } = await supabase
-      .from('classrooms')
-      .select('id')
-      .eq('teacher_id', user.id)
-      .single()
-    if (c) teacherClassroomId = c.id
+  let staffClassroomId: string | null = null
+  if (profile.role === 'teacher' || profile.role === 'auxiliary') {
+    const classroom = await getTeacherClassroom(supabase, user.id, profile.role)
+    staffClassroomId = classroom?.id ?? null
   }
 
   // Build query for students
@@ -44,12 +40,11 @@ export default async function DashboardConfigAlumnosPage() {
     .eq('school_id', profile.school_id)
     .order('first_name', { ascending: true })
 
-  if (profile.role === 'teacher') {
-    if (teacherClassroomId) {
-      query = query.eq('classroom_id', teacherClassroomId)
+  if (profile.role === 'teacher' || profile.role === 'auxiliary') {
+    if (staffClassroomId) {
+      query = query.eq('classroom_id', staffClassroomId)
     } else {
-      // Teacher has no classroom, show empty
-      query = query.eq('id', '00000000-0000-0000-0000-000000000000') 
+      query = query.eq('id', '00000000-0000-0000-0000-000000000000')
     }
   }
 
@@ -94,7 +89,7 @@ export default async function DashboardConfigAlumnosPage() {
         <div className="flex items-center gap-4">
           {profile.role === 'admin' && (
             <Link 
-              href="/dashboard/config"
+              href="/dashboard"
               className="p-2 rounded-xl bg-white border border-stone-200 text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-sm cursor-pointer flex items-center justify-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -122,7 +117,7 @@ export default async function DashboardConfigAlumnosPage() {
       {/* Render tables by level */}
       <div className="space-y-8">
         {[...levels, 'Sense Aula'].map(level => {
-          if (profile.role === 'teacher' && level === 'Sense Aula') return null; // Teachers don't see unassigned students
+          if ((profile.role === 'teacher' || profile.role === 'auxiliary') && level === 'Sense Aula') return null
           const list = level === 'Sense Aula' ? unassigned : studentsByLevel[level]
           if (list.length === 0) return null
 

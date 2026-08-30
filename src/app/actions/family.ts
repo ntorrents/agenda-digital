@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { normalizeEmail, syncAuthAndProfileEmail } from '@/lib/auth-email'
 
 export async function updateFamilyProfile(formData: FormData) {
   const supabase = await createClient()
@@ -11,8 +12,19 @@ export async function updateFamilyProfile(formData: FormData) {
     throw new Error('No estás autenticado')
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, email')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'guardian') {
+    throw new Error('No autoritzat')
+  }
+
   const fullName = formData.get('full_name') as string
   const phone = formData.get('phone') as string
+  const email = normalizeEmail((formData.get('email') as string) || '')
   const oldPassword = formData.get('old_password') as string
   const newPassword = formData.get('new_password') as string
   
@@ -33,6 +45,10 @@ export async function updateFamilyProfile(formData: FormData) {
     if (profileError) {
       throw new Error('Error al actualizar el perfil: ' + profileError.message)
     }
+  }
+
+  if (email && email !== normalizeEmail(user.email || profile.email || '')) {
+    await syncAuthAndProfileEmail(user.id, email)
   }
 
   // Actualizar Contraseña (si se provee antigua y nueva)

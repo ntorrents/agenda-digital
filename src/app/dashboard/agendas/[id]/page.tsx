@@ -31,11 +31,11 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
   // Verify the student belongs to the teacher's school/classroom
   const { data: student } = await supabase
     .from('students')
-    .select('first_name, last_name, school_id')
+    .select('first_name, last_name, school_id, classroom_id')
     .eq('id', studentId)
     .single()
 
-  if (!student || student.school_id !== schoolId) {
+  if (!student || student.school_id !== schoolId || !student.classroom_id) {
     redirect('/dashboard/agendas')
   }
 
@@ -122,6 +122,7 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
         studentId={studentId}
         studentName={`${student.first_name} ${student.last_name}`}
         dateStr={dateStr}
+        classroomId={student.classroom_id}
         initialData={existingLog || undefined}
         settings={settings}
       />

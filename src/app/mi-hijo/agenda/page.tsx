@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
+import { normalizeDiaperTypes } from '@/lib/diaper'
+import type { DiaperType } from '@/types/enums'
 
 export default async function FamilyAgendaPage(props: { searchParams: Promise<{ date?: string }> }) {
   const searchParams = await props.searchParams
@@ -21,11 +23,13 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
     .select('student_id')
     .eq('guardian_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   let dailyLog = null
   let studentName = ''
   let settings: any = {}
+  let globalNote: string | null = null
+  let globalNotePhoto: string | null = null
 
   if (guardianRel) {
     const studentId = guardianRel.student_id
@@ -50,28 +54,18 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
       
     dailyLog = log
 
-    let globalNote = null
-    if (log && student?.classroom_id) {
+    if (student?.classroom_id) {
       const { data: gn } = await supabase
-        .from('events_announcements')
-        .select('description')
+        .from('classroom_daily_notes')
+        .select('note, photo_url')
         .eq('classroom_id', student.classroom_id)
-        .eq('event_date', dateStr)
-        .eq('title', 'NOTAGLOBAL')
+        .eq('date', dateStr)
         .maybeSingle()
       if (gn) {
-        // Extraemos la foto de la descripción si la hay (el Markdown de Foto Grupal)
-        const match = gn.description.match(/\[Foto Grupal\]\((.*?)\)/)
-        if (match) {
-          dailyLog.globalNotePhoto = match[1]
-          globalNote = gn.description.replace(match[0], '').trim()
-        } else {
-          globalNote = gn.description.trim()
-        }
+        globalNote = gn.note?.trim() || null
+        globalNotePhoto = gn.photo_url || null
       }
     }
-
-    dailyLog.globalNote = globalNote
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -112,12 +106,30 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
     irritable: t('mood.irritable')
   }
 
-  const diaperMap: Record<string, string> = {
-    pee: t('diaper.pee'),
-    poo: t('diaper.poo'),
-    both: t('diaper.both'),
-    dry: t('diaper.dry')
+  const diaperMap: Record<DiaperType, string> = {
+    soft: t('diaper.soft'),
+    normal: t('diaper.normal'),
+    liquid: t('diaper.liquid'),
   }
+
+  const dayNoteBlock = (globalNote || globalNotePhoto) ? (
+    <div className="bg-white border border-blue-200/50 rounded-[28px] overflow-hidden shadow-xs">
+      <div className="bg-blue-500/90 px-4 py-2.5 flex items-center gap-2">
+        <MessageCircle className="h-3.5 w-3.5 text-white" />
+        <h3 className="text-[11px] font-black uppercase text-white tracking-wider">{t('globalNotes')}</h3>
+      </div>
+      <div className="p-5 bg-blue-50/30">
+        <div className="text-sm font-bold text-stone-800 leading-relaxed italic whitespace-pre-wrap">
+          {globalNote && <p className={globalNotePhoto ? 'mb-4' : ''}>&ldquo;{globalNote}&rdquo;</p>}
+          {globalNotePhoto && (
+            <div className="rounded-xl overflow-hidden shadow-sm border border-stone-200 inline-block">
+              <img src={globalNotePhoto} alt={t('photo')} className="w-full h-auto max-h-64 object-cover" />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  ) : null
 
   return (
     <main className="max-w-md mx-auto pt-4 pb-8 space-y-5 px-4">
@@ -132,15 +144,21 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
             <p className="text-xs text-stone-500 mt-1">{t('futureDay')}</p>
           </div>
         ) : !dailyLog ? (
-           <div className="rounded-[28px] border border-stone-200/80 bg-stone-50 p-8 text-center shadow-xs">
-             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-stone-400 mb-3 shadow-sm">
-               <Calendar className="h-6 w-6" />
-             </div>
-             <h3 className="text-sm font-bold text-stone-800">{t('notFilled')}</h3>
-             <p className="text-xs text-stone-500 mt-1">{t('notFilledDesc')}</p>
-           </div>
+          <>
+            {dayNoteBlock}
+            <div className="rounded-[28px] border border-stone-200/80 bg-stone-50 p-8 text-center shadow-xs">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-stone-400 mb-3 shadow-sm">
+                <Calendar className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-bold text-stone-800">{t('notFilled')}</h3>
+              <p className="text-xs text-stone-500 mt-1">
+                {globalNote || globalNotePhoto ? t('dayNoteOnly') : t('notFilledDesc')}
+              </p>
+            </div>
+          </>
         ) : (
           <>
+            {dayNoteBlock}
             {/* Fotos (Mini carrusel) */}
             {dailyLog.photos && dailyLog.photos.length > 0 && (
               <div className="bg-white border border-stone-200/60 rounded-[28px] p-4 shadow-xs">
@@ -156,10 +174,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                   {dailyLog.photos.map((photo: string, index: number) => (
                     <Link href={`/mi-hijo/galeria`} key={index} className="shrink-0 snap-start">
                       <div className="relative h-16 w-16 rounded-[16px] overflow-hidden border border-stone-100">
-                        {/* Placeholder visual por ahora. En produccion usariamos next/image con el src real */}
-                        <div className="absolute inset-0 bg-stone-200 flex items-center justify-center text-[10px] text-stone-400">
-                          {t('photo')} {index + 1}
-                        </div>
+                        <Image src={photo} alt={`${t('photo')} ${index + 1}`} fill className="object-cover" unoptimized />
                       </div>
                     </Link>
                   ))}
@@ -238,7 +253,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 </p>
                 {dailyLog.diaper_type && (
                   <p className="text-xs font-medium text-stone-500 mt-1">
-                    {diaperMap[dailyLog.diaper_type]}
+                    {normalizeDiaperTypes(dailyLog.diaper_type).map(type => diaperMap[type]).join(', ')}
                   </p>
                 )}
               </div>
@@ -269,28 +284,6 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
                 </div>
               </div>
             </div>
-
-            {/* Anotaciones Globales */}
-            {(dailyLog.globalNote || dailyLog.globalNotePhoto) && (
-              <div className="bg-white border border-blue-200/50 rounded-[28px] overflow-hidden shadow-xs mt-4">
-                <div className="bg-blue-500/90 px-4 py-2.5 flex items-center gap-2">
-                  <MessageCircle className="h-3.5 w-3.5 text-white" />
-                  <h3 className="text-[11px] font-black uppercase text-white tracking-wider">{t('globalNotes')}</h3>
-                </div>
-                <div className="p-5 bg-blue-50/30">
-                  <div className="text-sm font-bold text-stone-800 leading-relaxed italic whitespace-pre-wrap">
-                    {dailyLog.globalNote && <p className="mb-4">"{dailyLog.globalNote.trim()}"</p>}
-                    
-                    {dailyLog.globalNotePhoto && (
-                      <div className="rounded-xl overflow-hidden shadow-sm border border-stone-200 inline-block mt-2">
-                        <img src={dailyLog.globalNotePhoto} alt="Foto Grupal" className="w-full h-auto max-h-64 object-cover" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
 
           </>
         )}

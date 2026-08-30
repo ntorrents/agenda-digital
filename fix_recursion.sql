@@ -48,3 +48,8 @@ CREATE POLICY "student_guardians_select_staff"
     AND is_staff_of_student(student_id)
   );
 
+CREATE POLICY "student_guardians_select_guardian"
+  ON student_guardians FOR SELECT
+  TO authenticated
+  USING (guardian_id = auth.uid());
+

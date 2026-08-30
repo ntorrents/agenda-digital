@@ -14,7 +14,8 @@
     "demoFamily": "Familia (Marta)",
     "demoTeacher": "Educadora (Anna)",
     "demoAdmin": "Dirección (Laura)",
-    "demoSuperAdmin": "Súper Admin"
+    "demoSuperAdmin": "Súper Admin",
+    "errorInactive": "Tu cuenta está inactiva. Contacta con dirección."
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -42,7 +43,8 @@
     "notices": "Tablón / Avisos",
     "help": "Ayuda",
     "panelAdmin": "Panel de Dirección",
-    "panelTeacher": "Panel Educador/a"
+    "panelTeacher": "Panel Educador/a",
+    "panelAuxiliary": "Panel Auxiliar"
   },
   "familyProfile": {
     "languageTitle": "Idioma de la aplicación",
@@ -57,6 +59,12 @@
     "delete": "Eliminar",
     "back": "Volver",
     "loading": "Cargando..."
+  },
+  "datePicker": {
+    "dateLabel": "Fecha",
+    "prevDay": "Día anterior",
+    "nextDay": "Día siguiente",
+    "today": "Hoy"
   },
   "familyHome": {
     "title": "Pantalla Principal",
@@ -108,7 +116,8 @@
     "notFilledDesc": "La educadora aún no ha guardado los datos para este día.",
     "galleryOfDay": "Galería del día",
     "seeAll": "Ver todo",
-    "photo": "Foto"
+    "photo": "Foto",
+    "dayNoteOnly": "Aún no hay agenda individual, pero ya tienes la nota del día del aula."
   },
   "calendar": {
     "title": "Calendario",
@@ -175,6 +184,7 @@
       "absences": {
         "title": "Ausencias del Equipo",
         "today": "bajas hoy",
+        "onLeave": "de baja",
         "allOk": "● Todo el equipo está operativo"
       },
       "intolerances": {
@@ -182,7 +192,8 @@
         "students": "ALUMNOS",
         "none": "Ningún registro activo."
       }
-    }
+    },
+    "welcomeName": "¡Buenos días, {name}!"
   },
   "dashboardAlumnos": {
     "gender": {
@@ -242,7 +253,8 @@
     "archiveDesc2": "Esta acción desvinculará a todos los alumnos de esta aula y los dejará \"Sin aula asignada\". Sin embargo, no se borrará su historial.",
     "cancel": "Cancelar",
     "archiveConfirm": "Sí, Archivar Aula",
-    "archiving": "Archivando..."
+    "archiving": "Archivando...",
+    "newClassroomDefault": "Nueva Aula"
   },
   "studentForm": {
     "errorTitle": "Error en la operación",
@@ -324,13 +336,19 @@
     "cancel": "Cancelar",
     "save": "Sí, Archivar",
     "archiveConfirm": "Sí, Archivar",
-    "archiving": "Archivando..."
+    "archiving": "Archivando...",
+    "roleAuxiliary": "Auxiliar"
   },
   "dashboardCentro": {
     "title": "Ajustes del Centro",
     "subtitle": "Configuración general de {name}",
     "activeStudents": "Alumnos Activos",
-    "activeTeam": "Equipo Activo"
+    "activeTeam": "Equipo Activo",
+    "hubTitle": "Configuración",
+    "hubSchoolTitle": "Configuración del centro",
+    "hubSchoolDesc": "Nombre, logo, opciones de la agenda y envío de accesos.",
+    "hubProfileTitle": "Mi perfil",
+    "hubProfileDesc": "Tus datos personales y contraseña."
   },
   "dashboardParametres": {
     "title": "Parámetros",
@@ -399,7 +417,12 @@
     "noCompleted": "Aún no has rellenado ninguna agenda hoy.",
     "backToList": "Volver a las agendas",
     "guardianTitle": "Datos de Contacto Familia",
-    "successMsg": "¡Agenda guardada correctamente en la base de datos!"
+    "successMsg": "¡Agenda guardada correctamente en la base de datos!",
+    "classroomLabel": "Aula",
+    "dateLabel": "Fecha",
+    "prevDay": "Día anterior",
+    "nextDay": "Día siguiente",
+    "today": "Hoy"
   },
   "dashboardAula": {
     "noClassroom": "No tienes ninguna aula asignada. Contacta con dirección.",
@@ -451,7 +474,15 @@
     "emptyDesc": "No se han encontrado fotos subidas a las agendas.",
     "typeGroup": "Grupal",
     "typeIndividual": "Individual",
-    "classroomFallback": "Aula"
+    "classroomFallback": "Aula",
+    "downloadAll": "Descargar todo (ZIP)",
+    "photoAlt": "Foto",
+    "filterClassroom": "Aula",
+    "filterAllClassrooms": "Todas las aulas",
+    "filterStudent": "Alumno",
+    "filterAllStudents": "Todos los alumnos",
+    "filterType": "Tipo",
+    "filterAllTypes": "Todas"
   },
   "dashboardMensajes": {
     "adminOnly": "Esta sección solo está disponible para la dirección del centro.",
@@ -512,5 +543,41 @@
     "moodOption": "Habilitar registro de Estado de Ánimo",
     "optionsNote": "Nota: Las fotos del día y la nota global estarán siempre activadas.",
     "btnSave": "Guardar Configuración"
+  },
+  "dashboardTeacher": {
+    "welcomeName": "¡Buenos días, {name}!",
+    "welcomeDesc": "Este es tu resumen de hoy. Prepara el aula y mantén informadas a las familias.",
+    "noClassroomTitle": "Aún no tienes un aula asignada",
+    "noClassroomDesc": "Habla con dirección para que te asignen como tutor/a o auxiliar de un aula.",
+    "yourClassroom": "Tu Aula",
+    "activeStudents": "{count} alumnos activos",
+    "viewStudents": "Ver mis alumnos",
+    "agendaStatus": "Estado de las Agendas",
+    "allDone": "¡Todas al día!",
+    "pending": "Faltan {count} por rellenar",
+    "fillAgendas": "Rellenar Agendas"
+  },
+  "bulkActions": {
+    "title": "Registro masivo",
+    "dayNote": "Nota del día",
+    "dayNoteHint": "Un solo texto para todo el aula. Visible aparte para las familias.",
+    "dayNotePanelHint": "Se guarda para hoy y se muestra a todas las familias, aunque aún no hayas rellenado cada agenda.",
+    "dayNotePlaceholder": "Ej: Todo ha ido bien. ¡Hasta mañana!",
+    "dayNoteSuccess": "Nota del día guardada.",
+    "groupPhoto": "Foto grupal del día",
+    "groupPhotoHint": "Una foto para todo el aula (galería y agenda).",
+    "groupPhotoPanelHint": "Visible para todas las familias del aula.",
+    "photoSuccess": "Foto grupal publicada.",
+    "lunchAll": "Todos han comido \"Todo\"",
+    "lunchHint": "Solo marca la comida de las agendas ya creadas hoy.",
+    "lunchConfirm": "¿Marcar comida \"Todo\" en todas las agendas de hoy que ya existen?",
+    "lunchSuccess": "Se ha marcado la comida en todas las agendas de hoy.",
+    "pickPhoto": "Elegir foto",
+    "back": "Volver",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "publish": "Publicar",
+    "uploading": "Subiendo...",
+    "errorGeneric": "Ha ocurrido un error"
   }
 }

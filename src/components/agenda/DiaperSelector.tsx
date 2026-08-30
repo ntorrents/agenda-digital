@@ -1,49 +1,63 @@
 'use client'
 
-import { Droplets, CircleDot, Minus, Plus } from 'lucide-react'
+import { Droplets, Minus, Plus } from 'lucide-react'
 import { PillSelector, type PillOption } from '@/components/shared/PillSelector'
 import type { DiaperType } from '@/types/enums'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { toggleDiaperType } from '@/lib/diaper'
 
 interface DiaperSelectorProps {
-  type: DiaperType | null
+  types: DiaperType[]
   changes: number
-  onTypeChange: (value: DiaperType) => void
+  onTypesChange: (value: DiaperType[]) => void
   onChangesChange: (value: number) => void
   className?: string
 }
 
 export function DiaperSelector({
-  type,
+  types,
   changes,
-  onTypeChange,
+  onTypesChange,
   onChangesChange,
   className,
 }: DiaperSelectorProps) {
-  const t = useTranslations('diaper')
-  const tLog = useTranslations('dailyLog')
+  const t = useTranslations('dailyLogForm')
+  const tAgenda = useTranslations('agenda')
 
   const typeOptions: PillOption<DiaperType>[] = [
-    { value: 'pee', label: t('pee'), icon: <Droplets className="h-4 w-4" /> },
-    { value: 'poo', label: t('poo'), icon: <CircleDot className="h-4 w-4" /> },
-    { value: 'both', label: t('both'), icon: <><Droplets className="h-3.5 w-3.5" /><CircleDot className="h-3.5 w-3.5" /></> },
-    { value: 'dry', label: t('dry'), icon: <Minus className="h-4 w-4" /> },
+    { value: 'soft', label: t('diaperSoft'), icon: <Droplets className="h-4 w-4" /> },
+    { value: 'normal', label: t('diaperNormal'), icon: <Droplets className="h-4 w-4" /> },
+    { value: 'liquid', label: t('diaperLiquid'), icon: <Droplets className="h-4 w-4" /> },
   ]
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>
-      <PillSelector
-        options={typeOptions}
-        value={type}
-        onChange={onTypeChange}
-        colorScheme="mustard"
-        label={tLog('diaper')}
-      />
+      <span className="text-xs font-bold uppercase tracking-wider text-stone-500">{t('diaperType')}</span>
+      <div className="flex flex-wrap gap-2">
+        {typeOptions.map(option => {
+          const active = types.includes(option.value)
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onTypesChange(toggleDiaperType(types, option.value))}
+              className={cn(
+                'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-all',
+                active
+                  ? 'bg-amber-400 text-amber-950 border-amber-400'
+                  : 'bg-amber-50/80 text-amber-900 border-amber-100 hover:bg-amber-100'
+              )}
+            >
+              {option.icon}
+              {option.label}
+            </button>
+          )
+        })}
+      </div>
 
-      {/* Changes counter */}
       <div className="flex items-center justify-between pt-2 border-t border-stone-100">
-        <span className="text-xs font-bold uppercase tracking-wider text-stone-500">{t('changes')}</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-stone-500">{tAgenda('changes')}</span>
         <div className="flex items-center gap-2">
           <button
             type="button"

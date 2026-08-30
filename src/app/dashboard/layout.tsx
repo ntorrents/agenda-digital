@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('school_id, role, force_password_reset')
+        .select('school_id, role, force_password_reset, full_name')
         .eq('id', user.id)
         .single()
         
@@ -59,6 +59,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           return
         }
         setRole(profile.role)
+        if (profile.full_name) {
+          setUserName(profile.full_name)
+        }
       }
       
       if (profile?.school_id) {
@@ -100,24 +103,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { href: '/dashboard/config/centro', icon: Settings, label: tNav('settings') },
   ]
 
-  const teacherNavItems = [
+  const staffNavItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: tNav('dailySummary') },
-    { href: '/dashboard/aula', icon: Building2, label: tNav('myClassroom') },
     { href: '/dashboard/config/alumnos', icon: Baby, label: tNav('students') },
     { href: '/dashboard/agendas', icon: MessageSquare, label: tNav('agendas') },
     { href: '/dashboard/calendario', icon: CalendarIcon, label: tNav('calendar') },
     { href: '/dashboard/comunicacion', icon: Bell, label: tNav('communication') },
+    { href: '/dashboard/galeria', icon: ImageIcon, label: tNav('gallery') },
     { href: '/dashboard/config/parametres', icon: Settings, label: tNav('personalSettings') },
   ]
 
-  const navItems = role === 'admin' ? adminNavItems : teacherNavItems
+  const auxiliaryNavItems = staffNavItems.filter((item) => item.href !== '/dashboard/comunicacion')
+
+  const teacherNavItems = staffNavItems
+
+  const navItems =
+    role === 'admin'
+      ? adminNavItems
+      : role === 'auxiliary'
+        ? auxiliaryNavItems
+        : teacherNavItems
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white">
       <div className="p-6 flex items-center gap-3 border-b border-stone-100">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 border border-teal-100 overflow-hidden shadow-md shadow-teal-700/10 shrink-0">
           {schoolInfo?.logo_url ? (
-            <img src={schoolInfo.logo_url} alt="Logo" className="w-full h-full object-cover" />
+            <img src={schoolInfo.logo_url} alt="Logo" className="max-h-full max-w-full object-contain p-1.5" />
           ) : (
             <Baby className="h-5 w-5 text-teal-700" />
           )}
@@ -127,7 +139,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {schoolInfo?.name || 'Escola'}
           </h1>
           <p className="text-xs text-stone-500 font-medium">
-            {role === 'admin' ? tNav('panelAdmin') : tNav('panelTeacher')}
+            {role === 'admin'
+              ? tNav('panelAdmin')
+              : role === 'auxiliary'
+                ? tNav('panelAuxiliary')
+                : tNav('panelTeacher')}
           </p>
         </div>
       </div>
@@ -195,7 +211,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 border border-teal-100 overflow-hidden shrink-0">
             {schoolInfo?.logo_url ? (
-              <img src={schoolInfo.logo_url} alt="Logo" className="w-full h-full object-cover" />
+              <img src={schoolInfo.logo_url} alt="Logo" className="max-h-full max-w-full object-contain p-1" />
             ) : (
               <Baby className="h-4 w-4 text-teal-700" />
             )}

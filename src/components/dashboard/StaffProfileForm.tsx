@@ -110,6 +110,7 @@ export function StaffProfileForm({ profile }: StaffProfileFormProps) {
             type="email"
             className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
           />
+          <p className="text-[10px] text-stone-400 pl-1">Aquest correu és el que faràs servir per entrar a l&apos;app.</p>
         </div>
 
         <div className="space-y-1.5">

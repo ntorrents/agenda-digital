@@ -14,7 +14,8 @@
     "demoFamily": "Famille (Marta)",
     "demoTeacher": "Éducatrice (Anna)",
     "demoAdmin": "Direction (Laura)",
-    "demoSuperAdmin": "Super Admin"
+    "demoSuperAdmin": "Super Admin",
+    "errorInactive": "Votre compte est inactif. Contactez la direction."
   },
   "navigation": {
     "dashboard": "Tableau de Bord",
@@ -42,7 +43,8 @@
     "notices": "Avis / Circulaires",
     "help": "Aide",
     "panelAdmin": "Panneau de Direction",
-    "panelTeacher": "Panneau Éducateur/trice"
+    "panelTeacher": "Panneau Éducateur/trice",
+    "panelAuxiliary": "Panneau Auxiliaire"
   },
   "familyProfile": {
     "languageTitle": "Langue de l'application",
@@ -57,6 +59,12 @@
     "delete": "Supprimer",
     "back": "Retour",
     "loading": "Chargement..."
+  },
+  "datePicker": {
+    "dateLabel": "Date",
+    "prevDay": "Jour précédent",
+    "nextDay": "Jour suivant",
+    "today": "Aujourd'hui"
   },
   "familyHome": {
     "title": "Écran d'accueil",
@@ -108,7 +116,8 @@
     "notFilledDesc": "L'éducatrice n'a pas encore enregistré les données pour ce jour.",
     "galleryOfDay": "Galerie du jour",
     "seeAll": "Voir tout",
-    "photo": "Photo"
+    "photo": "Photo",
+    "dayNoteOnly": "Pas encore d'agenda individuel, mais la note du jour de la classe est disponible."
   },
   "calendar": {
     "title": "Calendrier",
@@ -175,6 +184,7 @@
       "absences": {
         "title": "Absences de l'Équipe",
         "today": "absences aujourd'hui",
+        "onLeave": "en congé",
         "allOk": "● Toute l'équipe est opérationnelle"
       },
       "intolerances": {
@@ -182,7 +192,8 @@
         "students": "ÉLÈVES",
         "none": "Aucun registre actif."
       }
-    }
+    },
+    "welcomeName": "Bonjour, {name} !"
   },
   "dashboardAlumnos": {
     "gender": {
@@ -242,7 +253,8 @@
     "archiveDesc2": "Cette action dissociera tous les élèves de cette classe et les laissera \"Sans classe assignée\". Cependant, leur historique ne sera pas supprimé.",
     "cancel": "Annuler",
     "archiveConfirm": "Oui, Archiver la Classe",
-    "archiving": "Archivage..."
+    "archiving": "Archivage...",
+    "newClassroomDefault": "Nouvelle Classe"
   },
   "studentForm": {
     "errorTitle": "Erreur d'opération",
@@ -324,13 +336,19 @@
     "cancel": "Annuler",
     "save": "Oui, Archiver",
     "archiveConfirm": "Oui, Archiver",
-    "archiving": "Archivage..."
+    "archiving": "Archivage...",
+    "roleAuxiliary": "Auxiliaire"
   },
   "dashboardCentro": {
     "title": "Paramètres de l'école",
     "subtitle": "Configuration générale de {name}",
     "activeStudents": "Élèves Actifs",
-    "activeTeam": "Équipe Active"
+    "activeTeam": "Équipe Active",
+    "hubTitle": "Configuration",
+    "hubSchoolTitle": "Configuration de l'école",
+    "hubSchoolDesc": "Nom, logo, options de l'agenda et envoi des accès.",
+    "hubProfileTitle": "Mon profil",
+    "hubProfileDesc": "Vos données personnelles et mot de passe."
   },
   "dashboardParametres": {
     "title": "Paramètres",
@@ -399,7 +417,12 @@
     "noCompleted": "Vous n'avez encore rempli aucun agenda aujourd'hui.",
     "backToList": "Retour à la liste des agendas",
     "guardianTitle": "Coordonnées de Contact de la Famille",
-    "successMsg": "L'agenda a été enregistré avec succès !"
+    "successMsg": "L'agenda a été enregistré avec succès !",
+    "classroomLabel": "Classe",
+    "dateLabel": "Date",
+    "prevDay": "Jour précédent",
+    "nextDay": "Jour suivant",
+    "today": "Aujourd'hui"
   },
   "dashboardAula": {
     "noClassroom": "Vous n'avez pas de classe assignée. Veuillez contacter la direction.",
@@ -451,7 +474,15 @@
     "emptyDesc": "Aucune photo trouvée téléchargée dans les agendas.",
     "typeGroup": "Groupe",
     "typeIndividual": "Individuelle",
-    "classroomFallback": "Classe"
+    "classroomFallback": "Classe",
+    "downloadAll": "Tout télécharger (ZIP)",
+    "photoAlt": "Photo",
+    "filterClassroom": "Classe",
+    "filterAllClassrooms": "Toutes les classes",
+    "filterStudent": "Élève",
+    "filterAllStudents": "Tous les élèves",
+    "filterType": "Type",
+    "filterAllTypes": "Tous"
   },
   "dashboardMensajes": {
     "adminOnly": "Cette section n'est disponible que pour la direction de l'école.",
@@ -512,5 +543,41 @@
     "moodOption": "Activer le suivi de l'Humeur",
     "optionsNote": "Remarque : Les photos quotidiennes et les notes globales seront toujours activées.",
     "btnSave": "Enregistrer les Paramètres"
+  },
+  "dashboardTeacher": {
+    "welcomeName": "Bonjour, {name} !",
+    "welcomeDesc": "Voici votre résumé du jour. Préparez la classe et tenez les familles informées.",
+    "noClassroomTitle": "Vous n'avez pas encore de classe assignée",
+    "noClassroomDesc": "Parlez à la direction pour être assigné(e) comme éducateur/trice ou auxiliaire.",
+    "yourClassroom": "Votre Classe",
+    "activeStudents": "{count} élèves actifs",
+    "viewStudents": "Voir mes élèves",
+    "agendaStatus": "État des Agendas",
+    "allDone": "Tout est à jour !",
+    "pending": "Il en reste {count} à remplir",
+    "fillAgendas": "Remplir les Agendas"
+  },
+  "bulkActions": {
+    "title": "Enregistrement groupé",
+    "dayNote": "Note du jour",
+    "dayNoteHint": "Un seul texte pour toute la classe. Affiché séparément aux familles.",
+    "dayNotePanelHint": "Enregistré pour aujourd'hui et visible par toutes les familles.",
+    "dayNotePlaceholder": "Ex : Tout s'est bien passé. À demain !",
+    "dayNoteSuccess": "Note du jour enregistrée.",
+    "groupPhoto": "Photo de groupe du jour",
+    "groupPhotoHint": "Une photo pour toute la classe.",
+    "groupPhotoPanelHint": "Visible par toutes les familles de la classe.",
+    "photoSuccess": "Photo de groupe publiée.",
+    "lunchAll": "Tous ont mangé \"Tout\"",
+    "lunchHint": "Ne marque le déjeuner que sur les agendas déjà créés aujourd'hui.",
+    "lunchConfirm": "Marquer le déjeuner \"Tout\" sur tous les agendas existants d'aujourd'hui ?",
+    "lunchSuccess": "Déjeuner marqué sur tous les agendas du jour.",
+    "pickPhoto": "Choisir une photo",
+    "back": "Retour",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "publish": "Publier",
+    "uploading": "Envoi...",
+    "errorGeneric": "Une erreur s'est produite"
   }
 }

@@ -46,6 +46,91 @@ BEGIN
 EXCEPTION WHEN others THEN NULL;
 END $$;
 
+-- Migraciones daily_logs (fora del bloc principal del seed)
+ALTER TABLE public.daily_logs ADD COLUMN IF NOT EXISTS photos TEXT[] DEFAULT '{}';
+
+DO $$
+BEGIN
+  ALTER TABLE public.daily_logs ALTER COLUMN diaper_type TYPE TEXT USING diaper_type::text;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+-- Taula i polítiques per notes globals d'aula
+CREATE TABLE IF NOT EXISTS public.classroom_daily_notes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  school_id UUID NOT NULL REFERENCES public.schools(id) ON DELETE CASCADE,
+  classroom_id UUID NOT NULL REFERENCES public.classrooms(id) ON DELETE CASCADE,
+  teacher_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  note TEXT,
+  photo_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  UNIQUE(classroom_id, date)
+);
+
+ALTER TABLE public.classroom_daily_notes ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "classroom_daily_notes_select_staff" ON public.classroom_daily_notes;
+  CREATE POLICY "classroom_daily_notes_select_staff"
+    ON public.classroom_daily_notes FOR SELECT TO authenticated
+    USING (
+      school_id IN (SELECT p.school_id FROM public.profiles p WHERE p.id = auth.uid())
+    );
+
+  DROP POLICY IF EXISTS "classroom_daily_notes_select_guardian" ON public.classroom_daily_notes;
+  CREATE POLICY "classroom_daily_notes_select_guardian"
+    ON public.classroom_daily_notes FOR SELECT TO authenticated
+    USING (
+      EXISTS (
+        SELECT 1 FROM public.student_guardians sg
+        JOIN public.students s ON s.id = sg.student_id
+        WHERE sg.guardian_id = auth.uid()
+          AND s.classroom_id = classroom_daily_notes.classroom_id
+      )
+    );
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+-- Famílies: llegir el seu vincle amb l'alumne
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "student_guardians_select_guardian" ON public.student_guardians;
+  CREATE POLICY "student_guardians_select_guardian"
+    ON public.student_guardians FOR SELECT TO authenticated
+    USING (guardian_id = auth.uid());
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+-- Membres del centre: llegir dades de l'escola
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "schools_select_member" ON public.schools;
+  CREATE POLICY "schools_select_member"
+    ON public.schools FOR SELECT TO authenticated
+    USING (
+      id IN (SELECT p.school_id FROM public.profiles p WHERE p.id = auth.uid() AND p.school_id IS NOT NULL)
+    );
+EXCEPTION WHEN others THEN NULL;
+END $$;
+
+-- Funcions helper per RLS (evitar recursió)
+CREATE OR REPLACE FUNCTION public.is_my_student(p_student_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $function$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.student_guardians
+    WHERE guardian_id = auth.uid()
+      AND student_id = p_student_id
+  );
+END;
+$function$;
+
 -- Asegurarse de que existe la función para crear tutores
 CREATE OR REPLACE FUNCTION public.create_guardian_user(
   p_email TEXT,
@@ -87,6 +172,24 @@ BEGIN
 END;
 $function$;
 
+-- Storage: buckets per fotos i documents
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'daily-photos', 'daily-photos', true, 5242880,
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+)
+ON CONFLICT (id) DO UPDATE SET
+  public = true,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'school-documents', 'school-documents', true, 10485760,
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
 DO $$
 DECLARE
   v_school_id UUID := '11111111-1111-1111-1111-111111111111';
@@ -107,19 +210,7 @@ DECLARE
 BEGIN
 
   -- 0. APLICAR MIGRACIONES PENDIENTES QUE QUIZÁS NO TENGAS
-  -- Tabla para notas globales de aula
-  CREATE TABLE IF NOT EXISTS public.classroom_daily_notes (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    school_id UUID NOT NULL REFERENCES public.schools(id) ON DELETE CASCADE,
-    classroom_id UUID NOT NULL REFERENCES public.classrooms(id) ON DELETE CASCADE,
-    teacher_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-    date DATE NOT NULL,
-    note TEXT,
-    photo_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
-    UNIQUE(classroom_id, date)
-  );
-
+  -- (classroom_daily_notes ja creat abans del bloc principal)
   -- Añadir columnas a profiles si no existen
   BEGIN
     ALTER TABLE public.profiles ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
@@ -308,4 +399,21 @@ BEGIN
     ('50000000-0000-0000-0000-000000000000', v_school_id, v_admin_id, 'Reunión de inicio de curso', 'Os esperamos el día 5 de septiembre a las 17:30 para conocernos.', 'announcement', 'school', '2026-08-29', true),
     ('50000000-0000-0000-0000-000000000001', v_school_id, v_admin_id, 'Traer ropa de recambio', 'Por favor traed ropa cómoda de recambio para cuando hagamos actividades de pintura y agua.', 'announcement', 'school', '2026-08-30', false);
 
+  -- Assegurar contrasenyes demo (les famílies poden quedar amb hash invàlid després del seed)
+  UPDATE auth.users
+  SET encrypted_password = extensions.crypt('123456', extensions.gen_salt('bf'))
+  WHERE email IN (
+    'd@cole.cat', 'p1@cole.cat', 'p2@cole.cat', 'p3@cole.cat', 'p4@cole.cat', 'p5@cole.cat',
+    'f1@cole.cat', 'f2@cole.cat', 'superadmin@bressol.cat'
+  );
+
+END $$;
+
+-- Estat del personal (actiu / pausa / inactiu)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+DO $$
+BEGIN
+  ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_status_check;
+  ALTER TABLE public.profiles ADD CONSTRAINT profiles_status_check CHECK (status IN ('active', 'paused', 'inactive'));
+EXCEPTION WHEN others THEN NULL;
 END $$;

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Baby, Users, Building2, Settings, ChevronRight, Sparkles, Calendar, ShieldAlert, HeartPulse, Activity, LayoutDashboard, MessageSquare } from 'lucide-react'
 import { TeacherDashboard } from '@/components/teacher/TeacherDashboard'
 import { getTranslations } from 'next-intl/server'
+import { firstName } from '@/lib/roles'
 
 export default async function DashboardSummaryPage() {
   const supabase = await createClient()
@@ -14,7 +15,7 @@ export default async function DashboardSummaryPage() {
   // Find school for this admin
   const { data: profile } = await supabase
     .from('profiles')
-    .select('school_id, role')
+    .select('school_id, role, full_name')
     .eq('id', user.id)
     .single()
 
@@ -36,7 +37,7 @@ export default async function DashboardSummaryPage() {
     .from('profiles')
     .select('*', { count: 'exact', head: true })
     .eq('school_id', schoolId)
-    .in('role', ['teacher', 'admin'])
+    .in('role', ['teacher', 'admin', 'auxiliary'])
     .eq('status', 'active')
 
   const totalTeachers = staffTotal || 0
@@ -58,13 +59,13 @@ export default async function DashboardSummaryPage() {
 
   const missingLogs = totalS - (logCount || 0)
 
-  // 5. Staff Absences today
-  const { data: staffAbsences } = await supabase
-    .from('staff_attendance')
-    .select('id, profiles(full_name), status')
+  // 5. Staff on leave (profiles.status = paused)
+  const { data: staffOnLeave } = await supabase
+    .from('profiles')
+    .select('id, full_name')
     .eq('school_id', schoolId)
-    .eq('date', todayDateStr)
-    .in('status', ['absent', 'sick'])
+    .in('role', ['teacher', 'admin', 'auxiliary'])
+    .eq('status', 'paused')
 
   // 6. Intolerances
   const { data: intolerantStudents } = await supabase
@@ -96,7 +97,7 @@ export default async function DashboardSummaryPage() {
       title: t('cards.staff.title'),
       description: t('cards.staff.desc'),
       icon: Users,
-      href: '/dashboard/config/equipo',
+      href: '/dashboard/equipo',
       color: 'amber',
       stat: `${totalTeachers} ${t('cards.staff.stat')}`
     },
@@ -118,14 +119,15 @@ export default async function DashboardSummaryPage() {
     }
   ]
 
-  // If the user is a teacher, render their specific dashboard instead of the admin one
-  if (profile.role === 'teacher') {
+  if (profile.role === 'teacher' || profile.role === 'auxiliary') {
     return (
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-        <TeacherDashboard schoolId={schoolId} userId={user.id} />
+        <TeacherDashboard schoolId={schoolId!} userId={user.id} userName={profile.full_name} />
       </main>
     )
   }
+
+  const displayName = firstName(profile.full_name) || profile.full_name || ''
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
@@ -138,7 +140,7 @@ export default async function DashboardSummaryPage() {
               <Sparkles className="h-3.5 w-3.5 text-teal-300" /> {todayFormatted}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              {t('welcome')}
+              {t('welcomeName', { name: displayName })}
             </h2>
             <p className="text-sm text-teal-100/90 font-medium max-w-lg">
               {t('welcomeDesc')}
@@ -231,14 +233,14 @@ export default async function DashboardSummaryPage() {
             <h3 className="text-sm font-black text-stone-800">{t('alerts.absences.title')}</h3>
           </div>
           <div className="flex items-end gap-2">
-            <h4 className="text-3xl font-black text-stone-900 leading-none">{staffAbsences?.length || 0}</h4>
-            <span className="text-xs font-bold text-stone-500 mb-1">{t('alerts.absences.today')}</span>
+            <h4 className="text-3xl font-black text-stone-900 leading-none">{staffOnLeave?.length || 0}</h4>
+            <span className="text-xs font-bold text-stone-500 mb-1">{t('alerts.absences.onLeave')}</span>
           </div>
-          {(staffAbsences?.length || 0) === 0 ? (
+          {(staffOnLeave?.length || 0) === 0 ? (
              <p className="text-[11px] text-emerald-600 font-bold mt-2">{t('alerts.absences.allOk')}</p>
           ) : (
              <p className="text-[11px] text-rose-600 font-bold mt-2 line-clamp-1 truncate">
-               ● {staffAbsences?.map((a: any) => Array.isArray(a.profiles) ? a.profiles[0]?.full_name : a.profiles?.full_name).join(', ')}
+               ● {staffOnLeave?.map((s) => s.full_name).join(', ')}
              </p>
           )}
         </div>

@@ -14,7 +14,7 @@ export default async function NotaPage() {
     .select('student_id')
     .eq('guardian_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (!guardianRel) redirect('/login')
 

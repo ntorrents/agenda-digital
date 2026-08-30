@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { DASHBOARD_STAFF_ROLES } from '@/lib/roles'
+import { normalizeEmail, syncAuthAndProfileEmail } from '@/lib/auth-email'
 
 export async function updateStaffProfile(formData: FormData) {
   const supabase = await createClient()
@@ -11,9 +13,19 @@ export async function updateStaffProfile(formData: FormData) {
     throw new Error('No estàs autenticat')
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, email')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !(DASHBOARD_STAFF_ROLES as readonly string[]).includes(profile.role)) {
+    throw new Error('No autoritzat')
+  }
+
   const fullName = (formData.get('full_name') as string)?.trim()
   const phone = formData.get('phone') as string
-  const email = (formData.get('email') as string)?.trim()
+  const email = normalizeEmail((formData.get('email') as string) || '')
   const oldPassword = formData.get('old_password') as string
   const newPassword = formData.get('new_password') as string
 
@@ -36,13 +48,8 @@ export async function updateStaffProfile(formData: FormData) {
     })
   }
 
-  if (email && email !== user.email) {
-    const { error: emailError } = await supabase.auth.updateUser({ email })
-    if (emailError) {
-      throw new Error('Error en canviar el correu: ' + emailError.message)
-    }
-
-    await supabase.from('profiles').update({ email }).eq('id', user.id)
+  if (email && email !== normalizeEmail(user.email || profile.email || '')) {
+    await syncAuthAndProfileEmail(user.id, email)
   }
 
   if (newPassword) {
@@ -73,5 +80,6 @@ export async function updateStaffProfile(formData: FormData) {
   }
 
   revalidatePath('/dashboard/config/parametres')
+  revalidatePath('/dashboard/config/centro')
   revalidatePath('/dashboard')
 }

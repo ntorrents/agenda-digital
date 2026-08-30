@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { normalizeEmail, syncAuthAndProfileEmail } from '@/lib/auth-email'
 
 function normalizeRelation(raw: string): string {
   const v = (raw || '').trim().toLowerCase()
@@ -53,16 +54,29 @@ async function upsertGuardianLink(
   const db = adminDb() || supabase
   const gId = opts.formData.get(`${opts.prefix}_id`) as string
   const gName = (opts.formData.get(`${opts.prefix}_name`) as string)?.trim()
-  const gEmail = (opts.formData.get(`${opts.prefix}_email`) as string)?.trim()
+  const gEmail = normalizeEmail((opts.formData.get(`${opts.prefix}_email`) as string) || '')
   const gPhone = (opts.formData.get(`${opts.prefix}_phone`) as string) || ''
   const gRel = normalizeRelation((opts.formData.get(`${opts.prefix}_relation`) as string) || '')
 
   if (!gName || !gEmail) return
 
   if (gId) {
+    const { data: guardian } = await db
+      .from('profiles')
+      .select('id, email, school_id')
+      .eq('id', gId)
+      .single()
+
+    if (!guardian || guardian.school_id !== opts.schoolId) {
+      throw new Error('Tutor no vàlid per aquest centre')
+    }
+
+    if (normalizeEmail(guardian.email || '') !== gEmail) {
+      await syncAuthAndProfileEmail(gId, gEmail)
+    }
+
     const { error: profileError } = await db.from('profiles').update({
       full_name: gName,
-      email: gEmail,
       phone: gPhone,
     }).eq('id', gId)
     if (profileError) throw new Error('Error actualitzant el tutor: ' + profileError.message)
@@ -110,62 +124,6 @@ async function upsertGuardianLink(
     })
     if (insertError) throw new Error('Error enllaçant el tutor: ' + insertError.message)
   }
-}
-
-export async function createStaffMember(formData: FormData) {
-  const { supabase, user } = await requireAdmin()
-
-  const fullName = formData.get('full_name') as string
-  const email = formData.get('email') as string
-  const role = formData.get('role') as string // 'admin' or 'teacher'
-  const password = formData.get('password') as string || '123456'
-
-  if (!fullName || !email || !role) {
-    throw new Error('Missing required fields')
-  }
-
-  // Use the RPC to securely create the auth user and profile
-  const { data, error } = await supabase.rpc('create_staff_user', {
-    p_email: email,
-    p_full_name: fullName,
-    p_role: role,
-    p_password: password
-  })
-
-  if (error) {
-    console.error('Error creating staff:', error)
-    throw new Error(error.message)
-  }
-
-  revalidatePath('/dashboard/personal')
-  return { success: true }
-}
-
-export async function updateStaffMember(formData: FormData) {
-  const { supabase } = await requireAdmin()
-
-  const id = formData.get('id') as string
-  const fullName = formData.get('full_name') as string
-  const role = formData.get('role') as string
-  const phone = formData.get('phone') as string || null
-
-  if (!id || !fullName || !role) {
-    throw new Error('Missing required fields')
-  }
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      full_name: fullName,
-      role: role,
-      phone: phone
-    })
-    .eq('id', id)
-
-  if (error) throw new Error(error.message)
-
-  revalidatePath('/dashboard/personal')
-  return { success: true }
 }
 
 export async function createClassroom(formData: FormData) {
@@ -364,14 +322,23 @@ export async function sendWelcomeEmail(userId: string) {
   const { supabase } = await requireAdmin();
 
   // 1. Get user details
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('school_id')
+    .eq('id', (await supabase.auth.getUser()).data.user!.id)
+    .single();
+
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('email, full_name, role')
+    .select('email, full_name, role, school_id')
     .eq('id', userId)
     .single();
 
   if (profileError || !profile) {
     throw new Error('User not found');
+  }
+  if (!adminProfile?.school_id || profile.school_id !== adminProfile.school_id) {
+    throw new Error('Unauthorized');
   }
 
   // 2. Generate random password

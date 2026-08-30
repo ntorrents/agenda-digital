@@ -24,7 +24,7 @@ export default async function FamilyProfilePage() {
     .select('student_id')
     .eq('guardian_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   let studentData = null
   let classroomData = null

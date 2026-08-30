@@ -55,10 +55,12 @@ export function FamilyProfileForm({ profile, email, student }: { profile: any, e
       }
 
       await updateFamilyProfile(formData)
-      
-      // Limpiar campos de contraseña
-      form.reset() // Esto resetea todo, pero queremos mantener los valores actuales de los inputs
-      
+
+      const oldPasswordInput = form.querySelector<HTMLInputElement>('input[name="old_password"]')
+      const newPasswordInput = form.querySelector<HTMLInputElement>('input[name="new_password"]')
+      if (oldPasswordInput) oldPasswordInput.value = ''
+      if (newPasswordInput) newPasswordInput.value = ''
+
       setSuccessMsg(true)
       setTimeout(() => setSuccessMsg(false), 3000)
     } catch (err: any) {
@@ -110,13 +112,15 @@ export function FamilyProfileForm({ profile, email, student }: { profile: any, e
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-stone-500 pl-1">Correu (Només Lectura)</label>
+          <label className="text-xs font-bold text-stone-500 pl-1">Correu Electrònic</label>
           <input 
-            disabled
-            value={email || ''}
+            required
+            name="email"
+            defaultValue={email || profile.email || ''}
             type="email" 
-            className="w-full bg-stone-100/50 border border-stone-200 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-400 cursor-not-allowed"
+            className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
           />
+          <p className="text-[10px] text-stone-400 pl-1">Aquest correu és el que faràs servir per entrar a l&apos;app.</p>
         </div>
       </div>
 

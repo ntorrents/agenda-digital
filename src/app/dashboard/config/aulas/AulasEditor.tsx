@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Building2, Plus, ChevronDown, ChevronUp, Trash2, Save, X, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { saveAllClassrooms, archiveClassroom } from './actions'
@@ -34,6 +34,7 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
   const [classroomToArchive, setClassroomToArchive] = useState<Classroom | null>(null)
   const [isArchiving, setIsArchiving] = useState(false)
   const t = useTranslations('dashboardAulas')
+  const listTopRef = useRef<HTMLDivElement>(null)
 
   // Initialize expanded state based on desktop/mobile
   useEffect(() => {
@@ -65,17 +66,19 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
 
   const addNewClassroom = () => {
     const newId = `new-${Date.now()}`
-    setClassrooms(prev => [...prev, {
+    const newRoom: Classroom = {
       id: newId,
-      name: 'Nova Aula',
+      name: t('newClassroomDefault'),
       level: 'I0',
       capacity: 10,
       teacher_id: null,
       auxiliary_teacher_ids: [],
-      _isNew: true
-    }])
+      _isNew: true,
+    }
+    setClassrooms(prev => [newRoom, ...prev])
     setExpandedIds(prev => ({ ...prev, [newId]: true }))
     setHasChanges(true)
+    setTimeout(() => listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   const handleSaveAll = async () => {
@@ -133,7 +136,7 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
       </div>
 
       {/* Lista de Aulas */}
-      <div className="space-y-4">
+      <div className="space-y-4" ref={listTopRef}>
         {classrooms.map((aula) => {
           const isExpanded = expandedIds[aula.id] || false
           

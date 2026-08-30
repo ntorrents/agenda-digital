@@ -11,6 +11,8 @@ export default async function FamilyAppHome() {
   if (!user) redirect('/login')
 
   const t = await getTranslations('familyHome')
+  const today = new Date().toISOString().split('T')[0]
+  const withDate = (path: string) => `${path}?date=${today}`
 
   return (
     <main className="px-5 pt-8 pb-12 flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
@@ -27,7 +29,7 @@ export default async function FamilyAppHome() {
         <div className="grid grid-cols-2 gap-4">
           
           <Link 
-            href="/mi-hijo/agenda"
+            href={withDate('/mi-hijo/agenda')}
             className="group flex flex-col items-center justify-center gap-3 p-5 rounded-[28px] bg-white border border-stone-200/60 shadow-xs hover:shadow-md transition-all active:scale-95"
           >
             <div className="h-16 w-16 rounded-[20px] bg-rose-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
@@ -37,7 +39,7 @@ export default async function FamilyAppHome() {
           </Link>
 
           <Link 
-            href="/mi-hijo/mensajes"
+            href={withDate('/mi-hijo/mensajes')}
             className="group flex flex-col items-center justify-center gap-3 p-5 rounded-[28px] bg-white border border-stone-200/60 shadow-xs hover:shadow-md transition-all active:scale-95"
           >
             <div className="h-16 w-16 rounded-[20px] bg-cyan-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
@@ -47,7 +49,7 @@ export default async function FamilyAppHome() {
           </Link>
 
           <Link 
-            href="/mi-hijo/galeria"
+            href={withDate('/mi-hijo/galeria')}
             className="group flex flex-col items-center justify-center gap-3 p-5 rounded-[28px] bg-white border border-stone-200/60 shadow-xs hover:shadow-md transition-all active:scale-95"
           >
             <div className="h-16 w-16 rounded-[20px] bg-emerald-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
@@ -57,7 +59,7 @@ export default async function FamilyAppHome() {
           </Link>
 
           <Link 
-            href="/mi-hijo/avisos"
+            href={withDate('/mi-hijo/avisos')}
             className="group flex flex-col items-center justify-center gap-3 p-5 rounded-[28px] bg-white border border-stone-200/60 shadow-xs hover:shadow-md transition-all active:scale-95"
           >
             <div className="h-16 w-16 rounded-[20px] bg-amber-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
@@ -67,7 +69,7 @@ export default async function FamilyAppHome() {
           </Link>
 
           <Link 
-            href="/mi-hijo/calendario"
+            href={withDate('/mi-hijo/calendario')}
             className="group flex flex-col items-center justify-center gap-3 p-5 rounded-[28px] bg-white border border-stone-200/60 shadow-xs hover:shadow-md transition-all active:scale-95"
           >
             <div className="h-16 w-16 rounded-[20px] bg-purple-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">

@@ -1,87 +1,110 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { assertClassroomAccess } from '@/lib/teacher-classroom'
+import { DASHBOARD_STAFF_ROLES } from '@/lib/roles'
+import { PHOTOS_BUCKET } from '@/lib/storage'
 
 export async function saveGlobalNoteAndPhoto(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'No autenticat' }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !(DASHBOARD_STAFF_ROLES as readonly string[]).includes(profile.role)) {
+    return { success: false, error: 'No autoritzat' }
+  }
+
   const classroomId = formData.get('classroomId') as string
   const schoolId = formData.get('schoolId') as string
   const dateStr = formData.get('dateStr') as string
-  const note = formData.get('note') as string || ''
+  const note = (formData.get('note') as string) || ''
   const file = formData.get('file') as File | null
 
   if (!classroomId || !schoolId || !dateStr) {
     return { success: false, error: 'Dades incompletes' }
   }
 
-  try {
-    let imageUrl = null
+  if (!note.trim() && !(file instanceof File && file.size > 0)) {
+    return { success: false, error: 'Afegeix una nota o una foto' }
+  }
 
-    // 1. Upload photo if present
-    if (file) {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${schoolId}/classrooms/${classroomId}/${dateStr}-${Math.random()}.${fileExt}`
-      
-      const { error: uploadError, data } = await supabase.storage
-        .from('media') // Assumes a 'media' bucket exists
-        .upload(fileName, file)
-        
+  try {
+    await assertClassroomAccess(supabase, user.id, profile.role, classroomId)
+
+    let photoUrl: string | null = null
+
+    if (file instanceof File && file.size > 0) {
+      const admin = createAdminClient()
+      const fileExt = file.name.split('.').pop() || 'jpg'
+      const fileName = `${schoolId}/classrooms/${classroomId}/${dateStr}-${Math.random().toString(36).slice(2)}.${fileExt}`
+
+      const { error: uploadError } = await admin.storage
+        .from(PHOTOS_BUCKET)
+        .upload(fileName, file, {
+          contentType: file.type || 'image/jpeg',
+          upsert: true,
+        })
+
       if (uploadError) {
-        console.error('Storage upload error:', uploadError)
-        // If the bucket doesn't exist or fails, we gracefully continue without the image
-        // return { success: false, error: 'Error pujant la imatge' }
-      } else {
-        const { data: publicUrlData } = supabase.storage
-          .from('media')
-          .getPublicUrl(fileName)
-        imageUrl = publicUrlData.publicUrl
+        return { success: false, error: "Error pujant la imatge: " + uploadError.message }
       }
+
+      const { data: publicUrlData } = admin.storage.from(PHOTOS_BUCKET).getPublicUrl(fileName)
+      photoUrl = publicUrlData.publicUrl
     }
 
-    // 2. Insert or Update into events_announcements as NOTAGLOBAL
-    const content = note + (imageUrl ? `\n\n[Foto Grupal](${imageUrl})` : '')
-    
-    // Check if it already exists
-    const { data: existingGlobal } = await supabase
-      .from('events_announcements')
-      .select('id')
+    const admin = createAdminClient()
+
+    const { data: existingGlobal } = await admin
+      .from('classroom_daily_notes')
+      .select('id, note, photo_url')
       .eq('classroom_id', classroomId)
-      .eq('event_date', dateStr)
-      .eq('title', 'NOTAGLOBAL')
-      .single()
+      .eq('date', dateStr)
+      .maybeSingle()
+
+    const payload = {
+      school_id: schoolId,
+      classroom_id: classroomId,
+      teacher_id: user.id,
+      date: dateStr,
+      note: note.trim() || existingGlobal?.note || null,
+      photo_url: photoUrl || existingGlobal?.photo_url || null,
+    }
 
     if (existingGlobal) {
-      await supabase
-        .from('events_announcements')
-        .update({ description: content })
+      const { error } = await admin
+        .from('classroom_daily_notes')
+        .update(payload)
         .eq('id', existingGlobal.id)
+
+      if (error) return { success: false, error: error.message }
     } else {
-      await supabase
-        .from('events_announcements')
-        .insert({
-          school_id: schoolId,
-          classroom_id: classroomId,
-          author_id: user.id,
-          title: `NOTAGLOBAL`,
-          description: content,
-          event_type: 'announcement',
-          audience: 'classroom',
-          event_date: dateStr
-        })
+      const { error } = await admin
+        .from('classroom_daily_notes')
+        .insert(payload)
+
+      if (error) return { success: false, error: error.message }
     }
 
     revalidatePath('/dashboard')
-    revalidatePath('/dashboard/aula')
     revalidatePath('/dashboard/agendas')
+    revalidatePath('/mi-hijo/agenda')
+    revalidatePath('/mi-hijo/galeria')
 
     return { success: true }
-
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('saveGlobalNoteAndPhoto error:', error)
-    return { success: false, error: error.message }
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Error desconegut',
+    }
   }
 }

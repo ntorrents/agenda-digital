@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { CalendarDays, ExternalLink, Download } from 'lucide-react'
 import Link from 'next/link'
 
-export default async function MenusViewPage({ searchParams }: { searchParams: { m?: string, y?: string } }) {
+export default async function MenusViewPage(props: { searchParams: Promise<{ m?: string, y?: string }> }) {
+  const searchParams = await props.searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -27,7 +28,7 @@ export default async function MenusViewPage({ searchParams }: { searchParams: { 
     .eq('school_id', profile.school_id)
     .eq('month', currentMonth)
     .eq('year', currentYear)
-    .single()
+    .maybeSingle()
 
   const monthName = new Date(currentYear, currentMonth - 1).toLocaleString('ca', { month: 'long' })
 

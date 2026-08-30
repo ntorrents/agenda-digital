@@ -44,6 +44,6 @@ export async function setStaffAttendance(staffId: string, status: string) {
     if (error) throw new Error(error.message)
   }
 
-  revalidatePath('/dashboard/config/personal')
+  revalidatePath('/dashboard/equipo')
   return { success: true }
 }

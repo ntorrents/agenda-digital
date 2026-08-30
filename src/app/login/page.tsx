@@ -45,21 +45,42 @@ export default function LoginPage() {
       }
 
       // Comprobar force_password_reset y rol desde profiles
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('force_password_reset, role')
+        .select('force_password_reset, role, status')
         .eq('id', data.user.id)
         .maybeSingle()
+
+      if (profileError) {
+        console.error('Profile fetch error:', profileError)
+      }
+
+      if (profile?.status && profile.status !== 'active') {
+        await supabase.auth.signOut()
+        setErrorMessage(t('errorInactive'))
+        setIsLoading(false)
+        return
+      }
 
       if (profile?.force_password_reset) {
         window.location.assign('/force-password-reset')
         return
       }
 
-      const role = profile?.role || data.user.app_metadata?.role
+      const role =
+        profile?.role ||
+        data.user.app_metadata?.role ||
+        data.user.user_metadata?.role
+
       let dest = '/dashboard'
       if (role === 'superadmin') dest = '/superadmin'
       else if (role === 'guardian') dest = '/mi-hijo'
+      else if (role === 'teacher' || role === 'admin' || role === 'auxiliary') dest = '/dashboard'
+      else {
+        setErrorMessage(t('errorCredentials'))
+        setIsLoading(false)
+        return
+      }
 
       window.location.assign(dest)
       return

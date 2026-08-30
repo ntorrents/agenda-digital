@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Users, Plus, ChevronDown, ChevronUp, Trash2, Save, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { saveAllStaff, archiveStaffMember } from './actions'
@@ -26,6 +27,7 @@ type EquipoEditorProps = {
 }
 
 export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
+  const router = useRouter()
   const [staff, setStaff] = useState<StaffMember[]>(initialStaff)
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
   const [isSaving, setIsSaving] = useState(false)
@@ -34,6 +36,14 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
   const [memberToArchive, setMemberToArchive] = useState<StaffMember | null>(null)
   const [isArchiving, setIsArchiving] = useState(false)
   const t = useTranslations('dashboardEquipo')
+
+  const listTopRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!hasChanges) {
+      setStaff(initialStaff)
+    }
+  }, [initialStaff, hasChanges])
 
   // Initialize expanded state based on desktop/mobile
   useEffect(() => {
@@ -64,7 +74,7 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
 
   const addNewMember = () => {
     const newId = `new-${Date.now()}`
-    setStaff(prev => [...prev, {
+    const newMember: StaffMember = {
       id: newId,
       school_id: schoolId,
       full_name: '',
@@ -72,10 +82,12 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
       email: '',
       phone: '',
       status: 'active',
-      _isNew: true
-    }])
+      _isNew: true,
+    }
+    setStaff(prev => [newMember, ...prev])
     setExpandedIds(prev => ({ ...prev, [newId]: true }))
     setHasChanges(true)
+    setTimeout(() => listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   const handleSaveAll = async () => {
@@ -91,8 +103,12 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
     
     if (result.success) {
       setHasChanges(false)
-      // Remove _isNew flag internally so we don't trigger creation again
-      setStaff(prev => prev.map(s => ({ ...s, _isNew: false })))
+      setStaff((prev) =>
+        prev
+          .map((s) => ({ ...s, _isNew: false }))
+          .filter((s) => s.status !== 'inactive')
+      )
+      router.refresh()
     } else {
       alert(result.error)
     }
@@ -139,7 +155,7 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
       </div>
 
       {/* Lista */}
-      <div className="space-y-4">
+      <div className="space-y-4" ref={listTopRef}>
         {staff.map((member) => {
           const isExpanded = expandedIds[member.id] || false
           
@@ -162,7 +178,12 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
                       {member.full_name || t('noName')}
                     </h4>
                     <p className="text-xs font-bold text-stone-400">
-                      {member.role === 'admin' ? t('roleAdmin') : t('roleTeacher')} {member.email ? `· ${member.email}` : ''}
+                      {member.role === 'admin'
+                        ? t('roleAdmin')
+                        : member.role === 'auxiliary'
+                          ? t('roleAuxiliary')
+                          : t('roleTeacher')}{' '}
+                      {member.email ? `· ${member.email}` : ''}
                     </p>
                   </div>
                 </div>
@@ -217,6 +238,7 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
                         className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 text-stone-600"
                       >
                         <option value="teacher">{t('roleTeacher')}</option>
+                        <option value="auxiliary">{t('roleAuxiliary')}</option>
                         <option value="admin">{t('roleAdminSelect')}</option>
                       </select>
                     </div>

@@ -5,7 +5,8 @@ import { CalendarDays, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 
-export default async function MenusPage({ searchParams }: { searchParams: { m?: string, y?: string } }) {
+export default async function MenusPage(props: { searchParams: Promise<{ m?: string, y?: string }> }) {
+  const searchParams = await props.searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -29,7 +30,7 @@ export default async function MenusPage({ searchParams }: { searchParams: { m?: 
     .eq('school_id', profile.school_id)
     .eq('month', currentMonth)
     .eq('year', currentYear)
-    .single()
+    .maybeSingle()
 
   const t = await getTranslations('dashboardMenus')
   const locale = await getLocale()

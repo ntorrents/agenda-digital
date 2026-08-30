@@ -3,17 +3,39 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function saveAllClassrooms(classrooms: any[], schoolId: string) {
+async function requireAdmin() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' as const }
 
-  // First we upsert the classrooms
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, school_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'admin' || !profile.school_id) {
+    return { error: 'Unauthorized' as const }
+  }
+
+  return { supabase, profile }
+}
+
+export async function saveAllClassrooms(classrooms: any[], schoolId: string) {
+  const auth = await requireAdmin()
+  if ('error' in auth && auth.error) return { error: auth.error }
+
+  const { supabase, profile } = auth
+  if (schoolId !== profile.school_id) {
+    return { error: 'Unauthorized' }
+  }
+
   const classroomsToUpsert = classrooms.map(c => {
-    // Si no tiene id, es nuevo (el id temporal de UI no se debe mandar a DB)
     const isNew = typeof c.id === 'string' && c.id.startsWith('new-')
-    
+
     return {
-      ...(isNew ? {} : { id: c.id }), // Si es nuevo no mandamos ID para que lo genere
-      school_id: schoolId,
+      ...(isNew ? {} : { id: c.id }),
+      school_id: profile.school_id,
       name: c.name,
       level: c.level,
       capacity: c.capacity ? parseInt(c.capacity) : null,
@@ -23,8 +45,6 @@ export async function saveAllClassrooms(classrooms: any[], schoolId: string) {
     }
   })
 
-  // Unfortunately Supabase upsert requires primary keys to match
-  // Instead of upserting a mix of new and old, we can do them in 2 operations
   const existing = classroomsToUpsert.filter(c => c.id)
   const newClasses = classroomsToUpsert.filter(c => !c.id)
 
@@ -46,28 +66,31 @@ export async function saveAllClassrooms(classrooms: any[], schoolId: string) {
   }
 
   revalidatePath('/dashboard/config/aulas')
-  revalidatePath('/dashboard/config/alumnos') // Para refrescar asignaciones en filtro
+  revalidatePath('/dashboard/config/alumnos')
   return { success: true }
 }
 
 export async function archiveClassroom(classroomId: string) {
-  const supabase = await createClient()
+  const auth = await requireAdmin()
+  if ('error' in auth && auth.error) return { error: auth.error }
 
-  // 1. Archivar aula
+  const { supabase, profile } = auth
+
   const { error: archiveError } = await supabase
     .from('classrooms')
     .update({ status: 'inactive' })
     .eq('id', classroomId)
+    .eq('school_id', profile.school_id)
 
   if (archiveError) {
     return { error: 'Error a l\'arxivar l\'aula.' }
   }
 
-  // 2. Liberar alumnos (poner aula a NULL)
   const { error: studentsError } = await supabase
     .from('students')
     .update({ classroom_id: null })
     .eq('classroom_id', classroomId)
+    .eq('school_id', profile.school_id)
 
   if (studentsError) {
     console.error('Error desassignant alumnes', studentsError)

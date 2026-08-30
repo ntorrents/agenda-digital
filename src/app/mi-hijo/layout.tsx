@@ -7,28 +7,20 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { LogOut, Home, Calendar, Image as ImageIcon, Bell, Menu, X, ArrowLeft, MessageCircle, HelpCircle, Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useTranslations, useLocale } from 'next-intl'
-import { Locale } from '@/i18n'
+import { useTranslations } from 'next-intl'
+import { DatePickerNav } from '@/components/ui/DatePickerNav'
 
 export default function FamilyLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const tNav = useTranslations('navigation')
   const tCommon = useTranslations('common')
-  const locale = useLocale() as Locale
   const [studentName, setStudentName] = useState<string>('Infant')
   const [classroomName, setClassroomName] = useState<string>('')
   const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const searchParams = useSearchParams()
   const currentDate = searchParams.get('date') || new Date().toISOString().split('T')[0]
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = e.target.value
-    if (newDate) {
-      router.replace(`${pathname}?date=${newDate}`, { scroll: false })
-    }
-  }
 
   useEffect(() => {
     async function loadProfile() {
@@ -57,7 +49,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
         .select('student_id')
         .eq('guardian_id', user.id)
         .limit(1)
-        .single()
+        .maybeSingle()
 
       if (guardianRel) {
         const { data: student } = await supabase
@@ -109,6 +101,13 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
 
   const isHome = pathname === '/mi-hijo'
 
+  const hideDatePicker =
+    isHome ||
+    pathname.startsWith('/mi-hijo/perfil') ||
+    pathname.startsWith('/mi-hijo/ayuda') ||
+    pathname.startsWith('/mi-hijo/menus')
+  const showDatePicker = !hideDatePicker
+
   const getBackHref = (path: string): string => {
     if (path === '/mi-hijo' || path === '/mi-hijo/') return '/mi-hijo'
     // Siempre volver al menú principal de familia, no al historial del navegador
@@ -134,6 +133,18 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     setIsMenuOpen(false)
   }, [pathname])
+
+  const schoolBrand = schoolInfo?.logo_url ? (
+    <img
+      src={schoolInfo.logo_url}
+      alt={schoolInfo.name || 'Logo escola'}
+      className="h-6 lg:h-8 w-auto max-w-full object-contain"
+    />
+  ) : (
+    <span className="text-xs lg:text-sm font-black text-stone-900 truncate max-w-full">
+      {schoolInfo?.name || 'Agenda Digital'}
+    </span>
+  )
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-800 font-sans flex flex-col relative lg:pl-72">
@@ -201,75 +212,71 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
       </aside>
 
       {/* Top Navbar — mòbil */}
-      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md px-2 py-2 flex items-center justify-between shadow-xs h-16 lg:hidden">
-        
-        <div className="flex items-center gap-1">
-          {isHome ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMenuOpen(true)}
-              className="rounded-full text-stone-600 hover:text-stone-900 active:bg-stone-100 h-10 w-10"
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleBack}
-              className="rounded-full text-stone-600 hover:text-stone-900 active:bg-stone-100 h-10 w-10"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-          )}
-
-          {!isHome && (
-            <div className="flex items-center gap-2 px-1">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20">
-                {studentName.charAt(0)}
-              </div>
-              <span className="text-sm font-black text-stone-900">{studentName}</span>
-            </div>
-          )}
-        </div>
-
-        {isHome ? (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center flex-col">
-            {schoolInfo?.logo_url ? (
-              <img src={schoolInfo.logo_url} alt="Logo escola" className="h-6 w-auto object-contain mb-0.5" />
-            ) : (
-              <h1 className="text-[15px] font-black text-stone-900 leading-tight">
-                {schoolInfo?.name || 'Agenda Digital'}
-              </h1>
-            )}
-            <p className="text-[10px] text-stone-500 font-bold capitalize">{todayFormatted}</p>
-          </div>
-        ) : (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center">
-            <input 
-              type="date" 
-              value={currentDate}
-              onChange={handleDateChange}
-              className="bg-stone-100 border border-stone-200 text-stone-700 text-xs font-bold rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none"
-            />
-          </div>
+      <header
+        className={cn(
+          'sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md shadow-xs overflow-visible lg:hidden',
+          showDatePicker && !isHome ? 'px-2 pt-2 pb-3' : 'px-2 py-2 min-h-16'
         )}
-
-        <div className="flex items-center gap-2 pr-2">
-          {isHome && (
-            <Link 
-              href="/mi-hijo/perfil"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-            >
-              {studentName.charAt(0)}
-            </Link>
-          )}
-        </div>
+      >
+        {isHome ? (
+          <>
+            <div className="relative flex items-center justify-between min-h-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMenuOpen(true)}
+                className="rounded-full text-stone-600 hover:text-stone-900 active:bg-stone-100 h-10 w-10 shrink-0"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none">
+                {schoolBrand}
+              </div>
+              <Link
+                href="/mi-hijo/perfil"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20 hover:scale-105 active:scale-95 transition-all"
+              >
+                {studentName.charAt(0)}
+              </Link>
+            </div>
+            <p className="text-center text-[10px] text-stone-500 font-bold capitalize mt-1">{todayFormatted}</p>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 min-h-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBack}
+                className="rounded-full text-stone-600 hover:text-stone-900 active:bg-stone-100 h-10 w-10 shrink-0"
+              >
+                <ArrowLeft className="h-6 w-6" />
+              </Button>
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20">
+                  {studentName.charAt(0)}
+                </div>
+                <span className="text-sm font-black text-stone-900 truncate">{studentName}</span>
+              </div>
+              <div className="shrink-0 pl-2 max-w-[42%]">{schoolBrand}</div>
+            </div>
+            {showDatePicker && (
+              <div className="mt-2.5 mb-1 flex justify-center px-1">
+                <DatePickerNav
+                  currentDate={currentDate}
+                  variant="compact"
+                  replace
+                  popoverAnchor="header"
+                  className="w-full max-w-[280px]"
+                />
+              </div>
+            )}
+          </>
+        )}
       </header>
 
       {/* Top Navbar — escriptori */}
-      <header className="hidden lg:flex sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md px-6 py-3 items-center justify-between shadow-xs h-16">
+      <header className="hidden lg:flex sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md px-6 py-3 items-center justify-between shadow-xs h-16 overflow-visible">
         <div className="flex items-center gap-3 min-w-0">
           {!isHome && (
             <Button
@@ -282,6 +289,13 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
+          {isHome && schoolInfo?.logo_url && (
+            <img
+              src={schoolInfo.logo_url}
+              alt={schoolInfo.name || 'Logo escola'}
+              className="h-8 w-auto max-w-[120px] object-contain shrink-0"
+            />
+          )}
           <div className="min-w-0">
             <h1 className="text-sm font-black text-stone-900 truncate">
               {isHome ? (schoolInfo?.name || 'Agenda Digital') : studentName}
@@ -292,23 +306,12 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
           </div>
         </div>
 
-        {!isHome ? (
-          <div className="flex items-center gap-2">
-            <label htmlFor="family-date-desktop" className="text-xs font-bold text-stone-500 uppercase tracking-wide">
-              Dia
-            </label>
-            <input
-              id="family-date-desktop"
-              type="date"
-              value={currentDate}
-              onChange={handleDateChange}
-              className="bg-stone-100 border border-stone-200 text-stone-700 text-sm font-bold rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
+        {showDatePicker ? (
+          <DatePickerNav currentDate={currentDate} variant="compact" replace />
         ) : (
           <Link
             href="/mi-hijo/perfil"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20 hover:scale-105 transition-all"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20 hover:scale-105 transition-all shrink-0"
           >
             {studentName.charAt(0)}
           </Link>

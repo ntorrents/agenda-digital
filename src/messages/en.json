@@ -14,7 +14,8 @@
     "demoFamily": "Family (Marta)",
     "demoTeacher": "Teacher (Anna)",
     "demoAdmin": "Principal (Laura)",
-    "demoSuperAdmin": "Super Admin"
+    "demoSuperAdmin": "Super Admin",
+    "errorInactive": "Your account is inactive. Please contact the school office."
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -42,7 +43,8 @@
     "notices": "Notice Board",
     "help": "Help",
     "panelAdmin": "Admin Panel",
-    "panelTeacher": "Teacher Panel"
+    "panelTeacher": "Teacher Panel",
+    "panelAuxiliary": "Auxiliary Panel"
   },
   "familyProfile": {
     "languageTitle": "Application Language",
@@ -57,6 +59,12 @@
     "delete": "Delete",
     "back": "Back",
     "loading": "Loading..."
+  },
+  "datePicker": {
+    "dateLabel": "Date",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
+    "today": "Today"
   },
   "familyHome": {
     "title": "Home Screen",
@@ -108,7 +116,8 @@
     "notFilledDesc": "The teacher hasn't saved the data for this day yet.",
     "galleryOfDay": "Gallery of the day",
     "seeAll": "See all",
-    "photo": "Photo"
+    "photo": "Photo",
+    "dayNoteOnly": "No individual agenda yet, but the class day note is already available."
   },
   "calendar": {
     "title": "Calendar",
@@ -175,6 +184,7 @@
       "absences": {
         "title": "Team Absences",
         "today": "absences today",
+        "onLeave": "on leave",
         "allOk": "● All team is operational"
       },
       "intolerances": {
@@ -182,7 +192,8 @@
         "students": "STUDENTS",
         "none": "No active records."
       }
-    }
+    },
+    "welcomeName": "Good morning, {name}!"
   },
   "dashboardAlumnos": {
     "gender": {
@@ -242,7 +253,8 @@
     "archiveDesc2": "This action will unlink all students from this classroom and leave them as \"Unassigned\". However, their history will not be deleted.",
     "cancel": "Cancel",
     "archiveConfirm": "Yes, Archive Classroom",
-    "archiving": "Archiving..."
+    "archiving": "Archiving...",
+    "newClassroomDefault": "New Classroom"
   },
   "studentForm": {
     "errorTitle": "Operation error",
@@ -323,13 +335,19 @@
     "archiveDesc2": "This will revoke their access to the platform and unlink them from any classrooms they are assigned to. However, their history will be kept.",
     "cancel": "Cancel",
     "archiveConfirm": "Yes, Archive",
-    "archiving": "Archiving..."
+    "archiving": "Archiving...",
+    "roleAuxiliary": "Auxiliary"
   },
   "dashboardCentro": {
     "title": "School Settings",
     "subtitle": "General configuration of {name}",
     "activeStudents": "Active Students",
-    "activeTeam": "Active Team"
+    "activeTeam": "Active Team",
+    "hubTitle": "Settings",
+    "hubSchoolTitle": "School settings",
+    "hubSchoolDesc": "Name, logo, agenda options and access emails.",
+    "hubProfileTitle": "My profile",
+    "hubProfileDesc": "Your personal details and password."
   },
   "dashboardParametres": {
     "title": "Settings",
@@ -398,7 +416,12 @@
     "noCompleted": "You have not filled out any agendas today.",
     "backToList": "Back to agendas list",
     "guardianTitle": "Family Contact Details",
-    "successMsg": "Daily log successfully saved to the database!"
+    "successMsg": "Daily log successfully saved to the database!",
+    "classroomLabel": "Classroom",
+    "dateLabel": "Date",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
+    "today": "Today"
   },
   "dashboardAula": {
     "noClassroom": "You do not have a classroom assigned. Contact management.",
@@ -450,7 +473,15 @@
     "emptyDesc": "No photos found uploaded to the agendas.",
     "typeGroup": "Group",
     "typeIndividual": "Individual",
-    "classroomFallback": "Classroom"
+    "classroomFallback": "Classroom",
+    "downloadAll": "Download all (ZIP)",
+    "photoAlt": "Photo",
+    "filterClassroom": "Classroom",
+    "filterAllClassrooms": "All classrooms",
+    "filterStudent": "Student",
+    "filterAllStudents": "All students",
+    "filterType": "Type",
+    "filterAllTypes": "All"
   },
   "dashboardMensajes": {
     "adminOnly": "This section is only available to the school management.",
@@ -511,5 +542,41 @@
     "moodOption": "Enable Mood tracking",
     "optionsNote": "Note: Daily photos and global notes will always be enabled.",
     "btnSave": "Save Settings"
+  },
+  "dashboardTeacher": {
+    "welcomeName": "Good morning, {name}!",
+    "welcomeDesc": "Here is your summary for today. Get the classroom ready and keep families informed.",
+    "noClassroomTitle": "You do not have a classroom assigned yet",
+    "noClassroomDesc": "Ask management to assign you as teacher or auxiliary in a classroom.",
+    "yourClassroom": "Your Classroom",
+    "activeStudents": "{count} active students",
+    "viewStudents": "View my students",
+    "agendaStatus": "Agenda Status",
+    "allDone": "All done!",
+    "pending": "{count} still to fill in",
+    "fillAgendas": "Fill Agendas"
+  },
+  "bulkActions": {
+    "title": "Bulk register",
+    "dayNote": "Day note",
+    "dayNoteHint": "One text for the whole class. Shown separately to families.",
+    "dayNotePanelHint": "Saved for today and shown to all families, even before each log is filled.",
+    "dayNotePlaceholder": "E.g. Everything went well. See you tomorrow!",
+    "dayNoteSuccess": "Day note saved.",
+    "groupPhoto": "Group photo of the day",
+    "groupPhotoHint": "One photo for the whole class.",
+    "groupPhotoPanelHint": "Visible to all families in the class.",
+    "photoSuccess": "Group photo published.",
+    "lunchAll": "Everyone ate \"All\"",
+    "lunchHint": "Only marks lunch on agendas already created today.",
+    "lunchConfirm": "Mark lunch as \"All\" on all existing agendas for today?",
+    "lunchSuccess": "Lunch marked on all today's agendas.",
+    "pickPhoto": "Choose photo",
+    "back": "Back",
+    "save": "Save",
+    "saving": "Saving...",
+    "publish": "Publish",
+    "uploading": "Uploading...",
+    "errorGeneric": "Something went wrong"
   }
 }

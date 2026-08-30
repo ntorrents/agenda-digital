@@ -1,7 +1,9 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { DOCUMENTS_BUCKET } from '@/lib/storage'
 
 export async function upsertMenu(formData: FormData) {
   const supabase = await createClient()
@@ -22,35 +24,44 @@ export async function upsertMenu(formData: FormData) {
   const description = formData.get('description') as string
   const menuFile = formData.get('file') as File | null
 
-  let file_url = undefined
+  let file_url: string | undefined
 
   if (menuFile && menuFile.size > 0) {
-    const fileExt = menuFile.name.split('.').pop()
-    const fileName = `${profile.school_id}-${year}-${month}-${Date.now()}.${fileExt}`
-    
-    const { error: uploadError } = await supabase.storage
-      .from('school-documents')
-      .upload(fileName, menuFile, { upsert: true })
+    const admin = createAdminClient()
+    const fileExt = menuFile.name.split('.').pop() || 'jpg'
+    const fileName = `${profile.school_id}/${year}-${month}-${Date.now()}.${fileExt}`
 
-    if (uploadError) throw new Error('Error pujant el menú')
+    const { error: uploadError } = await admin.storage
+      .from(DOCUMENTS_BUCKET)
+      .upload(fileName, menuFile, {
+        contentType: menuFile.type || 'application/octet-stream',
+        upsert: true,
+      })
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('school-documents')
+    if (uploadError) throw new Error('Error pujant el menú: ' + uploadError.message)
+
+    const { data: { publicUrl } } = admin.storage
+      .from(DOCUMENTS_BUCKET)
       .getPublicUrl(fileName)
 
     file_url = publicUrl
   }
 
-  // Comprobar si ya existe
   const { data: existing } = await supabase
     .from('dining_menus')
     .select('id, file_url')
     .eq('school_id', profile.school_id)
     .eq('month', month)
     .eq('year', year)
-    .single()
+    .maybeSingle()
 
-  const payload: any = { school_id: profile.school_id, month, year, title, description }
+  const payload: Record<string, unknown> = {
+    school_id: profile.school_id,
+    month,
+    year,
+    title,
+    description,
+  }
   if (file_url) {
     payload.file_url = file_url
   }
@@ -70,6 +81,5 @@ export async function upsertMenu(formData: FormData) {
 
   revalidatePath('/dashboard/menus')
   revalidatePath('/mi-hijo/menus')
-  revalidatePath('/mi-aula/menus')
   return { success: true }
 }

@@ -36,7 +36,7 @@ export async function createAnnouncement(formData: FormData) {
   
   if (error) throw new Error(error.message)
 
-  revalidatePath('/mi-aula/avisos')
+  revalidatePath('/dashboard/avisos')
   revalidatePath('/mi-hijo/avisos')
   
   return { success: true }
@@ -51,7 +51,7 @@ export async function deleteAnnouncement(id: string) {
   
   if (error) throw new Error(error.message)
 
-  revalidatePath('/mi-aula/avisos')
+  revalidatePath('/dashboard/avisos')
   revalidatePath('/mi-hijo/avisos')
   
   return { success: true }

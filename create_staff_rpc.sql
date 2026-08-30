@@ -5,7 +5,7 @@ DROP FUNCTION IF EXISTS public.create_staff_user(text, text, text, text);
 CREATE OR REPLACE FUNCTION public.create_staff_user(
   p_email text,
   p_full_name text,
-  p_role text, -- 'admin' or 'teacher'
+  p_role text,
   p_password text
 ) RETURNS UUID AS $$
 DECLARE
@@ -13,7 +13,6 @@ DECLARE
   v_school_id UUID;
   v_admin_role TEXT;
 BEGIN
-  -- Verify caller is an admin
   SELECT school_id INTO v_school_id FROM public.profiles WHERE id = auth.uid();
   SELECT role::text INTO v_admin_role FROM public.profiles WHERE id = auth.uid();
   
@@ -21,14 +20,12 @@ BEGIN
     RAISE EXCEPTION 'Only admins can create staff users';
   END IF;
 
-  IF p_role NOT IN ('admin', 'teacher') THEN
-    RAISE EXCEPTION 'Invalid role. Must be admin or teacher';
+  IF p_role NOT IN ('admin', 'teacher', 'auxiliary') THEN
+    RAISE EXCEPTION 'Invalid role. Must be admin, teacher or auxiliary';
   END IF;
 
-  -- Generate new UUID for the user
   v_user_id := extensions.uuid_generate_v4();
 
-  -- 1. Insert into auth.users
   INSERT INTO auth.users (
     id, instance_id, email, encrypted_password, email_confirmed_at,
     raw_app_meta_data, raw_user_meta_data, aud, role, is_super_admin,
@@ -48,7 +45,6 @@ BEGIN
     now()
   );
 
-  -- 2. Insert into auth.identities
   INSERT INTO auth.identities (
     id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
   ) VALUES (
@@ -62,9 +58,8 @@ BEGIN
     now()
   );
 
-  -- 3. Insert into public.profiles
-  INSERT INTO public.profiles (id, school_id, role, full_name, email, is_active)
-  VALUES (v_user_id, v_school_id, p_role::user_role, p_full_name, p_email, true);
+  INSERT INTO public.profiles (id, school_id, role, full_name, email, status)
+  VALUES (v_user_id, v_school_id, p_role, p_full_name, p_email, 'active');
 
   RETURN v_user_id;
 END;

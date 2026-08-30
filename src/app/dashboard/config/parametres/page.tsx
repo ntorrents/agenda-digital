@@ -17,7 +17,7 @@ export default async function DashboardParametresPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'teacher') {
+  if (!profile || (profile.role !== 'teacher' && profile.role !== 'auxiliary')) {
     redirect('/dashboard')
   }
 

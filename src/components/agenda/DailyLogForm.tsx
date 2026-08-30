@@ -7,18 +7,23 @@ import { Smile, Utensils, Droplets, Moon, CheckCircle2, XCircle, ArrowLeft, Imag
 import { upsertDailyLog } from '@/app/actions/daily-logs'
 import { useTranslations, useLocale } from 'next-intl'
 import { CameraCapture } from '@/components/media/CameraCapture'
+import { formatDiaperTypes, normalizeDiaperTypes, toggleDiaperType } from '@/lib/diaper'
+import { compressImageFiles } from '@/lib/compress-image'
+import type { DiaperType } from '@/types/enums'
 
 interface DailyLogFormProps {
   studentId: string
   studentName: string
   dateStr: string
+  classroomId: string
   initialData?: any
   settings?: any
 }
 
-export function DailyLogForm({ studentId, studentName, dateStr, initialData, settings = {} }: DailyLogFormProps) {
+export function DailyLogForm({ studentId, studentName, dateStr, classroomId, initialData, settings = {} }: DailyLogFormProps) {
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
+  const [isCompressingPhotos, setIsCompressingPhotos] = useState(false)
   const t = useTranslations('dailyLogForm')
   const locale = useLocale()
   
@@ -26,7 +31,9 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
   const [breakfast, setBreakfast] = useState<string | null>(initialData?.meal_breakfast || null)
   const [lunch, setLunch] = useState<string | null>(initialData?.meal_lunch || null)
   const [snack, setSnack] = useState<string | null>(initialData?.meal_snack || null)
-  const [diaperType, setDiaperType] = useState<string | null>(initialData?.diaper_type || null)
+  const [diaperTypes, setDiaperTypes] = useState<DiaperType[]>(
+    normalizeDiaperTypes(initialData?.diaper_type)
+  )
   const [diaperChanges, setDiaperChanges] = useState<number>(initialData?.diaper_changes || 0)
   
   // Basic boolean for UI, but backend expects time strings. We'll simplify for now.
@@ -41,16 +48,24 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
   )
   const galleryRef = useRef<HTMLInputElement>(null)
 
-  const addPhotoFiles = (files: File[]) => {
+  const addPhotoFiles = async (files: File[]) => {
     if (files.length === 0) return
     const remaining = Math.max(0, 5 - photoFiles.length - photoPreviews.length)
     const selected = files.slice(0, remaining)
-    setPhotoFiles(prev => [...prev, ...selected])
-    setPhotoPreviews(prev => [...prev, ...selected.map(f => URL.createObjectURL(f))])
+    if (selected.length === 0) return
+
+    setIsCompressingPhotos(true)
+    try {
+      const compressed = await compressImageFiles(selected)
+      setPhotoFiles(prev => [...prev, ...compressed])
+      setPhotoPreviews(prev => [...prev, ...compressed.map(f => URL.createObjectURL(f))])
+    } finally {
+      setIsCompressingPhotos(false)
+    }
   }
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    addPhotoFiles(Array.from(e.target.files || []))
+    void addPhotoFiles(Array.from(e.target.files || []))
     e.target.value = ''
   }
 
@@ -73,7 +88,8 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
       if (breakfast) formData.append('meal_breakfast', breakfast)
       if (lunch) formData.append('meal_lunch', lunch)
       if (snack) formData.append('meal_snack', snack)
-      if (diaperType) formData.append('diaper_type', diaperType)
+      const diaperValue = formatDiaperTypes(diaperTypes)
+      if (diaperValue) formData.append('diaper_type', diaperValue)
       formData.append('diaper_changes', diaperChanges.toString())
       if (didNap) {
         formData.append('nap_start', napStart)
@@ -83,9 +99,8 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
       photoFiles.forEach(file => formData.append('photos', file))
 
       await upsertDailyLog(formData)
-      
-      // Redirect to the same page with ?success=true
-      router.push(`/dashboard/agendas/${studentId}?date=${dateStr}&success=true`)
+
+      router.push(`/dashboard/agendas?date=${dateStr}&classroom_id=${classroomId}`)
       
     } catch (error) {
       console.error('Error saving log:', error)
@@ -103,10 +118,9 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
     { value: 'none', label: t('mealNone'), color: 'red' },
   ]
   const diaperOptions = [
-    { value: 'pee', label: t('diaperPee'), color: 'amber' },
-    { value: 'poo', label: t('diaperPoo'), color: 'amber' },
-    { value: 'both', label: t('diaperBoth'), color: 'orange' },
-    { value: 'dry', label: t('diaperDry'), color: 'stone' },
+    { value: 'soft' as DiaperType, label: t('diaperSoft') },
+    { value: 'normal' as DiaperType, label: t('diaperNormal') },
+    { value: 'liquid' as DiaperType, label: t('diaperLiquid') },
   ]
 
   const dateLocaleMap: Record<string, string> = {
@@ -253,14 +267,15 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
           <div className="grid grid-cols-12 gap-3">
             <div className="col-span-8 bg-stone-50/50 rounded-[20px] p-3 border border-stone-100">
               <label className="text-xs font-bold text-stone-600 mb-2 block">{t('diaperType')}</label>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
                 {diaperOptions.map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => setDiaperType(opt.value)}
+                    type="button"
+                    onClick={() => setDiaperTypes(prev => toggleDiaperType(prev, opt.value))}
                     className={`py-2 text-[11px] font-bold rounded-xl transition-colors border cursor-pointer ${
-                      diaperType === opt.value
-                        ? `bg-${opt.color}-50 border-${opt.color}-200 text-${opt.color}-800`
+                      diaperTypes.includes(opt.value)
+                        ? 'bg-amber-50 border-amber-300 text-amber-900'
                         : 'bg-white border-stone-200/80 text-stone-500 hover:bg-stone-50'
                     }`}
                   >
@@ -371,7 +386,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, initialData, set
             <div className="flex gap-2">
               <CameraCapture
                 label={t('btnCamera')}
-                onCapture={(file) => addPhotoFiles([file])}
+                onCapture={(file) => void addPhotoFiles([file])}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer"
               />
               <button

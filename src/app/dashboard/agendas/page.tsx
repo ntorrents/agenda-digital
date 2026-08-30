@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { CheckCircle2, AlertCircle, Baby, ChevronRight } from 'lucide-react'
 import { BulkActionsWidget } from '@/components/agenda/BulkActionsWidget'
 import { AgendaFilters } from '@/components/agenda/AgendaFilters'
+import { getTeacherClassroom } from '@/lib/teacher-classroom'
 import { getTranslations, getLocale } from 'next-intl/server'
 
 export default async function AgendasIndexPage(props: { searchParams: Promise<{ date?: string, classroom_id?: string }> }) {
@@ -30,7 +31,7 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
   // Get all classrooms for the school
   const { data: classrooms } = await supabase
     .from('classrooms')
-    .select('id, name, level, teacher_id')
+    .select('id, name, level, teacher_id, school_id')
     .eq('school_id', profile.school_id)
     .order('name', { ascending: true })
 
@@ -47,12 +48,20 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
   let classroom = queryClassroomId ? classrooms.find(c => c.id === queryClassroomId) : null
   
   if (!classroom) {
-    if (profile.role === 'teacher') {
-      classroom = classrooms.find(c => c.teacher_id === user.id) || classrooms[0]
+    if (profile.role === 'teacher' || profile.role === 'auxiliary') {
+      const assigned = await getTeacherClassroom(supabase, user.id, profile.role)
+      classroom = assigned
+        ? classrooms.find((c) => c.id === assigned.id) || classrooms[0]
+        : classrooms[0]
     } else {
       classroom = classrooms[0]
     }
   }
+
+  const visibleClassrooms =
+    profile.role === 'teacher' || profile.role === 'auxiliary'
+      ? classrooms.filter((c) => c.id === classroom!.id)
+      : classrooms
 
   if (!classroom) {
     return (
@@ -103,11 +112,15 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
         </div>
         <div className="flex flex-col sm:flex-row items-end gap-3">
           <AgendaFilters 
-            classrooms={classrooms}
+            classrooms={visibleClassrooms}
             currentClassroomId={classroom.id}
             currentDate={dateStr}
           />
-          <BulkActionsWidget dateStr={dateStr} />
+          <BulkActionsWidget
+            dateStr={dateStr}
+            classroomId={classroom.id}
+            schoolId={classroom.school_id ?? profile.school_id!}
+          />
         </div>
       </div>
 

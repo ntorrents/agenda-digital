@@ -23,15 +23,14 @@ export default async function DashboardEquipoPage() {
     .from('profiles')
     .select('*')
     .eq('school_id', profile.school_id)
-    .in('role', ['admin', 'teacher'])
+    .in('role', ['admin', 'teacher', 'auxiliary'])
+    .neq('status', 'inactive')
     .order('role', { ascending: true })
     .order('full_name', { ascending: true })
 
   if (staffError) {
     console.error('STAFF FETCH ERROR:', staffError)
   }
-  console.log('FETCHED STAFF:', staff?.length)
-
   const t = await getTranslations('dashboardEquipo')
 
   return (

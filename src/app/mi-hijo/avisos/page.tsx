@@ -17,7 +17,7 @@ export default async function TaulerPage() {
     .select('student_id')
     .eq('guardian_id', user.id)
     .limit(1)
-    .single()
+    .maybeSingle()
 
   let classroomId = null
   if (guardianRel?.student_id) {
@@ -25,7 +25,7 @@ export default async function TaulerPage() {
       .from('students')
       .select('classroom_id')
       .eq('id', guardianRel.student_id)
-      .single()
+      .maybeSingle()
     classroomId = student?.classroom_id
   }
 

@@ -11,11 +11,12 @@ export async function updateSchoolSettings(formData: FormData) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('school_id')
+    .select('school_id, role')
     .eq('id', user.id)
     .single()
 
   if (!profile) throw new Error('No profile')
+  if (profile.role !== 'admin') throw new Error('Unauthorized. Admin access required.')
 
   const settingsJsonStr = formData.get('settings') as string
   const cif = formData.get('cif') as string || null
@@ -64,6 +65,5 @@ export async function updateSchoolSettings(formData: FormData) {
 
   revalidatePath('/dashboard/config/centro')
   revalidatePath('/mi-hijo', 'layout')
-  revalidatePath('/mi-aula', 'layout')
   return { success: true }
 }

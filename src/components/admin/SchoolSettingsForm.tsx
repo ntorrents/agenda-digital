@@ -110,7 +110,7 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
                 <img 
                   src={logoPreview || schoolInfo?.logo_url} 
                   alt="Logo preview" 
-                  className="w-full h-full object-cover" 
+                  className="max-h-full max-w-full object-contain p-2" 
                 />
               ) : (
                 <Building className="h-8 w-8 text-stone-300" />

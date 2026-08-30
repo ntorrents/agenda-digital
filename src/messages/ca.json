@@ -14,7 +14,8 @@
     "demoFamily": "Familia (Marta)",
     "demoTeacher": "Educadora (Anna)",
     "demoAdmin": "Direcció (Laura)",
-    "demoSuperAdmin": "Súper Admin"
+    "demoSuperAdmin": "Súper Admin",
+    "errorInactive": "El teu compte està inactiu. Contacta amb direcció."
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -28,7 +29,7 @@
     "communication": "Comunicació",
     "calendar": "Calendari",
     "gallery": "Galeria",
-    "settings": "Paràmetres del Centre",
+    "settings": "Configuració",
     "personalSettings": "Paràmetres",
     "dailySummary": "Resum del dia",
     "myClassroom": "La meva Aula",
@@ -42,7 +43,8 @@
     "notices": "Tauler / Avisos",
     "help": "Ajuda",
     "panelAdmin": "Panell de Direcció",
-    "panelTeacher": "Panell Educador/a"
+    "panelTeacher": "Panell Educador/a",
+    "panelAuxiliary": "Panell Auxiliar"
   },
   "familyProfile": {
     "languageTitle": "Idioma de l'aplicació",
@@ -57,6 +59,12 @@
     "delete": "Eliminar",
     "back": "Tornar",
     "loading": "Carregant..."
+  },
+  "datePicker": {
+    "dateLabel": "Data",
+    "prevDay": "Dia anterior",
+    "nextDay": "Dia següent",
+    "today": "Avui"
   },
   "familyHome": {
     "title": "Pantalla Principal",
@@ -86,10 +94,9 @@
       "irritable": "Irritable"
     },
     "diaper": {
-      "pee": "Pipí",
-      "poo": "Caca",
-      "both": "Pipí + Caca",
-      "dry": "Sec"
+      "soft": "Blanda",
+      "normal": "Normal",
+      "liquid": "Líquida"
     },
     "sleep": "Migdiada",
     "slept": "Ha dormit",
@@ -101,7 +108,8 @@
     "specificNotes": "Anotacions de l'Educadora",
     "noNotes": "Sense anotacions avui.",
     "teacher": "Educadora",
-    "globalNotes": "Nota Global de l'Aula",
+    "globalNotes": "Nota del dia",
+    "dayNoteOnly": "Encara no hi ha agenda individual, però ja tens la nota del dia de l'aula.",
     "noData": "No hi ha dades",
     "futureDay": "Aquest dia encara no ha arribat.",
     "notFilled": "L'agenda encara no s'ha omplert",
@@ -109,6 +117,29 @@
     "galleryOfDay": "Galeria del dia",
     "seeAll": "Veure tot",
     "photo": "Foto"
+  },
+  "bulkActions": {
+    "title": "Registre massiu",
+    "dayNote": "Nota del dia",
+    "dayNoteHint": "Un sol text per a tot l'aula. Visible apart a les famílies.",
+    "dayNotePanelHint": "Es guarda per avui i es mostra a totes les famílies, encara que encara no hagis omplert cada agenda.",
+    "dayNotePlaceholder": "Ex: Tot ha anat bé. Fins demà!",
+    "dayNoteSuccess": "Nota del dia guardada.",
+    "groupPhoto": "Foto grupal del dia",
+    "groupPhotoHint": "Una foto per a tot l'aula (galeria i agenda).",
+    "groupPhotoPanelHint": "Visible per a totes les famílies de l'aula.",
+    "photoSuccess": "Foto grupal publicada.",
+    "lunchAll": "Tots han dinat \"Tot\"",
+    "lunchHint": "Només marca el dinar de les agendes ja creades avui.",
+    "lunchConfirm": "Marcar dinar \"Tot\" a totes les agendes d'avui que ja existeixen?",
+    "lunchSuccess": "S'ha marcat el dinar a totes les agendes d'avui.",
+    "pickPhoto": "Triar foto",
+    "back": "Enrere",
+    "save": "Desar",
+    "saving": "Desant...",
+    "publish": "Publicar",
+    "uploading": "Pujant...",
+    "errorGeneric": "Hi ha hagut un error"
   },
   "calendar": {
     "title": "Calendari",
@@ -135,12 +166,27 @@
     "subtitle": "Tots els records guardats",
     "noStudent": "No s'ha trobat l'alumne associat.",
     "noPhotos": "Encara no hi ha fotos a la galeria.",
+    "downloadAll": "Descarregar totes",
     "individual": "Individual",
     "group": "Grup",
     "photoOf": "Foto del"
   },
+  "dashboardTeacher": {
+    "welcomeName": "Bon dia, {name}!",
+    "welcomeDesc": "Aquest és el teu resum d'avui. Prepara l'aula i mantingues a les famílies informades.",
+    "noClassroomTitle": "Encara no tens cap aula assignada",
+    "noClassroomDesc": "Parla amb direcció perquè t'assignin com a tutor/a o auxiliar d'un aula.",
+    "yourClassroom": "La teva Aula",
+    "activeStudents": "{count} alumnes actius",
+    "viewStudents": "Veure els meus alumnes",
+    "agendaStatus": "Estat de les Agendes",
+    "allDone": "Totes al dia!",
+    "pending": "Falten {count} per omplir",
+    "fillAgendas": "Omplir Agendes"
+  },
   "dashboardAdmin": {
     "welcome": "Benvinguda a Direcció 👋",
+    "welcomeName": "Bon dia, {name}!",
     "welcomeDesc": "Des d'aquí pots administrar tota la teva escola, veure mètriques al dia i configurar l'agenda dels alumnes.",
     "kpiTitle": "Accessos i Mètriques Globals",
     "cards": {
@@ -175,6 +221,7 @@
       "absences": {
         "title": "Absències d'Equip",
         "today": "baixes avui",
+        "onLeave": "de baixa",
         "allOk": "● Tot l'equip està operatiu"
       },
       "intolerances": {
@@ -221,6 +268,7 @@
     "unsavedChanges": "Tens canvis sense desar",
     "allSaved": "Totes les aules desades",
     "add": "Afegir Aula",
+    "newClassroomDefault": "Nova Aula",
     "untitled": "Aula sense nom",
     "level": "Nivell",
     "places": "places",
@@ -301,6 +349,7 @@
     "noName": "Sense nom",
     "roleAdmin": "Direcció",
     "roleTeacher": "Educador/a",
+    "roleAuxiliary": "Auxiliar",
     "labelFullName": "Nom Complet",
     "placeholderName": "Ex: Clara Soler",
     "labelRole": "Rol",
@@ -326,7 +375,12 @@
     "archiving": "Arxivant..."
   },
   "dashboardCentro": {
-    "title": "Paràmetres del Centre",
+    "title": "Configuració",
+    "hubTitle": "Configuració",
+    "hubSchoolTitle": "Configuració del centre",
+    "hubSchoolDesc": "Nom, logo, opcions de l'agenda i enviament d'accessos.",
+    "hubProfileTitle": "El meu perfil",
+    "hubProfileDesc": "Les teves dades personals i contrasenya.",
     "subtitle": "Configuració general de {name}",
     "activeStudents": "Alumnes Actius",
     "activeTeam": "Equip Actiu"
@@ -358,13 +412,12 @@
   "dailyLogForm": {
     "errorSaving": "Error en desar les dades",
     "mealAll": "Tot",
-    "mealMost": "Molt",
+    "mealMost": "Bastant",
     "mealLittle": "Poc",
     "mealNone": "Res",
-    "diaperPee": "Pipí",
-    "diaperPoo": "Caca",
-    "diaperBoth": "Els dos",
-    "diaperDry": "Sec",
+    "diaperSoft": "Blanda",
+    "diaperNormal": "Normal",
+    "diaperLiquid": "Líquida",
     "agendaOf": "Agenda del {date}",
     "moodTitle": "Estat d'ànim",
     "moodHappy": "Feliç",
@@ -398,7 +451,12 @@
     "noCompleted": "Encara no has omplert cap agenda avui.",
     "backToList": "Tornar a les agendes",
     "guardianTitle": "Dades de Contacte Família",
-    "successMsg": "Agenda desada correctament a la base de dades!"
+    "successMsg": "Agenda desada correctament a la base de dades!",
+    "classroomLabel": "Aula",
+    "dateLabel": "Data",
+    "prevDay": "Dia anterior",
+    "nextDay": "Dia següent",
+    "today": "Avui"
   },
   "dashboardAula": {
     "noClassroom": "No tens cap aula assignada. Contacta amb direcció.",
@@ -439,7 +497,9 @@
     "labelDesc": "Descripció o Detalls (Opcional)",
     "descPlaceholder": "Escriu aquí el menú si no vols pujar cap imatge...",
     "labelFile": "Imatge o PDF del menú (Opcional)",
+    "existingFileHint": "Ja hi ha un arxiu pujat per aquest mes. Pots substituir-lo si cal.",
     "btnUpload": "Pujar Arxiu",
+    "btnReplace": "Substituir arxiu",
     "fileHelp": "Pots pujar una imatge (JPG, PNG) o un document PDF. Aquest serà visible per totes les famílies de l'escola durant aquest mes.",
     "btnSave": "Desar Menú del Mes"
   },
@@ -450,7 +510,15 @@
     "emptyDesc": "No s'han trobat fotos pujades a les agendes.",
     "typeGroup": "Grupal",
     "typeIndividual": "Individual",
-    "classroomFallback": "Aula"
+    "classroomFallback": "Aula",
+    "downloadAll": "Descarregar tot (ZIP)",
+    "photoAlt": "Foto",
+    "filterClassroom": "Aula",
+    "filterAllClassrooms": "Totes les aules",
+    "filterStudent": "Alumne",
+    "filterAllStudents": "Tots els alumnes",
+    "filterType": "Tipus",
+    "filterAllTypes": "Totes"
   },
   "dashboardMensajes": {
     "adminOnly": "Aquesta secció només està disponible per a la direcció del centre.",
