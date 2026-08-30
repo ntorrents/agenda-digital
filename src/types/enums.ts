@@ -1,5 +1,5 @@
 // ============================================
-// Pas A Pas — Enums de dominio
+// Petit Diari — Enums de dominio
 // ============================================
 
 /** Roles de usuario en el sistema */

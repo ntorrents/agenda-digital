@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Petit Diari
 
-## Getting Started
+El dia a dia a l'escola, a prop de la família (Next.js + Supabase).
 
-First, run the development server:
+## Desenvolupament local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Variables d'entorn (`.env.local`):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (només servidor; accions d'administració)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Obre [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Base de dades de prova
 
-To learn more about Next.js, take a look at the following resources:
+El schema viu al projecte Supabase en producció. Per preparar un entorn nou o de demo, executa `scripts/demo-seed.sql` al SQL Editor de Supabase.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Accés demo (contrasenya `123456`):
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Rol        | Email                 |
+|------------|-----------------------|
+| Direcció   | `d@cole.cat`          |
+| Professor  | `p1@cole.cat`         |
+| Família    | `f1@cole.cat`         |
+| Superadmin | `superadmin@bressol.cat` |
 
-## Deploy on Vercel
+## Desplegament
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Desplegat a Vercel des del branch `main`. Assegura't que les tres variables d'entorn de Supabase estan configurades al projecte.

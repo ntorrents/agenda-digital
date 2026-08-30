@@ -1,7 +1,8 @@
 {
   "login": {
-    "title": "Agenda Bressol",
-    "subtitle": "La vie quotidienne des enfants avec chaleur, simplicité et tranquillité.",
+    "title": "Petit Diari",
+    "subtitle": "Le quotidien à l'école, au plus près de la famille",
+    "footer": "Petit Diari",
     "emailLabel": "Adresse e-mail",
     "emailPlaceholder": "bonjour@ecole.fr",
     "passwordLabel": "Mot de passe",

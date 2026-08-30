@@ -1,7 +1,8 @@
 {
   "login": {
-    "title": "Agenda Bressol",
-    "subtitle": "Daily life of children with warmth, simplicity, and tranquility.",
+    "title": "Petit Diari",
+    "subtitle": "Daily life at school, close to the family",
+    "footer": "Petit Diari",
     "emailLabel": "Email address",
     "emailPlaceholder": "hello@school.edu",
     "passwordLabel": "Password",

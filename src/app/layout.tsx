@@ -12,15 +12,15 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Agenda Bressol',
-    template: '%s | Agenda Bressol',
+    default: 'Petit Diari',
+    template: '%s | Petit Diari',
   },
   description:
-    "Agenda digital per a escoles bressol i centres d'educació infantil (0-3 anys). Registra l'alimentació, el son, l'estat d'ànim i més.",
+    "El dia a dia a l'escola, a prop de la família. Registra l'alimentació, el son, l'estat d'ànim i més.",
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Agenda Bressol',
+    title: 'Petit Diari',
   },
   formatDetection: {
     telephone: false,

@@ -142,7 +142,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
     />
   ) : (
     <span className="text-xs lg:text-sm font-black text-stone-900 truncate max-w-full">
-      {schoolInfo?.name || 'Agenda Digital'}
+      {schoolInfo?.name || 'Petit Diari'}
     </span>
   )
 
@@ -298,7 +298,7 @@ export default function FamilyLayout({ children }: { children: React.ReactNode }
           )}
           <div className="min-w-0">
             <h1 className="text-sm font-black text-stone-900 truncate">
-              {isHome ? (schoolInfo?.name || 'Agenda Digital') : studentName}
+              {isHome ? (schoolInfo?.name || 'Petit Diari') : studentName}
             </h1>
             <p className="text-xs text-stone-500 font-medium capitalize truncate">
               {isHome ? todayFormatted : classroomName}

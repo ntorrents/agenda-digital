@@ -45,7 +45,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-stone-50 flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <Loader2 className="h-7 w-7 animate-spin text-teal-700" />
-        <p className="text-xs font-medium text-stone-500">Carregant Agenda Bressol...</p>
+        <p className="text-xs font-medium text-stone-500">Carregant Petit Diari...</p>
       </div>
     </main>
   )

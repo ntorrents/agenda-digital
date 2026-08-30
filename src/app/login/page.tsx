@@ -36,7 +36,7 @@ export default function LoginPage() {
         if (error.message.includes('Invalid login credentials')) {
           setErrorMessage(t('errorCredentials'))
         } else if (error.message.includes('querying schema') || error.status === 500) {
-          setErrorMessage('Error de base de dades. Si us plau, executa el nou script "supabase/seed.sql" al SQL Editor de Supabase.')
+          setErrorMessage('Error de base de dades. Si us plau, executa el script "scripts/demo-seed.sql" al SQL Editor de Supabase.')
         } else {
           setErrorMessage(error.message)
         }
@@ -222,7 +222,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="text-center space-y-1">
           <p className="text-xs text-stone-400 font-medium">
-            Pas A Pas • Escoles Bressol & Llar d&apos;infants
+            {t('footer')}
           </p>
         </div>
 

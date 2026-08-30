@@ -1,5 +1,5 @@
 // ============================================
-// Pas A Pas — Tipos de dominio
+// Petit Diari — Tipos de dominio
 // ============================================
 
 import type {

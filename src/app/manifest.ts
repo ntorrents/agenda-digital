@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Agenda Bressol',
-    short_name: 'Bressol',
-    description: "Agenda digital per a escoles bressol i centres d'educació infantil (0-3 anys)",
+    name: 'Petit Diari',
+    short_name: 'Petit Diari',
+    description: "El dia a dia a l'escola, a prop de la família",
     start_url: '/',
     display: 'standalone',
     background_color: '#fafaf9',

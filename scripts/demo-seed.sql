@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Agenda Bressol — DATOS DE PRUEBA (SEED)
+-- Petit Diari — DATOS DE PRUEBA (SEED)
 --
 -- Accés demo (tots amb contrasenya 123456):
 --   Direcció:  d@cole.cat

@@ -1,7 +1,8 @@
 {
   "login": {
-    "title": "Agenda Bressol",
-    "subtitle": "El dia a dia dels infants amb calidesa, senzillesa i tranquil·litat.",
+    "title": "Petit Diari",
+    "subtitle": "El dia a dia a l'escola, a prop de la família",
+    "footer": "Petit Diari",
     "emailLabel": "Correu electrònic",
     "emailPlaceholder": "hola@escola.cat",
     "passwordLabel": "Contrasenya",
