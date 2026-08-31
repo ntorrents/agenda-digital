@@ -5,6 +5,7 @@ import { Hero } from './components/Hero'
 import { FeaturesScroll } from './components/FeaturesScroll'
 import { DiaryGallery } from './components/DiaryGallery'
 import { LanguagesSection } from './components/LanguagesSection'
+import { OriginStorySection } from './components/OriginStorySection'
 import { PricingSection } from './components/PricingSection'
 import { FAQSection } from './components/FAQSection'
 import { ContactForm } from './components/ContactForm'
@@ -20,6 +21,7 @@ export default function App() {
         <FeaturesScroll />
         <DiaryGallery />
         <LanguagesSection />
+        <OriginStorySection />
         <PricingSection />
         <FAQSection />
         <ContactForm />

@@ -197,7 +197,7 @@
         "stat": "alumnes"
       },
       "staff": {
-        "title": "Equip i Educadores",
+        "title": "Equip",
         "desc": "Administra els professors i el personal.",
         "stat": "actius"
       },
@@ -207,7 +207,7 @@
         "stat": "aules"
       },
       "settings": {
-        "title": "Ajustes Generals",
+        "title": "Configuració",
         "desc": "Configura el nom, logo i opcions de l'agenda."
       }
     },

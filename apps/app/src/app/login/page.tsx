@@ -98,13 +98,14 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-[#faf8f5] flex items-center justify-center p-4 sm:p-6 font-sans">
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher currentLocale={locale} />
+      </div>
+
       <div className="w-full mx-auto space-y-6" style={{ maxWidth: '420px' }}>
         
         {/* Header Branding */}
-        <div className="text-center space-y-2 relative">
-          <div className="absolute top-0 right-0">
-            <LanguageSwitcher currentLocale={locale} />
-          </div>
+        <div className="text-center space-y-2">
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#0f766e] text-white shadow-xl shadow-[#0f766e]/20 mb-1 ring-8 ring-[#0f766e]/10">
             <Baby className="h-8 w-8" />
           </div>

@@ -41,14 +41,14 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: Locale }) {
       <button 
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending}
-        className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-stone-100/50 text-stone-500 hover:text-stone-900 transition-colors focus:outline-none"
+        className="flex items-center justify-center h-10 w-10 rounded-full bg-white border border-stone-200 shadow-sm hover:bg-stone-50 text-stone-600 hover:text-stone-900 transition-colors focus:outline-none"
         title="Canviar idioma"
       >
         <Globe className={cn("h-5 w-5", isPending && "animate-spin opacity-50")} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 bottom-full sm:bottom-auto sm:top-full mb-2 sm:mb-0 sm:mt-2 w-40 bg-white border border-stone-200 shadow-lg rounded-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-stone-200 shadow-lg rounded-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-200">
           {languages.map((lang) => (
             <button
               key={lang.code}

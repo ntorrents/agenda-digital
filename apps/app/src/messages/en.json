@@ -160,7 +160,7 @@
         "stat": "students"
       },
       "staff": {
-        "title": "Team & Teachers",
+        "title": "Team",
         "desc": "Manage teachers and staff.",
         "stat": "active"
       },
@@ -170,7 +170,7 @@
         "stat": "classrooms"
       },
       "settings": {
-        "title": "General Settings",
+        "title": "Settings",
         "desc": "Set the name, logo and agenda options."
       }
     },

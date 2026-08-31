@@ -160,7 +160,7 @@
         "stat": "alumnos"
       },
       "staff": {
-        "title": "Equipo y Educadoras",
+        "title": "Equipo",
         "desc": "Administra los profesores y el personal.",
         "stat": "activos"
       },
@@ -170,7 +170,7 @@
         "stat": "aulas"
       },
       "settings": {
-        "title": "Ajustes Generales",
+        "title": "Configuración",
         "desc": "Configura el nombre, logo y opciones de la agenda."
       }
     },

@@ -52,6 +52,15 @@ export function PricingSection() {
                     {plan.unit}
                   </span>
                 )}
+                {plan.monthlyEquivalent && (
+                  <p className={`text-xs font-semibold mt-2 inline-block px-2.5 py-1 rounded-full ${
+                    plan.highlight
+                      ? 'bg-white/15 text-white/90'
+                      : 'bg-pd-teal/8 text-pd-teal'
+                  }`}>
+                    {plan.monthlyEquivalent}
+                  </p>
+                )}
               </div>
 
               <ul className="space-y-3">
@@ -77,7 +86,9 @@ export function PricingSection() {
           ))}
         </div>
 
-        <p className="text-center text-sm text-stone-400 font-medium mt-10">{t.pricing.note}</p>
+        <p className="text-center text-xs sm:text-sm text-stone-400 font-normal leading-relaxed mt-10 max-w-3xl mx-auto">
+          {t.pricing.note}
+        </p>
       </div>
     </section>
   )

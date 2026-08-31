@@ -22,6 +22,7 @@ export type PricingPlan = {
   name: string
   price: string
   unit: string
+  monthlyEquivalent?: string
   description: string
   features: string[]
   highlight?: boolean
@@ -70,6 +71,18 @@ export type Translations = {
     title: string
     subtitle: string
     langs: { code: string; name: string }[]
+  }
+  origin: {
+    label: string
+    title: string
+    lead: string
+    paragraphs: string[]
+    closing: string
+    highlights: {
+      madeIn: string
+      tested: string
+      families: string
+    }
   }
   pricing: {
     label: string

@@ -63,9 +63,9 @@ export default async function DashboardConfigAlumnosPage() {
 
   const getClassroomColor = (level: string) => {
     switch (level) {
-      case 'I0': return 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-      case 'I1': return 'bg-blue-100 text-blue-800 border border-blue-200'
-      case 'I2': return 'bg-purple-100 text-purple-800 border border-purple-200'
+      case 'I0': return 'bg-amber-100 text-amber-800 border border-amber-200'
+      case 'I1': return 'bg-sky-100 text-sky-800 border border-sky-200'
+      case 'I2': return 'bg-emerald-100 text-emerald-800 border border-emerald-200'
       default: return 'bg-stone-100 text-stone-800 border border-stone-200'
     }
   }
