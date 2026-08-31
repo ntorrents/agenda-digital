@@ -151,19 +151,19 @@ export function DiaryGallery() {
         </div>
 
         {/* Scattered polaroid wall */}
-        <div className="relative min-h-[520px] lg:min-h-[620px]">
+        <div className="relative min-h-[520px] lg:min-h-[720px]">
           {t.gallery.items.map((item, i) => {
             const Mock = mockComponents[item.id]
             const positions = [
-              'top-0 left-[5%] sm:left-[8%]',
-              'top-8 right-[5%] sm:right-[10%]',
-              'top-[38%] left-[2%] sm:left-[12%]',
-              'top-[32%] right-[2%] sm:right-[10%]',
-              'bottom-8 left-[10%] sm:left-[22%]',
-              'bottom-0 right-[8%] sm:right-[18%]',
-              'top-[12%] left-[32%] hidden lg:block',
-              'top-[48%] right-[28%] hidden lg:block',
-              'bottom-[12%] left-[42%] hidden lg:block',
+              'top-0 left-[5%] sm:left-[8%] lg:left-[4%]',
+              'top-8 right-[5%] sm:right-[10%] lg:right-[6%]',
+              'top-[38%] left-[2%] sm:left-[12%] lg:left-[6%]',
+              'top-[32%] right-[2%] sm:right-[10%] lg:right-[6%]',
+              'bottom-8 left-[10%] sm:left-[22%] lg:left-[16%]',
+              'bottom-0 right-[8%] sm:right-[18%] lg:right-[12%]',
+              'top-[12%] left-[32%] hidden lg:block lg:left-[28%]',
+              'top-[48%] right-[28%] hidden lg:block lg:right-[24%]',
+              'bottom-[12%] left-[42%] hidden lg:block lg:left-[38%]',
             ]
 
             return (
@@ -174,17 +174,17 @@ export function DiaryGallery() {
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.6, delay: i * 0.08 }}
                 whileHover={{ scale: 1.05, rotate: 0, zIndex: 20 }}
-                className={`absolute w-[140px] sm:w-[170px] ${positions[i] ?? 'hidden'} ${item.desktopOnly ? 'hidden lg:block' : ''} cursor-default`}
+                className={`absolute w-[140px] sm:w-[170px] lg:w-[210px] ${positions[i] ?? 'hidden'} ${item.desktopOnly ? 'hidden lg:block' : ''} cursor-default`}
               >
-                <div className="polaroid rounded-sm transition-shadow duration-300 hover:shadow-2xl">
+                <div className="polaroid lg:p-4 lg:pb-12 rounded-sm transition-shadow duration-300 hover:shadow-2xl">
                   <div className={`aspect-[4/3] rounded-sm overflow-hidden ${item.color}`}>
                     {Mock?.()}
                   </div>
-                  <p className="absolute bottom-3 left-3 right-3 text-[10px] font-bold text-stone-600 leading-tight">
+                  <p className="absolute bottom-3 left-3 right-3 text-[10px] lg:text-xs font-bold text-stone-600 leading-tight">
                     {item.caption}
                   </p>
                 </div>
-                <span className="absolute -top-2 -right-2 bg-pd-teal text-white text-[9px] font-black px-2 py-0.5 rounded-md sticker">
+                <span className="absolute -top-2 -right-2 bg-pd-teal text-white text-[9px] lg:text-[10px] font-black px-2 py-0.5 rounded-md sticker">
                   {item.label}
                 </span>
               </motion.div>

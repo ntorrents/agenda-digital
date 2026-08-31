@@ -60,7 +60,7 @@ export const en: Translations = {
     badge: 'Nursery schools 0-3',
     title: 'Daily life at school,',
     titleHighlight: 'close to family',
-    subtitle: 'Petit Diari connects educators and families with a digital diary designed for little ones\' rhythm.',
+    subtitle: 'Petit Diari connects schools and families with a digital diary designed for little ones\' rhythm.',
     ctaPrimary: 'Request a demo',
     ctaSecondary: 'See how it works',
     scrollHint: 'Scroll to explore',

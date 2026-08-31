@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { useI18n, localeLabels, type Locale } from '../i18n'
 import { APP_URL } from '../lib/config'
+import { Logo } from './Logo'
 
 const navLinks = [
   { key: 'features' as const, href: '#funcionalitats' },
@@ -29,18 +30,8 @@ export function Header() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-        <a href="#" className="flex items-center gap-2.5 shrink-0 group">
-          <div className="w-9 h-9 rounded-xl bg-pd-teal flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
-              <rect x="4" y="3" width="12" height="18" rx="2" opacity="0.9" />
-              <rect x="6" y="7" width="8" height="1" rx="0.5" fill="#0f766e" opacity="0.5" />
-              <rect x="6" y="10" width="6" height="1" rx="0.5" fill="#0f766e" opacity="0.3" />
-              <circle cx="18" cy="17" r="3" fill="#fbbf24" />
-            </svg>
-          </div>
-          <span className="font-display font-black text-lg text-stone-800 tracking-tight">
-            Petit <span className="text-pd-teal">Diari</span>
-          </span>
+        <a href="#" className="group">
+          <Logo className="group-hover:opacity-90 transition-opacity" />
         </a>
 
         <nav className="hidden lg:flex items-center gap-1">

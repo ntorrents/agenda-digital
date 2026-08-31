@@ -1,5 +1,6 @@
 import { useI18n } from '../i18n'
 import { APP_URL } from '../lib/config'
+import { Logo } from './Logo'
 
 export function Footer() {
   const { t } = useI18n()
@@ -10,14 +11,9 @@ export function Footer() {
     <footer className="border-t border-stone-200/60 bg-white/80">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-pd-teal flex items-center justify-center">
-              <span className="text-white text-lg">📖</span>
-            </div>
-            <div>
-              <p className="font-display font-black text-stone-800">Petit Diari</p>
-              <p className="text-xs text-stone-400 font-medium">{t.footer.tagline}</p>
-            </div>
+          <div>
+            <Logo size="lg" />
+            <p className="text-xs text-stone-400 font-medium mt-2 ml-14">{t.footer.tagline}</p>
           </div>
 
           <a

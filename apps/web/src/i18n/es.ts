@@ -60,7 +60,7 @@ export const es: Translations = {
     badge: 'Escuelas infantiles 0-3',
     title: 'El día a día en la escuela,',
     titleHighlight: 'cerca de la familia',
-    subtitle: 'Petit Diari conecta educadoras y familias con una agenda digital pensada para el ritmo de los más pequeños.',
+    subtitle: 'Petit Diari conecta escuelas y familias con una agenda digital pensada para el ritmo de los más pequeños.',
     ctaPrimary: 'Pide una demo',
     ctaSecondary: 'Descubre cómo funciona',
     scrollHint: 'Desplázate para explorar',

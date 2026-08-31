@@ -116,7 +116,7 @@ export const ca: Translations = {
     badge: 'Escoles bressol 0-3',
     title: 'El dia a dia a l\'escola,',
     titleHighlight: 'a prop de la família',
-    subtitle: 'Petit Diari connecta educadores i famílies amb una agenda digital pensada per al ritme dels més petits.',
+    subtitle: 'Petit Diari connecta escoles i famílies amb una agenda digital pensada per al ritme dels més petits.',
     ctaPrimary: 'Demana una demo',
     ctaSecondary: 'Descobreix com funciona',
     scrollHint: 'Desplaça\'t per explorar',
