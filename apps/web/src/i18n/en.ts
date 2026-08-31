@@ -218,7 +218,6 @@ export const en: Translations = {
     tagline: 'Daily life at school, close to family.',
     rights: 'All rights reserved.',
     madeIn: 'Made with care for nursery schools',
-    copyrightLine: 'Nil Torrents González · NIF 39520320H',
     links: {
       legal: 'Legal notice',
       privacy: 'Privacy',

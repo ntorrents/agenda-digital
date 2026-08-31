@@ -78,7 +78,7 @@ export function LegalLayout({ doc, children, uiLocale }: LegalLayoutProps) {
           </a>
         </div>
         <p className="text-center text-[10px] text-stone-400 mt-4 font-medium">
-          © {new Date().getFullYear()} Petit Diari · Nil Torrents González · NIF 39520320H
+          © {new Date().getFullYear()} Petit Diari
         </p>
       </footer>
     </div>

@@ -267,7 +267,6 @@ export const ca: Translations = {
     tagline: 'El dia a dia a l\'escola, a prop de la família.',
     rights: 'Tots els drets reservats.',
     madeIn: 'Fet amb carinyo per escoles bressol',
-    copyrightLine: 'Nil Torrents González · NIF 39520320H',
     links: {
       legal: 'Avís legal',
       privacy: 'Privacitat',

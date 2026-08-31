@@ -116,7 +116,6 @@ export type Translations = {
     tagline: string
     rights: string
     madeIn: string
-    copyrightLine: string
     links: {
       legal: string
       privacy: string

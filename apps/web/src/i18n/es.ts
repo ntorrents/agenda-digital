@@ -218,7 +218,6 @@ export const es: Translations = {
     tagline: 'El día a día en la escuela, cerca de la familia.',
     rights: 'Todos los derechos reservados.',
     madeIn: 'Hecho con cariño para escuelas infantiles',
-    copyrightLine: 'Nil Torrents González · NIF 39520320H',
     links: {
       legal: 'Aviso legal',
       privacy: 'Privacidad',

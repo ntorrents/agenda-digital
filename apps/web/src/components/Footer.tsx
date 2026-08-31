@@ -53,9 +53,7 @@ export function Footer() {
         </nav>
 
         <div className="mt-8 pt-6 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-stone-400 font-medium">
-          <p>
-            © {year} Petit Diari · {t.footer.copyrightLine}
-          </p>
+          <p>© {year} Petit Diari. {t.footer.rights}</p>
           <p>{t.footer.madeIn} 💛</p>
         </div>
       </div>
