@@ -98,3 +98,61 @@
 .sticker {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
+
+.legal-prose h1 {
+  @apply font-display font-black text-3xl sm:text-4xl text-stone-900 tracking-tight mb-6;
+}
+
+.legal-prose h2 {
+  @apply font-display font-black text-xl text-stone-900 mt-10 mb-3 pt-2 border-t border-stone-200/60;
+}
+
+.legal-prose h3 {
+  @apply font-bold text-base text-stone-800 mt-6 mb-2;
+}
+
+.legal-prose p {
+  @apply text-sm sm:text-[15px] text-stone-600 leading-relaxed mb-4;
+}
+
+.legal-prose ul,
+.legal-prose ol {
+  @apply text-sm sm:text-[15px] text-stone-600 leading-relaxed mb-4 pl-5 space-y-1.5;
+}
+
+.legal-prose ul {
+  @apply list-disc;
+}
+
+.legal-prose ol {
+  @apply list-decimal;
+}
+
+.legal-prose li {
+  @apply pl-1;
+}
+
+.legal-prose a {
+  @apply text-pd-teal font-semibold hover:text-pd-teal-dark underline underline-offset-2 decoration-pd-teal/30;
+}
+
+.legal-prose strong {
+  @apply font-bold text-stone-800;
+}
+
+.legal-prose hr {
+  @apply my-8 border-stone-200;
+}
+
+.legal-prose table {
+  @apply w-full text-sm mb-4 border-collapse;
+}
+
+.legal-prose th,
+.legal-prose td {
+  @apply border border-stone-200 px-3 py-2 text-left;
+}
+
+.legal-prose th {
+  @apply bg-stone-50 font-bold text-stone-700;
+}

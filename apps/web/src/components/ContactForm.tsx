@@ -1,16 +1,19 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { useI18n } from '../i18n'
 import { useMotionSafe } from '../lib/motion-safe'
 import { getWeb3FormsKey } from '../lib/config'
+import { getLegalPaths } from '../legal/registry'
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error' | 'no-key'
 
 export function ContactForm() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { hidden, visible, hiddenScale, visibleScale } = useMotionSafe()
   const [status, setStatus] = useState<FormStatus>('idle')
+  const privacyPath = getLegalPaths(locale).privacy
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -169,6 +172,14 @@ export function ContactForm() {
                     </>
                   )}
                 </button>
+
+                <p className="text-[11px] leading-relaxed text-stone-400 font-medium">
+                  {t.contact.legalNoticePrefix}{' '}
+                  <Link to={privacyPath} className="text-pd-teal hover:text-pd-teal-dark underline underline-offset-2">
+                    {t.contact.privacyLink}
+                  </Link>
+                  .
+                </p>
               </form>
             )}
           </motion.div>

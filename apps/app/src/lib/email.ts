@@ -54,7 +54,10 @@ export async function sendAccessEmail({ to, fullName, tempPassword, role }: Acce
       </div>
       <p><a href="${loginUrl}/login" style="display: inline-block; background: #0f766e; color: #fff; text-decoration: none; font-weight: 700; padding: 12px 24px; border-radius: 12px;">Entrar a Petit Diari</a></p>
       <p style="font-size: 14px; color: #78716c;">En el primer accés se't demanarà canviar la contrasenya per seguretat.</p>
-      <p style="font-size: 13px; color: #a8a29e; margin-top: 32px;">Si no esperaves aquest correu, contacta amb la direcció del centre.</p>
+      <hr style="border: none; border-top: 1px solid #e7e5e4; margin: 32px 0 16px;" />
+      <p style="font-size: 12px; color: #a8a29e; margin: 0 0 4px;">Petit Diari · app.petitdiari.com</p>
+      <p style="font-size: 12px; color: #a8a29e; margin: 0 0 4px;">Política de privacitat: <a href="https://petitdiari.com/legal/privacitat" style="color: #0f766e;">https://petitdiari.com/legal/privacitat</a></p>
+      <p style="font-size: 13px; color: #a8a29e; margin-top: 8px;">Si no esperaves aquest correu, contacta amb la direcció del teu centre.</p>
     </div>
   `
 

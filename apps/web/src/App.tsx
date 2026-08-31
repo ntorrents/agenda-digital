@@ -1,33 +1,20 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { I18nProvider } from './i18n'
-import { Header } from './components/Header'
-import { Hero } from './components/Hero'
-import { FeaturesScroll } from './components/FeaturesScroll'
-import { DiaryGallery } from './components/DiaryGallery'
-import { LanguagesSection } from './components/LanguagesSection'
-import { OriginStorySection } from './components/OriginStorySection'
-import { PricingSection } from './components/PricingSection'
-import { FAQSection } from './components/FAQSection'
-import { ContactForm } from './components/ContactForm'
-import { Footer } from './components/Footer'
+import { HomePage } from './pages/HomePage'
+import { LegalPage } from './pages/LegalPage'
 
 export default function App() {
   return (
     <ErrorBoundary>
-      <I18nProvider>
-      <Header />
-      <main>
-        <Hero />
-        <FeaturesScroll />
-        <DiaryGallery />
-        <LanguagesSection />
-        <OriginStorySection />
-        <PricingSection />
-        <FAQSection />
-        <ContactForm />
-      </main>
-      <Footer />
-      </I18nProvider>
+      <BrowserRouter>
+        <I18nProvider>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/legal/:slug" element={<LegalPage />} />
+          </Routes>
+        </I18nProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   )
 }

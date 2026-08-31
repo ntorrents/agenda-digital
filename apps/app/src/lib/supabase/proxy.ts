@@ -6,6 +6,17 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  const pathname = request.nextUrl.pathname
+
+  // Fitxers estàtics de /public i rutes d'icones — sense auth
+  if (
+    pathname.startsWith('/_next/') ||
+    pathname === '/manifest.webmanifest' ||
+    /\.(?:svg|png|jpe?g|gif|webp|ico|woff2?|txt|xml|webmanifest)$/i.test(pathname)
+  ) {
+    return supabaseResponse
+  }
+
   // Skip auth check if Supabase is not configured yet
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!supabaseUrl || supabaseUrl.includes('your-project')) {

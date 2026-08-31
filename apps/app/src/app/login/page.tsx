@@ -5,10 +5,12 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Sparkles, Shield, GraduationCap, Heart, Loader2, ArrowRight, Baby } from 'lucide-react'
+import { Sparkles, Shield, GraduationCap, Heart, Loader2, ArrowRight } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { Locale } from '@/i18n'
+import { PetitDiariBrandHero } from '@/components/brand/PetitDiariBrand'
+import { PetitDiariBrandFooter } from '@/components/brand/PetitDiariBrandFooter'
 
 export default function LoginPage() {
   const t = useTranslations('login')
@@ -107,9 +109,7 @@ export default function LoginPage() {
         
         {/* Header Branding */}
         <div className="text-center space-y-2">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#0f766e] text-white shadow-xl shadow-[#0f766e]/20 mb-1 ring-8 ring-[#0f766e]/10">
-            <Baby className="h-8 w-8" />
-          </div>
+          <PetitDiariBrandHero />
           <h1 className="text-2xl font-black tracking-tight text-stone-800">
             {t('title')}
           </h1>
@@ -222,12 +222,7 @@ export default function LoginPage() {
           </div>
         </Card>
 
-        {/* Footer */}
-        <div className="text-center space-y-1">
-          <p className="text-xs text-stone-400 font-medium">
-            {t('footer')}
-          </p>
-        </div>
+        <PetitDiariBrandFooter />
 
       </div>
     </main>

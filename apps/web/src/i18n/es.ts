@@ -211,10 +211,21 @@ export const es: Translations = {
     success: '¡Mensaje enviado! Te contactaremos pronto.',
     error: 'No se pudo enviar. Inténtalo de nuevo.',
     errorNoKey: 'Formulario no configurado. Reinicia el servidor local (npm run dev:web) o vuelve a desplegar en Vercel tras añadir VITE_WEB3FORMS_KEY.',
+    legalNoticePrefix: 'Al enviar este formulario, aceptas que usemos tu correo y los datos del mensaje únicamente para responder tu consulta. No se utilizarán con fines publicitarios ni se cederán a terceros, salvo el proveedor técnico del formulario (Web3Forms) para el envío del mensaje. Más información en la',
+    privacyLink: 'Política de privacidad',
   },
   footer: {
     tagline: 'El día a día en la escuela, cerca de la familia.',
     rights: 'Todos los derechos reservados.',
     madeIn: 'Hecho con cariño para escuelas infantiles',
+    copyrightLine: 'Nil Torrents González · NIF 39520320H',
+    links: {
+      legal: 'Aviso legal',
+      privacy: 'Privacidad',
+      cookies: 'Cookies',
+      terms: 'Términos de uso',
+      schools: 'Para escuelas',
+      contact: 'Contacto',
+    },
   },
 }

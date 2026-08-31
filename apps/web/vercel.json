@@ -2,5 +2,6 @@
   "installCommand": "cd ../.. && npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "vite"
+  "framework": "vite",
+  "rewrites": [{ "source": "/((?!assets/|logo-petit-diari\\.svg|favicon\\.ico).*)", "destination": "/index.html" }]
 }

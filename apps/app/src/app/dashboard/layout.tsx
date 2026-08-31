@@ -24,6 +24,8 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PetitDiariLoader } from '@/components/ui/PetitDiariLoader'
+import { PetitDiariBrandAvatar } from '@/components/brand/PetitDiariBrand'
+import { PetitDiariBrandMark } from '@/components/brand/PetitDiariBrandFooter'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -184,14 +186,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         })}
       </div>
 
-      <div className="p-4 border-t border-stone-100 bg-stone-50/50">
+      <div className="p-4 border-t border-stone-100 bg-stone-50/50 space-y-3">
+        <div className="flex justify-center">
+          <PetitDiariBrandMark />
+        </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-full bg-stone-200 border border-stone-300 flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-stone-600">
-                {userName.charAt(0)}
-              </span>
-            </div>
+            <PetitDiariBrandAvatar size="sm" />
             <div className="overflow-hidden">
               <p className="text-sm font-bold text-stone-900 truncate">{userName}</p>
               <p className="text-xs font-medium text-stone-500 capitalize">{role}</p>

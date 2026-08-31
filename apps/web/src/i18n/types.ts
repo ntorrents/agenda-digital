@@ -109,10 +109,21 @@ export type Translations = {
     success: string
     error: string
     errorNoKey: string
+    legalNoticePrefix: string
+    privacyLink: string
   }
   footer: {
     tagline: string
     rights: string
     madeIn: string
+    copyrightLine: string
+    links: {
+      legal: string
+      privacy: string
+      cookies: string
+      terms: string
+      schools: string
+      contact: string
+    }
   }
 }

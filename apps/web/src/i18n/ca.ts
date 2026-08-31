@@ -260,11 +260,22 @@ export const ca: Translations = {
     success: 'Missatge enviat! Et contactarem aviat.',
     error: 'No s\'ha pogut enviar. Torna-ho a provar.',
     errorNoKey: 'Formulari no configurat. Reinicia el servidor local (npm run dev:web) o torna a desplegar a Vercel després d\'afegir VITE_WEB3FORMS_KEY.',
+    legalNoticePrefix: 'En enviar aquest formulari, acceptes que utilitzem el teu correu i les dades del missatge únicament per respondre la teva consulta. No s\'utilitzaran per a publicitat ni es cediran a tercers, excepte el proveïdor tècnic del formulari (Web3Forms) per l\'enviament del missatge. Més informació a la',
+    privacyLink: 'Política de privacitat',
   },
   footer: {
     tagline: 'El dia a dia a l\'escola, a prop de la família.',
     rights: 'Tots els drets reservats.',
     madeIn: 'Fet amb carinyo per escoles bressol',
+    copyrightLine: 'Nil Torrents González · NIF 39520320H',
+    links: {
+      legal: 'Avís legal',
+      privacy: 'Privacitat',
+      cookies: 'Cookies',
+      terms: 'Termes d\'ús',
+      schools: 'Per a escoles',
+      contact: 'Contacte',
+    },
   },
 }
 

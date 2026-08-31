@@ -368,7 +368,10 @@
     "hubSchoolTitle": "School settings",
     "hubSchoolDesc": "Name, logo, agenda options and access emails.",
     "hubProfileTitle": "My profile",
-    "hubProfileDesc": "Your personal details and password."
+    "hubProfileDesc": "Your personal details and password.",
+    "legalTitle": "Legal documentation",
+    "legalBody": "The service agreement, school terms and data processing agreement (GDPR) are available at petitdiari.com. Request a signable copy at hola@petitdiari.com.",
+    "legalLink": "View school terms"
   },
   "dashboardParametres": {
     "title": "Settings",
@@ -599,5 +602,18 @@
     "publish": "Publish",
     "uploading": "Uploading...",
     "errorGeneric": "Something went wrong"
+  },
+  "legal": {
+    "brandTagline": "Digital diary for schools and families",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "cookies": "Cookies"
+  },
+  "familyHelp": {
+    "privacyTitle": "Privacy and your data",
+    "privacyBody": "The school is responsible for your child's data. Petit Diari (Nil Torrents González) processes this data only to provide the service contracted with the school, as data processor.",
+    "privacyRights": "To access, rectify or delete your child's data, contact the school first. For technical questions or about the app: hola@petitdiari.com",
+    "privacyLink": "Privacy policy",
+    "termsLink": "Terms of use"
   }
 }

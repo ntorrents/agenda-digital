@@ -12,6 +12,8 @@ import { DatePickerNav } from '@/components/ui/DatePickerNav'
 import { PetitDiariLoader } from '@/components/ui/PetitDiariLoader'
 import { FamilyStudentProvider, useFamilyStudent } from '@/components/family/FamilyStudentProvider'
 import { StudentSwitcher } from '@/components/family/StudentSwitcher'
+import { PetitDiariBrandAvatar } from '@/components/brand/PetitDiariBrand'
+import { PetitDiariBrandMark } from '@/components/brand/PetitDiariBrandFooter'
 
 export default function FamilyLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -172,9 +174,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
       >
         <div className="p-6 border-b border-stone-100 flex flex-col gap-4 relative">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-[1.2rem] bg-[#0f766e] flex items-center justify-center shadow-lg shadow-[#0f766e]/20 shrink-0">
-              <span className="text-lg font-black text-white">{guardianName.charAt(0)}</span>
-            </div>
+            <PetitDiariBrandAvatar size="sidebar" className="shadow-lg shadow-[#0f766e]/10 border-teal-100" />
             <div className="overflow-hidden min-w-0 flex-1 pr-8">
               <h1 className="text-xl font-black text-stone-800 tracking-tight truncate">{guardianName}</h1>
               <p className="text-sm font-bold text-[#0f766e] truncate">
@@ -221,7 +221,10 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-stone-100 bg-stone-50/50 mt-auto">
+        <div className="p-4 border-t border-stone-100 bg-stone-50/50 mt-auto space-y-3">
+          <div className="flex justify-center">
+            <PetitDiariBrandMark />
+          </div>
           <button
             onClick={handleLogout}
             className="flex w-full items-center justify-center gap-2 py-3 px-4 rounded-xl text-stone-500 hover:text-red-600 hover:bg-red-50 font-bold transition-all"
@@ -254,9 +257,9 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-1.5 shrink-0">
                 <Link
                   href={withStudent('/mi-hijo/perfil')}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20 hover:scale-105 active:scale-95 transition-all"
+                  className="block shrink-0 hover:scale-105 active:scale-95 transition-all"
                 >
-                  {guardianName.charAt(0)}
+                  <PetitDiariBrandAvatar size="xs" />
                 </Link>
               </div>
             </div>
@@ -339,9 +342,9 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
           ) : (
             <Link
               href={withStudent('/mi-hijo/perfil')}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400 text-amber-950 font-black text-xs shadow-sm shadow-amber-400/20 hover:scale-105 transition-all shrink-0"
+              className="block shrink-0 hover:scale-105 transition-all"
             >
-              {guardianName.charAt(0)}
+              <PetitDiariBrandAvatar size="sm" />
             </Link>
           )}
         </div>

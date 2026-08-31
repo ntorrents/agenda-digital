@@ -349,7 +349,10 @@
     "hubSchoolTitle": "Configuration de l'école",
     "hubSchoolDesc": "Nom, logo, options de l'agenda et envoi des accès.",
     "hubProfileTitle": "Mon profil",
-    "hubProfileDesc": "Vos données personnelles et mot de passe."
+    "hubProfileDesc": "Vos données personnelles et mot de passe.",
+    "legalTitle": "Documentation légale",
+    "legalBody": "Le contrat de service, les conditions pour les écoles et le contrat de sous-traitance (RGPD) sont disponibles sur petitdiari.com. Demandez une copie signable à hola@petitdiari.com.",
+    "legalLink": "Voir les conditions pour les écoles"
   },
   "dashboardParametres": {
     "title": "Paramètres",
@@ -580,5 +583,18 @@
     "publish": "Publier",
     "uploading": "Envoi...",
     "errorGeneric": "Une erreur s'est produite"
+  },
+  "legal": {
+    "brandTagline": "Agenda numérique pour écoles et familles",
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "cookies": "Cookies"
+  },
+  "familyHelp": {
+    "privacyTitle": "Confidentialité et vos données",
+    "privacyBody": "L'école est responsable des données de votre enfant. Petit Diari (Nil Torrents González) traite ces données uniquement pour fournir le service contracté avec l'école, en tant que sous-traitant.",
+    "privacyRights": "Pour accéder, rectifier ou supprimer les données de votre enfant, contactez d'abord la direction de l'école. Pour des questions techniques ou sur l'application : hola@petitdiari.com",
+    "privacyLink": "Politique de confidentialité",
+    "termsLink": "Conditions d'utilisation"
   }
 }

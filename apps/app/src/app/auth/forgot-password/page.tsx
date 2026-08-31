@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Loader2, Mail, Baby } from 'lucide-react'
+import { ArrowLeft, Loader2, Mail } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { Locale } from '@/i18n'
+import { PetitDiariBrandHero } from '@/components/brand/PetitDiariBrand'
+import { PetitDiariBrandFooter } from '@/components/brand/PetitDiariBrandFooter'
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('login')
@@ -51,9 +53,7 @@ export default function ForgotPasswordPage() {
 
       <div className="w-full mx-auto space-y-6" style={{ maxWidth: '420px' }}>
         <div className="text-center space-y-2">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#0f766e] text-white shadow-xl shadow-[#0f766e]/20 mb-1 ring-8 ring-[#0f766e]/10">
-            <Baby className="h-8 w-8" />
-          </div>
+          <PetitDiariBrandHero />
           <h1 className="text-2xl font-black tracking-tight text-stone-800">{t('forgotTitle')}</h1>
           <p className="text-xs text-stone-500 max-w-[300px] mx-auto">{t('forgotSubtitle')}</p>
         </div>
@@ -113,6 +113,8 @@ export default function ForgotPasswordPage() {
             </>
           )}
         </Card>
+
+        <PetitDiariBrandFooter />
       </div>
     </main>
   )

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useI18n, localeLabels, type Locale } from '../i18n'
 import { APP_URL } from '../lib/config'
@@ -30,9 +31,9 @@ export function Header() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-        <a href="#" className="group">
+        <Link to="/" className="group">
           <Logo className="group-hover:opacity-90 transition-opacity" />
-        </a>
+        </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
           {navLinks.map(({ key, href }) => (

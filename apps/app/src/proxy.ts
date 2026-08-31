@@ -20,6 +20,6 @@ export const config = {
      * - manifest.webmanifest (PWA manifest)
      * - icons/ (PWA icons)
      */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|icons/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|icons/|.*\\.(?:svg|png|jpe?g|gif|webp|ico)$).*)',
   ],
 }

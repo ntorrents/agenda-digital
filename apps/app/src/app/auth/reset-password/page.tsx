@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { KeyRound, Loader2, Shield } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { PetitDiariBrandHero } from '@/components/brand/PetitDiariBrand'
+import { PetitDiariBrandFooter } from '@/components/brand/PetitDiariBrandFooter'
 
 export default function ResetPasswordPage() {
   const t = useTranslations('login')
@@ -79,9 +81,7 @@ export default function ResetPasswordPage() {
     <main className="min-h-screen bg-[#faf8f5] flex items-center justify-center p-4 sm:p-6 font-sans">
       <div className="w-full mx-auto space-y-6" style={{ maxWidth: '420px' }}>
         <div className="text-center space-y-2">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-[#0f766e] text-white shadow-xl shadow-[#0f766e]/20 mb-1 ring-8 ring-[#0f766e]/10">
-            <KeyRound className="h-8 w-8" />
-          </div>
+          <PetitDiariBrandHero />
           <h1 className="text-2xl font-black tracking-tight text-stone-800">{t('resetTitle')}</h1>
           <p className="text-xs text-stone-500 max-w-[280px] mx-auto">{t('resetSubtitle')}</p>
         </div>
@@ -137,6 +137,8 @@ export default function ResetPasswordPage() {
             {t('backToLogin')}
           </Link>
         </Card>
+
+        <PetitDiariBrandFooter />
       </div>
     </main>
   )

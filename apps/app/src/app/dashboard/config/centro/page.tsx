@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Settings, Building2, UserCircle } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import { Settings, Building2, UserCircle, FileText } from 'lucide-react'
+import { getTranslations, getLocale } from 'next-intl/server'
+import { getLegalUrls } from '@/lib/legal-urls'
 
 export default async function DashboardConfigCentroHubPage() {
   const supabase = await createClient()
@@ -22,6 +23,8 @@ export default async function DashboardConfigCentroHubPage() {
 
   const school = Array.isArray(profile.schools) ? profile.schools[0] : profile.schools
   const t = await getTranslations('dashboardCentro')
+  const locale = await getLocale()
+  const urls = getLegalUrls(locale)
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
@@ -61,6 +64,26 @@ export default async function DashboardConfigCentroHubPage() {
           <h4 className="text-lg font-black text-stone-900 mb-1">{t('hubProfileTitle')}</h4>
           <p className="text-sm text-stone-500 font-medium">{t('hubProfileDesc')}</p>
         </Link>
+      </div>
+
+      <div className="bg-white border border-stone-200/80 rounded-[24px] p-6 space-y-3">
+        <div className="flex items-start gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-stone-100 text-stone-600 flex items-center justify-center shrink-0">
+            <FileText className="h-6 w-6" />
+          </div>
+          <div className="space-y-2 min-w-0">
+            <h4 className="text-base font-black text-stone-900">{t('legalTitle')}</h4>
+            <p className="text-sm text-stone-500 font-medium leading-relaxed">{t('legalBody')}</p>
+            <a
+              href={urls.centres}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex text-sm font-bold text-teal-700 hover:text-teal-900 underline underline-offset-2"
+            >
+              {t('legalLink')} →
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   )

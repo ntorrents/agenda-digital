@@ -211,10 +211,21 @@ export const en: Translations = {
     success: 'Message sent! We\'ll contact you soon.',
     error: 'Could not send. Please try again.',
     errorNoKey: 'Form not configured. Restart local dev (npm run dev:web) or redeploy on Vercel after adding VITE_WEB3FORMS_KEY.',
+    legalNoticePrefix: 'By submitting this form, you agree that we will use your email and message data solely to respond to your enquiry. They will not be used for advertising or shared with third parties, except the form provider (Web3Forms) for delivery. More information in the',
+    privacyLink: 'Privacy Policy',
   },
   footer: {
     tagline: 'Daily life at school, close to family.',
     rights: 'All rights reserved.',
     madeIn: 'Made with care for nursery schools',
+    copyrightLine: 'Nil Torrents González · NIF 39520320H',
+    links: {
+      legal: 'Legal notice',
+      privacy: 'Privacy',
+      cookies: 'Cookies',
+      terms: 'Terms of use',
+      schools: 'For schools',
+      contact: 'Contact',
+    },
   },
 }
