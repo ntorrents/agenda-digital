@@ -8,7 +8,9 @@ import type { DiaperType } from '@/types/enums'
 import { AgendaDayNote } from '@/components/family/AgendaDayNote'
 import { PhotoStrip } from '@/components/media/PhotoStrip'
 
-export default async function FamilyAgendaPage(props: { searchParams: Promise<{ date?: string }> }) {
+import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
+
+export default async function FamilyAgendaPage(props: { searchParams: Promise<{ date?: string; student?: string }> }) {
   const searchParams = await props.searchParams
   const dateStr = searchParams.date || new Date().toISOString().split('T')[0]
   
@@ -19,12 +21,15 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
     redirect('/login')
   }
 
-  const { data: guardianRel } = await supabase
-    .from('student_guardians')
-    .select('student_id')
-    .eq('guardian_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  const { activeStudentId } = await getActiveStudentForGuardian(
+    supabase,
+    user.id,
+    searchParams.student
+  )
+
+  if (!activeStudentId) {
+    redirect('/login')
+  }
 
   let dailyLog = null
   let studentName = ''
@@ -32,8 +37,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
   let globalNote: string | null = null
   let globalNotePhoto: string | null = null
 
-  if (guardianRel) {
-    const studentId = guardianRel.student_id
+  const studentId = activeStudentId
 
     const { data: student } = await supabase
       .from('students')
@@ -82,7 +86,6 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
         .single()
       settings = school?.settings || {}
     }
-  }
 
   const selectedDate = new Date(dateStr)
   selectedDate.setHours(0, 0, 0, 0)

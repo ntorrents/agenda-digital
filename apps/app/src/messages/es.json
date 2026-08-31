@@ -92,6 +92,11 @@
     "calendar": "Calendario",
     "help": "Ayuda"
   },
+  "familyStudent": {
+    "viewing": "Viendo",
+    "switchChild": "Cambiar hijo/a",
+    "pickChild": "Selecciona el hijo/a para ver su información"
+  },
   "agenda": {
     "food": "Alimentación",
     "breakfast": "Desayuno",

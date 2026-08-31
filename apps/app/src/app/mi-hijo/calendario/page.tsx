@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation'
 import { Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
-export default async function CalendariPage() {
+import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
+
+export default async function CalendariPage(props: { searchParams: Promise<{ student?: string }> }) {
+  const searchParams = await props.searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -11,20 +14,18 @@ export default async function CalendariPage() {
 
   const t = await getTranslations('calendar')
 
-  // Get student's classroom to fetch relevant events
-  const { data: guardianRel } = await supabase
-    .from('student_guardians')
-    .select('student_id')
-    .eq('guardian_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  const { activeStudentId } = await getActiveStudentForGuardian(
+    supabase,
+    user.id,
+    searchParams.student
+  )
 
   let classroomId = null
-  if (guardianRel?.student_id) {
+  if (activeStudentId) {
     const { data: student } = await supabase
       .from('students')
       .select('classroom_id')
-      .eq('id', guardianRel.student_id)
+      .eq('id', activeStudentId)
       .maybeSingle()
     classroomId = student?.classroom_id
   }

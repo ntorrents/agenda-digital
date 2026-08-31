@@ -3,13 +3,15 @@ import { redirect } from 'next/navigation'
 import { FamilyProfileForm } from '@/components/family/FamilyProfileForm'
 import { User, Baby, School } from 'lucide-react'
 
-export default async function FamilyProfilePage() {
+import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
+
+export default async function FamilyProfilePage(props: { searchParams: Promise<{ student?: string }> }) {
+  const searchParams = await props.searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
 
-  // Obtener Perfil del Tutor
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
@@ -18,22 +20,20 @@ export default async function FamilyProfilePage() {
 
   if (!profile) redirect('/login')
 
-  // Obtener Datos del Alumno y Aula
-  const { data: guardianRel } = await supabase
-    .from('student_guardians')
-    .select('student_id')
-    .eq('guardian_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  const { activeStudentId } = await getActiveStudentForGuardian(
+    supabase,
+    user.id,
+    searchParams.student
+  )
 
   let studentData = null
   let classroomData = null
 
-  if (guardianRel) {
+  if (activeStudentId) {
     const { data: student } = await supabase
       .from('students')
       .select('*, classrooms(*)')
-      .eq('id', guardianRel.student_id)
+      .eq('id', activeStudentId)
       .single()
       
     if (student) {

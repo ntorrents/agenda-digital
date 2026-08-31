@@ -342,15 +342,26 @@ export async function sendWelcomeEmail(userId: string) {
     throw new Error('Unauthorized');
   }
 
-  // 2. Generate random password
-  const tempPassword = Math.random().toString(36).slice(-8);
-
-  // 3. Update Auth user via Admin API (Need Admin Client)
-  // We need to import createAdminClient here
+  const normalizedEmail = normalizeEmail(profile.email || '')
   const { createAdminClient } = await import('@/lib/supabase/admin');
   const adminClient = createAdminClient();
 
-  const { error: updateError } = await adminClient.auth.admin.updateUserById(userId, {
+  let targetUserId = userId
+  if (normalizedEmail) {
+    const { data: canonical } = await adminClient
+      .from('profiles')
+      .select('id')
+      .eq('school_id', adminProfile.school_id)
+      .eq('email', normalizedEmail)
+      .maybeSingle()
+    if (canonical?.id) targetUserId = canonical.id
+  }
+
+  // 2. Generate random password
+  const tempPassword = Math.random().toString(36).slice(-8);
+
+  // 3. Update Auth user via Admin API
+  const { error: updateError } = await adminClient.auth.admin.updateUserById(targetUserId, {
     password: tempPassword,
   });
 
@@ -372,10 +383,20 @@ export async function sendWelcomeEmail(userId: string) {
       force_password_reset: true,
       welcome_email_sent: true,
     })
-    .eq('id', userId)
+    .eq('id', targetUserId)
 
   if (dbError) {
     throw new Error(dbError.message)
+  }
+
+  const { data: linkedStudents } = await adminClient
+    .from('student_guardians')
+    .select('student_id')
+    .eq('guardian_id', targetUserId)
+
+  revalidatePath('/dashboard/config/alumnos')
+  for (const row of linkedStudents || []) {
+    revalidatePath(`/dashboard/config/alumnos/${row.student_id}`)
   }
 
   return { success: true, emailSent: true }

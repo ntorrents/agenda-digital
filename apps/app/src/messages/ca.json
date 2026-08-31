@@ -92,6 +92,11 @@
     "calendar": "Calendari",
     "help": "Ajuda"
   },
+  "familyStudent": {
+    "viewing": "Veient",
+    "switchChild": "Canviar fill/a",
+    "pickChild": "Selecciona el fill/a per veure la seva informació"
+  },
   "agenda": {
     "food": "Alimentació",
     "breakfast": "Esmorzar",

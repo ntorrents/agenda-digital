@@ -3,25 +3,27 @@ import { redirect } from 'next/navigation'
 import { FileText, ChevronLeft, Calendar as CalendarIcon } from 'lucide-react'
 import Link from 'next/link'
 
-export default async function NotaPage() {
+import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
+
+export default async function NotaPage(props: { searchParams: Promise<{ student?: string }> }) {
+  const searchParams = await props.searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
 
-  const { data: guardianRel } = await supabase
-    .from('student_guardians')
-    .select('student_id')
-    .eq('guardian_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  const { activeStudentId } = await getActiveStudentForGuardian(
+    supabase,
+    user.id,
+    searchParams.student
+  )
 
-  if (!guardianRel) redirect('/login')
+  if (!activeStudentId) redirect('/login')
 
   const { data: notes } = await supabase
     .from('daily_logs')
     .select('id, date, notes, teacher:profiles!teacher_id(full_name)')
-    .eq('student_id', guardianRel.student_id)
+    .eq('student_id', activeStudentId)
     .not('notes', 'is', null)
     .order('date', { ascending: false })
 

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Mail, CheckCircle2, Loader2, KeyRound } from 'lucide-react'
 import { sendWelcomeEmail } from '@/app/actions/admin'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 interface SendAccessButtonProps {
   userId: string
@@ -14,9 +15,13 @@ interface SendAccessButtonProps {
 export function SendAccessButton({ userId, email, alreadySent }: SendAccessButtonProps) {
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(alreadySent)
+  const router = useRouter()
+
+  useEffect(() => {
+    setSent(alreadySent)
+  }, [alreadySent])
 
   const handleSend = async () => {
-    // Confirm reset if already sent
     if (sent) {
       if (!window.confirm(`¿Estás seguro de que quieres resetear la contraseña de ${email}? El usuario recibirá una nueva contraseña y se cerrará su sesión actual.`)) {
         return
@@ -28,6 +33,7 @@ export function SendAccessButton({ userId, email, alreadySent }: SendAccessButto
       const result = await sendWelcomeEmail(userId)
       if (result.success) {
         setSent(true)
+        router.refresh()
         alert(`Accés ${sent ? 'reenviat' : 'enviat'} a ${email}. Revisa la safata d'entrada (i spam).`)
       }
     } catch (error: any) {

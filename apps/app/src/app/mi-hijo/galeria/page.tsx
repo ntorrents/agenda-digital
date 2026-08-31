@@ -7,7 +7,9 @@ import { GalleryByDay } from '@/components/gallery/GalleryByDay'
 import { photosFromClassNote, photosFromDailyLog } from '@/lib/photos'
 import { groupPhotosByDay, type GalleryPhoto } from '@/lib/group-photos-by-day'
 
-export default async function GaleriaPage(props: { searchParams: Promise<{ date?: string }> }) {
+import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
+
+export default async function GaleriaPage(props: { searchParams: Promise<{ date?: string; student?: string }> }) {
   const searchParams = await props.searchParams
   const dateStr = searchParams.date || new Date().toISOString().split('T')[0]
 
@@ -19,27 +21,26 @@ export default async function GaleriaPage(props: { searchParams: Promise<{ date?
   const t = await getTranslations('gallery')
   const locale = await getLocale()
 
-  const { data: guardianRel } = await supabase
-    .from('student_guardians')
-    .select('student_id')
-    .eq('guardian_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  const { activeStudentId } = await getActiveStudentForGuardian(
+    supabase,
+    user.id,
+    searchParams.student
+  )
 
-  if (!guardianRel?.student_id) {
+  if (!activeStudentId) {
     return <div>{t('noStudent')}</div>
   }
 
   const { data: student } = await supabase
     .from('students')
     .select('classroom_id, first_name')
-    .eq('id', guardianRel.student_id)
+    .eq('id', activeStudentId)
     .maybeSingle()
 
   const { data: logsWithPhotos } = await supabase
     .from('daily_logs')
     .select('date, photos')
-    .eq('student_id', guardianRel.student_id)
+    .eq('student_id', activeStudentId)
     .not('photos', 'is', null)
     .order('date', { ascending: false })
 

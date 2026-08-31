@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation'
 import { Bell, Pin, Clock } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
-export default async function TaulerPage() {
+import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
+
+export default async function TaulerPage(props: { searchParams: Promise<{ student?: string }> }) {
+  const searchParams = await props.searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -11,20 +14,18 @@ export default async function TaulerPage() {
 
   const t = await getTranslations('notices')
 
-  // Get student's classroom to fetch relevant announcements
-  const { data: guardianRel } = await supabase
-    .from('student_guardians')
-    .select('student_id')
-    .eq('guardian_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  const { activeStudentId } = await getActiveStudentForGuardian(
+    supabase,
+    user.id,
+    searchParams.student
+  )
 
   let classroomId = null
-  if (guardianRel?.student_id) {
+  if (activeStudentId) {
     const { data: student } = await supabase
       .from('students')
       .select('classroom_id')
-      .eq('id', guardianRel.student_id)
+      .eq('id', activeStudentId)
       .maybeSingle()
     classroomId = student?.classroom_id
   }

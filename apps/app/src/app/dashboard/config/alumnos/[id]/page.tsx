@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { StudentDetailForm } from '@/components/admin/StudentDetailForm'
 import { getTranslations } from 'next-intl/server'
 
+import { getAccessStatusByEmail } from '@/lib/guardian-access'
+
 export default async function EditStudentPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
   const supabase = await createClient()
@@ -54,11 +56,30 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
     : { data: [] as any[] }
 
   const profileById = new Map((guardianProfiles || []).map(p => [p.id, p]))
-  const guardians = (guardianRows || []).map(row => ({
-    guardian_id: row.guardian_id,
-    relation: row.relation,
-    profiles: profileById.get(row.guardian_id) || null,
-  }))
+  const guardians = await Promise.all(
+    (guardianRows || []).map(async (row) => {
+      const p = profileById.get(row.guardian_id) || null
+      if (!p?.email) {
+        return {
+          guardian_id: row.guardian_id,
+          relation: row.relation,
+          profiles: p,
+        }
+      }
+
+      const access = await getAccessStatusByEmail(supabase, p.email, profile.school_id)
+
+      return {
+        guardian_id: row.guardian_id,
+        relation: row.relation,
+        profiles: {
+          ...p,
+          id: access.profileId || p.id,
+          welcome_email_sent: access.welcomeEmailSent,
+        },
+      }
+    })
+  )
 
   const t = await getTranslations('dashboardAlumnos')
 
