@@ -29,8 +29,8 @@ export function AgendaFilters({ classrooms, currentClassroomId, currentDate }: A
   }
 
   return (
-    <div className="flex flex-col gap-3 w-full min-w-0">
-      <div className="flex flex-col gap-1.5 w-full min-w-0">
+    <div className="flex flex-col gap-3 w-full min-w-0 md:flex-row md:items-end md:gap-3 md:w-auto">
+      <div className="flex flex-col gap-1.5 w-full min-w-0 md:w-44 lg:w-52 shrink-0">
         <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider pl-1">
           {t('classroomLabel')}
         </label>
@@ -45,7 +45,9 @@ export function AgendaFilters({ classrooms, currentClassroomId, currentDate }: A
         </select>
       </div>
 
-      <AgendaDatePicker currentDate={currentDate} />
+      <div className="shrink-0">
+        <AgendaDatePicker currentDate={currentDate} />
+      </div>
     </div>
   )
 }

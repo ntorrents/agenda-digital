@@ -45,22 +45,6 @@ export function EquipoEditor({ initialStaff, schoolId }: EquipoEditorProps) {
     }
   }, [initialStaff, hasChanges])
 
-  // Initialize expanded state based on desktop/mobile
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        const newExpanded: Record<string, boolean> = {}
-        staff.forEach(s => {
-          newExpanded[s.id] = true
-        })
-        setExpandedIds(prev => Object.keys(prev).length > 0 ? prev : newExpanded)
-      }
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [staff])
-
   const toggleExpand = (id: string) => {
     setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }))
   }

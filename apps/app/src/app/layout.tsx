@@ -25,14 +25,6 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  icons: {
-    icon: [
-      { url: '/icon.png', sizes: '180x180', type: 'image/png' },
-      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: '/apple-touch-icon.png',
-    shortcut: '/favicon-32.png',
-  },
 }
 
 export const viewport: Viewport = {

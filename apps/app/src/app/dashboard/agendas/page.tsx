@@ -102,12 +102,12 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+        <div className="min-w-0">
           <h2 className="text-2xl font-black text-stone-800">{t('title')}</h2>
           <p className="text-sm font-medium text-stone-500 mt-1">{t('subtitle', { name: classroom.name, date: formattedDate })}</p>
         </div>
-      <div className="flex flex-col gap-3 w-full sm:w-auto sm:items-end">
+        <div className="flex flex-col gap-3 w-full md:w-auto md:flex-row md:items-end md:shrink-0">
           <AgendaFilters 
             classrooms={visibleClassrooms}
             currentClassroomId={classroom.id}

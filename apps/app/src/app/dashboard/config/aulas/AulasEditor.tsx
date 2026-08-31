@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Building2, Plus, ChevronDown, ChevronUp, Trash2, Save, X, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { saveAllClassrooms, archiveClassroom } from './actions'
@@ -35,23 +35,6 @@ export function AulasEditor({ initialClassrooms, teachers, schoolId }: AulasEdit
   const [isArchiving, setIsArchiving] = useState(false)
   const t = useTranslations('dashboardAulas')
   const listTopRef = useRef<HTMLDivElement>(null)
-
-  // Initialize expanded state based on desktop/mobile
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        // En desktop: expandir todos por defecto si no tienen estado previo guardado
-        const newExpanded: Record<string, boolean> = {}
-        classrooms.forEach(c => {
-          newExpanded[c.id] = true
-        })
-        setExpandedIds(prev => Object.keys(prev).length > 0 ? prev : newExpanded)
-      }
-    }
-    handleResize() // Initial check
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [classrooms])
 
   const toggleExpand = (id: string) => {
     setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }))
