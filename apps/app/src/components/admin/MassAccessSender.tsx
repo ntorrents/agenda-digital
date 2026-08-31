@@ -18,7 +18,9 @@ export function MassAccessSender() {
         alert(
           result.count === 0
             ? 'No hi ha usuaris pendents d\'enviar.'
-            : `Accés generat per a ${result.count} usuari(s). Revisa la consola del servidor (claus temporals) fins que configures el correu.`
+            : result.failed
+              ? `Correu enviat a ${result.count} usuari(s). ${result.failed} no s'han pogut enviar.`
+              : `Correu enviat a ${result.count} usuari(s).`
         )
       }
     } catch (error: any) {

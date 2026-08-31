@@ -28,10 +28,7 @@ export function SendAccessButton({ userId, email, alreadySent }: SendAccessButto
       const result = await sendWelcomeEmail(userId)
       if (result.success) {
         setSent(true)
-        const pwdHint = result.tempPassword
-          ? `\n\nClau temporal (fins que configures el correu): ${result.tempPassword}`
-          : ''
-        alert(`Acceso ${sent ? 'reenviado' : 'enviado'} a ${email}.${pwdHint}`)
+        alert(`Accés ${sent ? 'reenviat' : 'enviat'} a ${email}. Revisa la safata d'entrada (i spam).`)
       }
     } catch (error: any) {
       alert(error.message || 'Error al enviar acceso')

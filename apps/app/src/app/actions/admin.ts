@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { normalizeEmail, syncAuthAndProfileEmail } from '@/lib/auth-email'
+import { sendAccessEmail } from '@/lib/email'
 
 function normalizeRelation(raw: string): string {
   const v = (raw || '').trim().toLowerCase()
@@ -357,33 +358,27 @@ export async function sendWelcomeEmail(userId: string) {
     throw new Error(updateError.message);
   }
 
-  // 4. Update profile flags
+  // 4. Enviar correu i marcar perfil
+  await sendAccessEmail({
+    to: profile.email!,
+    fullName: profile.full_name || '',
+    tempPassword,
+    role: profile.role,
+  })
+
   const { error: dbError } = await adminClient
     .from('profiles')
-    .update({ 
+    .update({
       force_password_reset: true,
-      welcome_email_sent: true
+      welcome_email_sent: true,
     })
-    .eq('id', userId);
+    .eq('id', userId)
 
   if (dbError) {
-    throw new Error(dbError.message);
+    throw new Error(dbError.message)
   }
 
-  // 5. Send Email (Simulation or via edge function/webhook)
-  // For now we simulate. If we configure an SMTP, Supabase sends it? 
-  // Wait, Supabase only sends emails for specific auth events (reset password, magic link).
-  // Changing password directly via admin doesn't send an email by default.
-  // BUT the user asked to send it via Supabase Auth... 
-  // Wait! Supabase Auth admin API has `adminClient.auth.admin.generateLink({ type: 'recovery', email: profile.email })`!
-  // OR we just assume we return the tempPassword and show it or simulate sending.
-  console.log(`[EMAIL SIMULADO] Para: ${profile.email} | Clave: ${tempPassword}`);
-  
-  // En este punto, como no tenemos un servicio SMTP configurado, 
-  // lo ideal sería retornar la clave generada para que se le pueda dar al usuario o simular.
-  // Retornaremos un mensaje de éxito.
-  
-  return { success: true, tempPassword }; 
+  return { success: true, emailSent: true }
 }
 
 export async function sendMassWelcomeEmails(role: 'guardian' | 'teacher') {
@@ -413,30 +408,50 @@ export async function sendMassWelcomeEmails(role: 'guardian' | 'teacher') {
     return { success: true, count: 0 };
   }
 
-  let successCount = 0;
+  let successCount = 0
+  const failures: string[] = []
 
   for (const user of targetUsers) {
-    const tempPassword = Math.random().toString(36).slice(-8);
-    
+    const tempPassword = Math.random().toString(36).slice(-8)
+
     const { error: updateError } = await adminClient.auth.admin.updateUserById(user.id, {
       password: tempPassword,
-    });
+    })
 
-    if (!updateError) {
+    if (updateError) {
+      failures.push(user.email || user.id)
+      continue
+    }
+
+    try {
+      await sendAccessEmail({
+        to: user.email!,
+        fullName: user.full_name || '',
+        tempPassword,
+        role,
+      })
+
       const { error: dbError } = await adminClient
         .from('profiles')
-        .update({ 
+        .update({
           force_password_reset: true,
-          welcome_email_sent: true
+          welcome_email_sent: true,
         })
-        .eq('id', user.id);
+        .eq('id', user.id)
 
-      if (!dbError) {
-        successCount++;
-        console.log(`[MASS EMAIL SIMULADO] Para: ${user.email} | Clave: ${tempPassword}`);
+      if (dbError) {
+        failures.push(user.email || user.id)
+      } else {
+        successCount++
       }
+    } catch {
+      failures.push(user.email || user.id)
     }
   }
 
-  return { success: true, count: successCount };
+  if (successCount === 0 && failures.length > 0) {
+    throw new Error('No s\'han pogut enviar els correus. Comprova la configuració de Resend.')
+  }
+
+  return { success: true, count: successCount, failed: failures.length }
 }
