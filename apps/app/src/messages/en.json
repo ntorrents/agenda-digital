@@ -16,7 +16,22 @@
     "demoTeacher": "Teacher (Anna)",
     "demoAdmin": "Principal (Laura)",
     "demoSuperAdmin": "Super Admin",
-    "errorInactive": "Your account is inactive. Please contact the school office."
+    "errorInactive": "Your account is inactive. Please contact the school office.",
+    "forgotLink": "Forgot your password?",
+    "forgotTitle": "Reset password",
+    "forgotSubtitle": "We'll send a link to your email so you can choose a new password.",
+    "forgotSubmit": "Send link",
+    "forgotSent": "If the email is registered, you'll receive a reset link. Check your spam folder too.",
+    "forgotError": "Could not send the link. Please try again.",
+    "backToLogin": "Back to login",
+    "resetTitle": "New password",
+    "resetSubtitle": "Choose a secure password for your account.",
+    "resetNewPassword": "New password",
+    "resetConfirmPassword": "Confirm password",
+    "resetSubmit": "Save and sign in",
+    "resetMismatch": "Passwords do not match",
+    "resetTooShort": "Password must be at least 6 characters",
+    "resetError": "Could not update password"
   },
   "navigation": {
     "dashboard": "Dashboard",

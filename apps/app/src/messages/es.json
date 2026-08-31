@@ -16,7 +16,22 @@
     "demoTeacher": "Educadora (Anna)",
     "demoAdmin": "Dirección (Laura)",
     "demoSuperAdmin": "Súper Admin",
-    "errorInactive": "Tu cuenta está inactiva. Contacta con dirección."
+    "errorInactive": "Tu cuenta está inactiva. Contacta con dirección.",
+    "forgotLink": "¿Has olvidado la contraseña?",
+    "forgotTitle": "Recuperar contraseña",
+    "forgotSubtitle": "Te enviaremos un enlace a tu correo para elegir una contraseña nueva.",
+    "forgotSubmit": "Enviar enlace",
+    "forgotSent": "Si el correo está registrado, recibirás un enlace para restablecer la contraseña. Revisa también la carpeta de spam.",
+    "forgotError": "No se ha podido enviar el enlace. Inténtalo de nuevo.",
+    "backToLogin": "Volver al login",
+    "resetTitle": "Nueva contraseña",
+    "resetSubtitle": "Elige una contraseña segura para tu cuenta.",
+    "resetNewPassword": "Nueva contraseña",
+    "resetConfirmPassword": "Confirma la contraseña",
+    "resetSubmit": "Guardar y entrar",
+    "resetMismatch": "Las contraseñas no coinciden",
+    "resetTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "resetError": "No se ha podido actualizar la contraseña"
   },
   "navigation": {
     "dashboard": "Dashboard",

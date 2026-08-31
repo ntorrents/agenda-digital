@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { Sparkles, Shield, GraduationCap, Heart, Loader2, ArrowRight, Baby } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
@@ -149,9 +150,17 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold tracking-wide text-stone-600 uppercase">
-                {t('passwordLabel')}
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold tracking-wide text-stone-600 uppercase">
+                  {t('passwordLabel')}
+                </label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-[11px] font-bold text-[#0f766e] hover:underline"
+                >
+                  {t('forgotLink')}
+                </Link>
+              </div>
               <input
                 type="password"
                 value={password}

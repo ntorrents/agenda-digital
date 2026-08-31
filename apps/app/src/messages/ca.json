@@ -16,7 +16,22 @@
     "demoTeacher": "Educadora (Anna)",
     "demoAdmin": "Direcció (Laura)",
     "demoSuperAdmin": "Súper Admin",
-    "errorInactive": "El teu compte està inactiu. Contacta amb direcció."
+    "errorInactive": "El teu compte està inactiu. Contacta amb direcció.",
+    "forgotLink": "Has oblidat la contrasenya?",
+    "forgotTitle": "Recuperar contrasenya",
+    "forgotSubtitle": "T'enviarem un enllaç al teu correu per triar una contrasenya nova.",
+    "forgotSubmit": "Enviar enllaç",
+    "forgotSent": "Si el correu està registrat, rebràs un enllaç per restablir la contrasenya. Revisa també la carpeta de spam.",
+    "forgotError": "No s'ha pogut enviar l'enllaç. Torna-ho a provar.",
+    "backToLogin": "Tornar al login",
+    "resetTitle": "Nova contrasenya",
+    "resetSubtitle": "Tria una contrasenya segura per al teu compte.",
+    "resetNewPassword": "Nova contrasenya",
+    "resetConfirmPassword": "Confirma la contrasenya",
+    "resetSubmit": "Guardar i entrar",
+    "resetMismatch": "Les contrasenyes no coincideixen",
+    "resetTooShort": "La contrasenya ha de tenir almenys 6 caràcters",
+    "resetError": "No s'ha pogut actualitzar la contrasenya"
   },
   "navigation": {
     "dashboard": "Dashboard",
