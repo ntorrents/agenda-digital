@@ -8,6 +8,7 @@ import { normalizeGender, upsertGuardianFromFormData } from '@/lib/guardian-link
 import { requireSuperadmin } from '@/lib/superadmin-auth'
 import { logBillingPriceChange } from '@/app/superadmin/erp-actions'
 import { DEFAULT_STAFF_PASSWORD, slugifySchoolName } from '@/lib/superadmin-constants'
+import { isDemoShowcaseEmail } from '@/lib/superadmin-demo'
 
 function revalidateSuperadmin(schoolId?: string) {
   revalidatePath('/superadmin')
@@ -28,6 +29,9 @@ export async function sendStaffAccessEmail(schoolId: string, userId: string) {
   if (profileError || !profile) return { error: 'Usuari no trobat' }
   if (profile.school_id !== schoolId) return { error: 'Aquest usuari no pertany a aquest centre' }
   if (!profile.email) return { error: 'El perfil no té correu' }
+  if (isDemoShowcaseEmail(profile.email)) {
+    return { error: 'Centre DEMO: correu fictici (@escola-demo.invalid). Usa «Entrar com» o la contrasenya del seed.' }
+  }
 
   const tempPassword = Math.random().toString(36).slice(-8)
 

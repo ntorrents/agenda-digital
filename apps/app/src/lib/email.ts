@@ -13,9 +13,33 @@ function getResendClient() {
   return new Resend(apiKey)
 }
 
+const PRODUCTION_APP_URL = 'https://app.petitdiari.com'
+
 export function getAppLoginUrl() {
-  const url = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://app.petitdiari.com'
-  return url.replace(/\/$/, '')
+  const candidates = [
+    process.env.APP_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : null,
+  ].filter(Boolean) as string[]
+
+  for (const raw of candidates) {
+    const url = raw.replace(/\/$/, '')
+    if (!url.includes('localhost') && !url.includes('127.0.0.1')) return url
+  }
+
+  return PRODUCTION_APP_URL
+}
+
+/** Enllaços d'impersonació sempre cap a producció (evita localhost al magic link). */
+export function getImpersonationAppUrl() {
+  const explicit = process.env.IMPERSONATION_APP_URL?.replace(/\/$/, '')
+  if (explicit) return explicit
+
+  const base = getAppLoginUrl()
+  if (base.includes('localhost') || base.includes('127.0.0.1')) return PRODUCTION_APP_URL
+  return base
 }
 
 function roleLabel(role: string) {

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { logAudit } from '@/lib/audit-log'
 import { normalizeEmail } from '@/lib/auth-email'
-import { getAppLoginUrl } from '@/lib/email'
+import { getImpersonationAppUrl } from '@/lib/email'
 import {
   getCommercialFromSettings,
   mergeCommercialSettings,
@@ -300,10 +300,9 @@ export async function getImpersonationLink(userId: string) {
   if (profileError || !profile?.email) return { error: 'Usuari no trobat o sense correu' }
   if (profile.role === 'superadmin') return { error: 'No es pot impersonar un superadmin' }
 
-  const redirectTo =
-    profile.role === 'guardian'
-      ? `${getAppLoginUrl()}/mi-hijo`
-      : `${getAppLoginUrl()}/dashboard`
+  const appBase = getImpersonationAppUrl()
+  const nextPath = profile.role === 'guardian' ? '/mi-hijo' : '/dashboard'
+  const redirectTo = `${appBase}/auth/callback?next=${encodeURIComponent(nextPath)}`
 
   const { data, error } = await admin.auth.admin.generateLink({
     type: 'magiclink',

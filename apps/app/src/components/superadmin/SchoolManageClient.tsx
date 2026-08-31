@@ -18,6 +18,7 @@ import {
   updateStudent,
 } from '@/app/superadmin/actions'
 import { DEFAULT_STAFF_PASSWORD } from '@/lib/superadmin-constants'
+import { DEMO_SCHOOL_META, isDemoSchool, isDemoShowcaseEmail } from '@/lib/superadmin-demo'
 import {
   getEffectivePricePerStudent,
   getSchoolMonthlyPrice,
@@ -146,6 +147,7 @@ export function SchoolManageClient({
   const billingActive = isSchoolBillingActive(school.settings)
   const mrr = getSchoolMrr(school.settings)
   const effectivePerStudent = getEffectivePricePerStudent(monthlyPrice, stats.activeStudents)
+  const isDemo = isDemoSchool(school.settings, school.id)
 
   function run(action: () => Promise<{ error?: string; success?: boolean; tempPassword?: string; emailSent?: boolean }>, okMsg: string) {
     startTransition(async () => {
@@ -169,7 +171,14 @@ export function SchoolManageClient({
           <Link href="/superadmin/escoles" className="text-xs text-stone-500 hover:text-stone-300">
             ← Escoles
           </Link>
-          <h2 className="text-xl font-black text-white mt-1">{school.name}</h2>
+          <h2 className="text-xl font-black text-white mt-1 flex items-center gap-2 flex-wrap">
+            {school.name}
+            {isDemo && (
+              <span className="text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                DEMO
+              </span>
+            )}
+          </h2>
           <p className="text-xs text-stone-500">
             {school.slug}
             <span className="text-stone-600 ml-2 font-mono" title={school.id}>
@@ -194,6 +203,30 @@ export function SchoolManageClient({
       </div>
 
       {message && <SaMessage type={message.type}>{message.text}</SaMessage>}
+
+      {isDemo && (
+        <div className="p-4 rounded-lg border border-amber-500/40 bg-amber-950/30 text-sm text-amber-100/90 space-y-2">
+          <p className="font-bold text-amber-300 uppercase text-xs tracking-wide">Centre de demostració</p>
+          <p className="text-stone-300 text-xs leading-relaxed">
+            Dades fictícies per presentacions i demos. Els correus <code className="text-amber-200">@escola-demo.invalid</code>{' '}
+            no existeixen — no s&apos;envia cap accés per correu. Usa «Entrar com» o login directe.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-2 text-xs font-mono bg-stone-950/60 rounded p-3 border border-stone-800">
+            <div>
+              <span className="text-stone-500 block text-[10px] uppercase font-sans font-bold">Directora</span>
+              {DEMO_SCHOOL_META.directorEmail}
+            </div>
+            <div>
+              <span className="text-stone-500 block text-[10px] uppercase font-sans font-bold">Contrasenya inicial</span>
+              {DEMO_SCHOOL_META.defaultPassword}
+              <span className="text-stone-500 font-sans text-[10px] block mt-0.5">(canvi obligatori al primer accés)</span>
+            </div>
+          </div>
+          <p className="text-[11px] text-stone-500">
+            Per regenerar dades: executa <code className="text-stone-400">scripts/demo-showcase-seed.sql</code> al SQL Editor de Supabase.
+          </p>
+        </div>
+      )}
 
       <SaPanel>
         <SaTabs tabs={TABS} active={tab} onChange={setTab} />
@@ -696,12 +729,18 @@ function StaffRow({
       <td className="py-2 px-2 text-stone-400">{member.role}</td>
       <td className="py-2 px-2 text-stone-400">{member.status}</td>
       <td className="py-2 px-2">
-        <SaSendAccessButton
-          userId={member.id}
-          schoolId={schoolId}
-          email={member.email}
-          alreadySent={!!member.welcome_email_sent}
-        />
+        {isDemoShowcaseEmail(member.email) ? (
+          <span className="text-[10px] text-stone-500" title="Correu fictici — no s'envia accés">
+            N/A (demo)
+          </span>
+        ) : (
+          <SaSendAccessButton
+            userId={member.id}
+            schoolId={schoolId}
+            email={member.email}
+            alreadySent={!!member.welcome_email_sent}
+          />
+        )}
       </td>
       <td className="py-2 px-2 text-right space-x-1">
         {member.status === 'active' && <SaImpersonateButton userId={member.id} />}

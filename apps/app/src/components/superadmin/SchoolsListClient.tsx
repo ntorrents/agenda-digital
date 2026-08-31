@@ -9,6 +9,7 @@ import {
   getSchoolMrr,
   isSchoolBillingActive,
 } from '@/lib/superadmin-billing'
+import { isDemoSchool } from '@/lib/superadmin-demo'
 import { SaButton, SaInput, SaMessage, SaPanel, SaPanelHeader, SaTable } from './sa-ui'
 
 type SchoolRow = {
@@ -135,12 +136,20 @@ export function SchoolsListClient({ schools }: { schools: SchoolRow[] }) {
               const monthlyPrice = getSchoolMonthlyPrice(school.settings)
               const mrr = getSchoolMrr(school.settings)
               const active = isSchoolBillingActive(school.settings)
+              const demo = isDemoSchool(school.settings, school.id)
               const perStudent = getEffectivePricePerStudent(monthlyPrice, studentCount)
 
               return (
                 <tr key={school.id} className="hover:bg-stone-800/30">
                   <td className="px-4 py-3">
-                    <div className="font-bold text-stone-200">{school.name}</div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-stone-200">{school.name}</span>
+                      {demo && (
+                        <span className="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                          DEMO
+                        </span>
+                      )}
+                    </div>
                     <div className="text-[11px] text-stone-500">{school.slug}</div>
                   </td>
                   <td className="px-4 py-3 text-stone-300">{studentCount}</td>
@@ -153,15 +162,19 @@ export function SchoolsListClient({ schools }: { schools: SchoolRow[] }) {
                   </td>
                   <td className="px-4 py-3 text-stone-300">{active ? `${mrr} €` : '0 €'}</td>
                   <td className="px-4 py-3">
-                    <span
-                      className={
-                        active
-                          ? 'text-[10px] font-bold uppercase text-emerald-400'
-                          : 'text-[10px] font-bold uppercase text-amber-400'
-                      }
-                    >
-                      {active ? 'Activa' : 'Pausada'}
-                    </span>
+                    {demo ? (
+                      <span className="text-[10px] font-bold uppercase text-amber-400">Demo</span>
+                    ) : (
+                      <span
+                        className={
+                          active
+                            ? 'text-[10px] font-bold uppercase text-emerald-400'
+                            : 'text-[10px] font-bold uppercase text-amber-400'
+                        }
+                      >
+                        {active ? 'Activa' : 'Pausada'}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link

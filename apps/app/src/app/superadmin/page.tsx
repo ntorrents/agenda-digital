@@ -9,6 +9,7 @@ import {
 import { fetchOperationalHealth } from '@/lib/superadmin-health'
 import { computeOnboardingSteps } from '@/lib/superadmin-onboarding'
 import { getCommercialFromSettings } from '@/lib/superadmin-commercial'
+import { DEMO_SCHOOL_META, isDemoSchool } from '@/lib/superadmin-demo'
 import { SaPanel, SaPanelHeader, SaTable } from '@/components/superadmin/sa-ui'
 import { OnboardingPanel } from '@/components/superadmin/OnboardingPanel'
 import { SuperadminAlertsClient } from '@/components/superadmin/SuperadminAlertsClient'
@@ -91,8 +92,9 @@ export default async function SuperadminDashboard() {
   )
 
   const totalMrr = schoolStats.reduce((sum, s) => sum + s.mrr, 0)
-  const activeSchools = schoolStats.filter((s) => s.billingActive).length
-  const notReady = schoolStats.filter((s) => !s.onboarding.ready)
+  const activeSchools = schoolStats.filter((s) => s.billingActive && !isDemoSchool(s.settings, s.id)).length
+  const notReady = schoolStats.filter((s) => !s.onboarding.ready && !isDemoSchool(s.settings, s.id))
+  const demoSchool = schoolStats.find((s) => isDemoSchool(s.settings, s.id))
 
   return (
     <div className="space-y-6">
@@ -108,6 +110,31 @@ export default async function SuperadminDashboard() {
         <Kpi label="Personal" value={String(teachersCount || 0)} />
         <Kpi label="Alertes crítiques" value={String(criticalCount)} highlight={criticalCount > 0} />
       </div>
+
+      {demoSchool && (
+        <SaPanel>
+          <SaPanelHeader
+            title="Centre DEMO"
+            action={
+              <Link
+                href={`/superadmin/escoles/${demoSchool.id}`}
+                className="text-xs font-bold text-violet-400 hover:text-violet-300"
+              >
+                Gestionar →
+              </Link>
+            }
+          />
+          <div className="p-4 text-sm text-stone-300 space-y-2">
+            <p>
+              <span className="font-bold text-amber-300">{demoSchool.name}</span> — dades fictícies per presentacions.
+              Correus <code className="text-stone-400">@escola-demo.invalid</code> (no s&apos;envien).
+            </p>
+            <p className="text-xs font-mono text-stone-400">
+              Directora: {DEMO_SCHOOL_META.directorEmail} · Contrasenya: {DEMO_SCHOOL_META.defaultPassword}
+            </p>
+          </div>
+        </SaPanel>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-4">
         <SaPanel>
