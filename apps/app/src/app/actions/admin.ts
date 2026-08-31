@@ -3,17 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { normalizeEmail, syncAuthAndProfileEmail } from '@/lib/auth-email'
+import { normalizeEmail } from '@/lib/auth-email'
 import { sendAccessEmail } from '@/lib/email'
-
-function normalizeRelation(raw: string): string {
-  const v = (raw || '').trim().toLowerCase()
-  if (['father', 'pare', 'padre', 'papà', 'papá', 'papa', 'dad'].includes(v)) return 'father'
-  if (['mother', 'mare', 'madre', 'mamà', 'mamá', 'mama', 'mum', 'mom'].includes(v)) return 'mother'
-  if (['tutor', 'tutora', 'tutor/a'].includes(v)) return 'tutor'
-  if (['other', 'altre', 'otro', 'altra'].includes(v)) return 'other'
-  return v || 'other'
-}
+import { upsertGuardianFromFormData } from '@/lib/guardian-link'
 
 async function requireStaff() {
   const supabase = await createClient()
@@ -53,78 +45,7 @@ async function upsertGuardianLink(
   }
 ) {
   const db = adminDb() || supabase
-  const gId = opts.formData.get(`${opts.prefix}_id`) as string
-  const gName = (opts.formData.get(`${opts.prefix}_name`) as string)?.trim()
-  const gEmail = normalizeEmail((opts.formData.get(`${opts.prefix}_email`) as string) || '')
-  const gPhone = (opts.formData.get(`${opts.prefix}_phone`) as string) || ''
-  const gRel = normalizeRelation((opts.formData.get(`${opts.prefix}_relation`) as string) || '')
-
-  if (!gName || !gEmail) return
-
-  if (gId) {
-    const { data: guardian } = await db
-      .from('profiles')
-      .select('id, email, school_id')
-      .eq('id', gId)
-      .single()
-
-    if (!guardian || guardian.school_id !== opts.schoolId) {
-      throw new Error('Tutor no vàlid per aquest centre')
-    }
-
-    if (normalizeEmail(guardian.email || '') !== gEmail) {
-      await syncAuthAndProfileEmail(gId, gEmail)
-    }
-
-    const { error: profileError } = await db.from('profiles').update({
-      full_name: gName,
-      phone: gPhone,
-    }).eq('id', gId)
-    if (profileError) throw new Error('Error actualitzant el tutor: ' + profileError.message)
-
-    const { error: relError } = await db.from('student_guardians').update({ relation: gRel })
-      .eq('guardian_id', gId)
-      .eq('student_id', opts.studentId)
-    if (relError) throw new Error('Error actualitzant el parentiu: ' + relError.message)
-    return
-  }
-
-  const { data: existingProfile } = await db.from('profiles').select('id').eq('email', gEmail).maybeSingle()
-  let guardianId = existingProfile?.id as string | undefined
-
-  if (guardianId) {
-    await db.from('profiles').update({ full_name: gName, phone: gPhone }).eq('id', guardianId)
-  } else {
-    const { data: newGuardianId, error: rpcError } = await db.rpc('create_guardian_user', {
-      p_email: gEmail,
-      p_full_name: gName,
-      p_phone: gPhone,
-      p_school_id: opts.schoolId,
-      p_password: 'changeme123',
-    })
-    if (rpcError || !newGuardianId) {
-      throw new Error(`No s'ha pogut crear el tutor ${gEmail}: ${rpcError?.message || 'RPC sense resultat'}`)
-    }
-    guardianId = newGuardianId as string
-  }
-
-  const { data: existingLink } = await db
-    .from('student_guardians')
-    .select('id')
-    .eq('student_id', opts.studentId)
-    .eq('guardian_id', guardianId)
-    .maybeSingle()
-
-  if (existingLink) {
-    await db.from('student_guardians').update({ relation: gRel }).eq('id', existingLink.id)
-  } else {
-    const { error: insertError } = await db.from('student_guardians').insert({
-      student_id: opts.studentId,
-      guardian_id: guardianId,
-      relation: gRel,
-    })
-    if (insertError) throw new Error('Error enllaçant el tutor: ' + insertError.message)
-  }
+  await upsertGuardianFromFormData(db, opts)
 }
 
 export async function createClassroom(formData: FormData) {
