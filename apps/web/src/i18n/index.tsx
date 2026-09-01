@@ -17,18 +17,16 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null)
 
 const LOCALE_KEY = 'pd-locale'
+const DEFAULT_LOCALE: Locale = 'ca'
 
 function detectLocale(): Locale {
   const stored = localStorage.getItem(LOCALE_KEY) as Locale | null
   if (stored && translations[stored]) return stored
-  const lang = navigator.language.slice(0, 2)
-  if (lang === 'es') return 'es'
-  if (lang === 'en') return 'en'
-  return 'ca'
+  return DEFAULT_LOCALE
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ca')
+  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE)
 
   useEffect(() => {
     setLocaleState(detectLocale())
