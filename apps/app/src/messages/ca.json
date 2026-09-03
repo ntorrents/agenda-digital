@@ -166,6 +166,8 @@
     "title": "Calendari",
     "subtitle": "Esdeveniments, festius i menú mensual",
     "noEvents": "No hi ha cap esdeveniment pròxim.",
+    "noEventsDay": "No hi ha res planejat per aquest dia.",
+    "today": "Avui",
     "general": "Festiu / General",
     "classroom": "Aula"
   },
@@ -188,6 +190,8 @@
     "noStudent": "No s'ha trobat l'alumne associat.",
     "noPhotos": "Encara no hi ha fotos a la galeria.",
     "downloadAll": "Descarregar totes",
+    "viewDay": "Dia seleccionat",
+    "viewAll": "Totes les fotos",
     "individual": "Individual",
     "group": "Grup",
     "photoOf": "Foto del"

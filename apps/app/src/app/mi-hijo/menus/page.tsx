@@ -33,7 +33,7 @@ export default async function MenusViewPage(props: { searchParams: Promise<{ m?:
   const monthName = new Date(currentYear, currentMonth - 1).toLocaleString('ca', { month: 'long' })
 
   return (
-    <div className="p-4 sm:p-8 space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 pt-6 max-w-4xl mx-auto">
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-black text-stone-800 tracking-tight flex items-center gap-2">
           <CalendarDays className="h-6 w-6 text-teal-600" />

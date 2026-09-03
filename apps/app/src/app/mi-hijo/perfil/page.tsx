@@ -43,7 +43,7 @@ export default async function FamilyProfilePage(props: { searchParams: Promise<{
   }
 
   return (
-    <main className="max-w-md mx-auto pt-6 pb-12 px-4 space-y-6">
+    <main className="max-w-md mx-auto pt-6 space-y-6">
       
       {/* Cabecera */}
       <div>

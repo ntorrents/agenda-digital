@@ -134,15 +134,15 @@ export default function CalendarioPage() {
   })
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-73px)] lg:h-screen">
+    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-73px)] lg:h-screen lg:overflow-hidden">
       
-      {/* Calendar Area */}
-      <div className="flex-1 overflow-y-auto bg-[#faf8f5] p-4 sm:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto space-y-6">
+      {/* Calendar Area — en mòbil es veu primer la graella mensual */}
+      <div className="flex-1 lg:overflow-y-auto bg-[#faf8f5] p-4 sm:p-6 lg:p-8 min-h-0">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-[24px] border border-stone-200/80 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center">
+              <div className="h-10 w-10 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center shrink-0">
                 <CalendarIcon className="h-5 w-5" />
               </div>
               <h2 className="text-xl font-black text-stone-800 capitalize">
@@ -163,18 +163,18 @@ export default function CalendarioPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[32px] border border-stone-200/80 shadow-sm overflow-hidden p-6">
-            <div className="grid grid-cols-7 gap-2 mb-2">
+          <div className="bg-white rounded-[24px] sm:rounded-[32px] border border-stone-200/80 shadow-sm overflow-hidden p-3 sm:p-6">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
               {weekdayNames.map(day => (
-                <div key={day} className="text-center text-xs font-black text-stone-400 uppercase tracking-wider py-2 capitalize">
+                <div key={day} className="text-center text-[10px] sm:text-xs font-black text-stone-400 uppercase tracking-wider py-2 capitalize">
                   {day}
                 </div>
               ))}
             </div>
             
-            <div className="grid grid-cols-7 gap-2 sm:gap-3 auto-rows-[75px] sm:auto-rows-[85px]">
+            <div className="grid grid-cols-7 gap-1 sm:gap-3 auto-rows-[52px] sm:auto-rows-[85px]">
               {Array.from({ length: startingDayIndex }).map((_, i) => (
-                <div key={`empty-${i}`} className="bg-stone-50/50 rounded-2xl border border-transparent" />
+                <div key={`empty-${i}`} className="bg-stone-50/50 rounded-xl sm:rounded-2xl border border-transparent" />
               ))}
               
               {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -192,20 +192,20 @@ export default function CalendarioPage() {
                       setIsCreating(false)
                     }}
                     className={cn(
-                      'relative flex flex-col p-2 sm:p-3 rounded-2xl border transition-all text-left hover:border-teal-300 hover:shadow-md cursor-pointer',
-                      isSelected ? 'border-teal-500 bg-teal-50 ring-4 ring-teal-500/10' : 'border-stone-200/80 bg-white',
+                      'relative flex flex-col p-1.5 sm:p-3 rounded-xl sm:rounded-2xl border transition-all text-left hover:border-teal-300 hover:shadow-md cursor-pointer',
+                      isSelected ? 'border-teal-500 bg-teal-50 ring-2 sm:ring-4 ring-teal-500/10' : 'border-stone-200/80 bg-white',
                       isToday && !isSelected ? 'border-amber-300 bg-amber-50/30' : ''
                     )}
                   >
                     <span className={cn(
-                      'text-sm font-black w-7 h-7 flex items-center justify-center rounded-full shrink-0',
+                      'text-xs sm:text-sm font-black w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full shrink-0',
                       isToday ? 'bg-amber-100 text-amber-700' : (isSelected ? 'bg-teal-600 text-white' : 'text-stone-700')
                     )}>
                       {date}
                     </span>
                     
-                    <div className="mt-1 flex-1 w-full overflow-hidden flex flex-col gap-1">
-                      <div className="flex flex-col gap-1 w-full px-1">
+                    <div className="mt-0.5 sm:mt-1 flex-1 w-full overflow-hidden flex flex-col gap-1">
+                      <div className="hidden sm:flex flex-col gap-1 w-full px-1">
                         {dayEvents.slice(0, 3).map(e => (
                           <div key={e.id} className={cn(
                             'text-[9px] font-bold px-1 py-0.5 rounded flex items-center gap-1 w-full',
@@ -216,8 +216,21 @@ export default function CalendarioPage() {
                           </div>
                         ))}
                       </div>
+                      {dayEvents.length > 0 && (
+                        <div className="sm:hidden flex justify-center gap-0.5 mt-auto pb-0.5">
+                          {dayEvents.slice(0, 3).map(e => (
+                            <span
+                              key={e.id}
+                              className={cn(
+                                'h-1.5 w-1.5 rounded-full',
+                                e.audience === 'school' ? 'bg-blue-500' : 'bg-purple-500'
+                              )}
+                            />
+                          ))}
+                        </div>
+                      )}
                       {dayEvents.length > 3 && (
-                        <div className="text-[9px] font-bold text-stone-400 pl-1">
+                        <div className="hidden sm:block text-[9px] font-bold text-stone-400 pl-1">
                           {t('moreEvents', { count: dayEvents.length - 3 })}
                         </div>
                       )}
@@ -232,17 +245,17 @@ export default function CalendarioPage() {
       </div>
 
       {/* Side Panel for Selected Day */}
-      <div className="w-full lg:w-96 bg-white border-l border-stone-200/80 flex flex-col h-full shrink-0">
-        <div className="p-6 border-b border-stone-100 bg-stone-50/50">
-          <h3 className="text-xl font-black text-stone-800 capitalize">
+      <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-stone-200/80 flex flex-col shrink-0 lg:h-full lg:min-h-0">
+        <div className="p-5 sm:p-6 border-b border-stone-100 bg-stone-50/50">
+          <h3 className="text-2xl sm:text-xl font-black text-stone-800 capitalize leading-tight">
             {selectedDate.toLocaleDateString(dateLocale, { weekday: 'long', day: 'numeric', month: 'long' })}
           </h3>
-          <p className="text-sm text-stone-500 font-medium">
+          <p className="text-sm text-stone-500 font-medium mt-1">
             {t('eventsCount', { count: selectedEvents.length })}
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 lg:overflow-y-auto p-5 sm:p-6 space-y-4 pb-10">
           {isCreating ? (
             <form onSubmit={handleCreateEvent} className="bg-stone-50 border border-stone-200 rounded-2xl p-4 space-y-4 animate-in slide-in-from-top-4 fade-in duration-200">
               <div className="flex items-center justify-between">

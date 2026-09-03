@@ -126,7 +126,7 @@ export default async function FamilyAgendaPage(props: { searchParams: Promise<{ 
   ) : null
 
   return (
-    <main className="max-w-md mx-auto pt-4 pb-8 space-y-5 px-4">
+    <main className="max-w-md mx-auto pt-4 space-y-5">
       
       <div className="space-y-5">
         {isFuture ? (

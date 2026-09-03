@@ -3,18 +3,21 @@ import { redirect } from 'next/navigation'
 import { Image as ImageIcon } from 'lucide-react'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { DownloadAllPhotosButton } from '@/components/family/DownloadAllPhotosButton'
-import { GalleryByDay } from '@/components/gallery/GalleryByDay'
+import { FamilyGalleryView } from '@/components/family/FamilyGalleryView'
 import { photosFromClassNote, photosFromDailyLog } from '@/lib/photos'
 import { groupPhotosByDay, type GalleryPhoto } from '@/lib/group-photos-by-day'
-
 import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
 
-export default async function GaleriaPage(props: { searchParams: Promise<{ date?: string; student?: string }> }) {
+export default async function GaleriaPage(props: {
+  searchParams: Promise<{ date?: string; student?: string }>
+}) {
   const searchParams = await props.searchParams
   const dateStr = searchParams.date || new Date().toISOString().split('T')[0]
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
 
@@ -74,42 +77,48 @@ export default async function GaleriaPage(props: { searchParams: Promise<{ date?
     }))
   )
 
-  const allPhotos = [...individualPhotos, ...classroomPhotos]
-    .filter((photo) => photo.date === dateStr)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const allPhotos = [...individualPhotos, ...classroomPhotos].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
 
-  const groups = groupPhotosByDay(allPhotos)
+  const dayPhotos = allPhotos.filter((photo) => photo.date === dateStr)
+  const allGroups = groupPhotosByDay(allPhotos)
+  const dayGroups = groupPhotosByDay(dayPhotos)
+
   const downloadItems = allPhotos.map((photo, index) => ({
     url: photo.url,
     filename: `${student?.first_name || 'foto'}-${photo.date}-${index + 1}.jpg`,
   }))
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-[24px] border border-stone-200/60 shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-            <ImageIcon className="h-6 w-6 text-emerald-500" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-stone-800 tracking-tight">{t('title')}</h2>
-            <p className="text-sm font-medium text-stone-500">{t('subtitle')}</p>
-          </div>
+    <div className="space-y-6 pt-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">
+            <ImageIcon className="h-6 w-6 text-emerald-600" /> {t('title')}
+          </h2>
+          <p className="text-sm text-stone-500 mt-1">{t('subtitle')}</p>
         </div>
-        <DownloadAllPhotosButton
-          photos={downloadItems}
-          label={t('downloadAll')}
-          zipName={`galeria-${student?.first_name || 'familia'}.zip`}
-        />
+        {allPhotos.length > 0 && (
+          <DownloadAllPhotosButton
+            photos={downloadItems}
+            label={t('downloadAll')}
+            zipName={`galeria-${student?.first_name || 'familia'}.zip`}
+          />
+        )}
       </div>
 
-      {allPhotos.length === 0 ? (
-        <div className="text-center p-8 bg-stone-50 rounded-2xl border border-stone-100">
-          <p className="text-stone-500 font-medium">{t('noPhotos')}</p>
-        </div>
-      ) : (
-        <GalleryByDay groups={groups} locale={locale} photoAltPrefix={t('photoOf')} />
-      )}
+      <FamilyGalleryView
+        dayGroups={dayGroups}
+        allGroups={allGroups}
+        dayEmpty={dayPhotos.length === 0}
+        allEmpty={allPhotos.length === 0}
+        locale={locale}
+        photoAltPrefix={t('photoOf')}
+        noPhotosLabel={t('noPhotos')}
+        viewDayLabel={t('viewDay')}
+        viewAllLabel={t('viewAll')}
+      />
     </div>
   )
 }

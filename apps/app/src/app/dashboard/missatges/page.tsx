@@ -71,11 +71,11 @@ export default async function DashboardMissatgesPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-16">
       
       {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="h-12 w-12 rounded-2xl bg-cyan-100 flex items-center justify-center shadow-inner">
+        <div className="h-12 w-12 shrink-0 rounded-2xl bg-cyan-100 flex items-center justify-center shadow-inner">
           <MessageCircle className="h-6 w-6 text-cyan-600" />
         </div>
         <div>
@@ -84,7 +84,7 @@ export default async function DashboardMissatgesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Formulario */}
         <div className="lg:col-span-1">
           <MessageForm families={families || []} senderId={user.id} schoolId={profile.school_id} />

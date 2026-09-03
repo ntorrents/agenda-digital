@@ -9,7 +9,7 @@ export default async function AyudaPage() {
   const urls = getLegalUrls(locale)
 
   return (
-    <main className="max-w-md mx-auto pt-6 pb-12 px-4 space-y-6">
+    <main className="max-w-md mx-auto pt-6 space-y-6">
       <div className="flex items-center gap-3">
         <div>
           <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">

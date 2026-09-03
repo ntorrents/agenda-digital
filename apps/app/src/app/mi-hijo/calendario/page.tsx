@@ -1,14 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react'
+import { Calendar as CalendarIcon } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-
 import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
+import { FamilyMonthCalendar } from '@/components/family/FamilyMonthCalendar'
 
-export default async function CalendariPage(props: { searchParams: Promise<{ student?: string }> }) {
+export default async function CalendariPage(props: {
+  searchParams: Promise<{ student?: string }>
+}) {
   const searchParams = await props.searchParams
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
 
@@ -21,86 +25,47 @@ export default async function CalendariPage(props: { searchParams: Promise<{ stu
   )
 
   let classroomId = null
+  let schoolId: string | null = null
   if (activeStudentId) {
     const { data: student } = await supabase
       .from('students')
-      .select('classroom_id')
+      .select('classroom_id, school_id')
       .eq('id', activeStudentId)
       .maybeSingle()
     classroomId = student?.classroom_id
+    schoolId = student?.school_id || null
   }
 
-  // Fetch upcoming events for school or classroom
-  const query = supabase
+  let query = supabase
     .from('events_announcements')
-    .select('*')
+    .select('id, title, description, event_date, audience')
     .eq('event_type', 'event')
-    .gte('event_date', new Date().toISOString().split('T')[0]) // Only future or today
     .order('event_date', { ascending: true })
 
+  if (schoolId) {
+    query = query.eq('school_id', schoolId)
+  }
+
   if (classroomId) {
-    query.or(`audience.eq.school,and(audience.eq.classroom,classroom_id.eq.${classroomId})`)
+    query = query.or(
+      `audience.eq.school,and(audience.eq.classroom,classroom_id.eq.${classroomId})`
+    )
   } else {
-    query.eq('audience', 'school')
+    query = query.eq('audience', 'school')
   }
 
   const { data: events } = await query
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3 bg-white p-5 rounded-[24px] border border-stone-200/60 shadow-xs">
-        <div className="h-12 w-12 rounded-xl bg-purple-100 flex items-center justify-center">
-          <CalendarIcon className="h-6 w-6 text-purple-500" />
-        </div>
-        <div>
-          <h2 className="text-xl font-black text-stone-800 tracking-tight">{t('title')}</h2>
-          <p className="text-sm font-medium text-stone-500">{t('subtitle')}</p>
-        </div>
+    <div className="space-y-6 pt-6">
+      <div>
+        <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">
+          <CalendarIcon className="h-6 w-6 text-purple-600" /> {t('title')}
+        </h2>
+        <p className="text-sm text-stone-500 mt-1">{t('subtitle')}</p>
       </div>
 
-      <div className="space-y-4">
-        {!events || events.length === 0 ? (
-          <div className="text-center p-8 bg-stone-50 rounded-2xl border border-stone-100">
-            <p className="text-stone-500 font-medium">{t('noEvents')}</p>
-          </div>
-        ) : (
-          events.map(event => (
-            <div 
-              key={event.id} 
-              className="p-5 rounded-[24px] bg-white border border-stone-200/60 shadow-xs flex items-start gap-4"
-            >
-              <div className="flex flex-col items-center justify-center bg-purple-50 border border-purple-100 rounded-2xl p-3 min-w-[70px]">
-                <span className="text-xs font-bold text-purple-400 uppercase">
-                  {new Date(event.event_date).toLocaleDateString('ca-ES', { month: 'short' })}
-                </span>
-                <span className="text-2xl font-black text-purple-600 leading-none mt-1">
-                  {new Date(event.event_date).getDate()}
-                </span>
-              </div>
-              
-              <div className="flex flex-col justify-center flex-1 py-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md ${
-                    event.audience === 'school' 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'bg-emerald-100 text-emerald-700'
-                  }`}>
-                    {event.audience === 'school' ? t('general') : t('classroom')}
-                  </span>
-                </div>
-                <h3 className="text-base font-bold text-stone-800 leading-tight">
-                  {event.title}
-                </h3>
-                {event.description && (
-                  <p className="text-sm text-stone-500 mt-1 line-clamp-2">
-                    {event.description}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+      <FamilyMonthCalendar events={events || []} />
     </div>
   )
 }

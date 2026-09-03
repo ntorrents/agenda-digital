@@ -144,6 +144,8 @@
     "title": "Calendar",
     "subtitle": "Events, holidays, and monthly menu",
     "noEvents": "There are no upcoming events.",
+    "noEventsDay": "Nothing planned for this day.",
+    "today": "Today",
     "general": "Holiday / General",
     "classroom": "Classroom"
   },
@@ -165,6 +167,9 @@
     "subtitle": "All saved memories",
     "noStudent": "The associated student was not found.",
     "noPhotos": "There are no photos in the gallery yet.",
+    "downloadAll": "Download all",
+    "viewDay": "Selected day",
+    "viewAll": "All photos",
     "individual": "Individual",
     "group": "Group",
     "photoOf": "Photo of"

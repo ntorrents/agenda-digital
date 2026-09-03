@@ -18,7 +18,7 @@ export default async function FamilyAppHome() {
   const withDate = (path: string) => `${path}?date=${today}`
 
   return (
-    <main className="px-5 pt-8 pb-12 flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
+    <main className="pt-8 pb-4 flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
       <div className="w-full max-w-sm mx-auto space-y-8">
         <div className="text-center space-y-1">
           <h2 className="text-2xl font-black text-stone-900 tracking-tight">{t('title')}</h2>

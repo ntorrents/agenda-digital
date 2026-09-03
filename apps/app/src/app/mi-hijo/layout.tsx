@@ -141,10 +141,10 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
     <img
       src={schoolInfo.logo_url}
       alt={schoolInfo.name || 'Logo escola'}
-      className="h-6 lg:h-8 w-auto max-w-full object-contain"
+      className="h-10 lg:h-10 w-auto max-w-full object-contain"
     />
   ) : (
-    <span className="text-xs lg:text-sm font-black text-stone-900 truncate max-w-full">
+    <span className="text-sm lg:text-base font-black text-stone-900 truncate max-w-full">
       {schoolInfo?.name || 'Petit Diari'}
     </span>
   )
@@ -237,7 +237,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
       <header
         className={cn(
           'sticky top-0 z-30 border-b border-stone-200/80 bg-white/95 backdrop-blur-md shadow-xs overflow-visible lg:hidden',
-          showDatePicker && !isHome ? 'px-2 pt-2 pb-3' : 'px-2 py-2 min-h-16'
+          showDatePicker && !isHome ? 'px-2 pt-2 pb-3' : 'px-3 py-3 min-h-[72px]'
         )}
       >
         {isHome ? (
@@ -251,7 +251,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
               >
                 <Menu className="h-6 w-6" />
               </Button>
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none max-w-[40%]">
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none max-w-[55%]">
                 {schoolBrand}
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
@@ -263,7 +263,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
             </div>
-            <p className="text-center text-[10px] text-stone-500 font-bold capitalize mt-1">
+            <p className="text-center text-sm text-stone-600 font-bold capitalize mt-2 tracking-wide">
               {todayFormatted}
             </p>
           </>
@@ -318,14 +318,14 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
             <img
               src={schoolInfo.logo_url}
               alt={schoolInfo.name || 'Logo escola'}
-              className="h-8 w-auto max-w-[120px] object-contain shrink-0"
+              className="h-11 w-auto max-w-[140px] object-contain shrink-0"
             />
           )}
           <div className="min-w-0">
             <h1 className="text-sm font-black text-stone-900 truncate">
               {isHome ? schoolInfo?.name || 'Petit Diari' : displayName}
             </h1>
-            <p className="text-xs text-stone-500 font-medium capitalize truncate">
+            <p className="text-sm text-stone-500 font-medium capitalize truncate">
               {isHome ? todayFormatted : classroomName}
             </p>
           </div>
@@ -350,7 +350,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <div className="flex-1 max-w-lg mx-auto w-full">{children}</div>
+      <div className="flex-1 max-w-lg mx-auto w-full px-4 pb-10">{children}</div>
     </div>
   )
 }

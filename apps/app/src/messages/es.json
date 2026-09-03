@@ -144,6 +144,8 @@
     "title": "Calendario",
     "subtitle": "Eventos, festivos y menú mensual",
     "noEvents": "No hay ningún evento próximo.",
+    "noEventsDay": "No hay nada planificado para este día.",
+    "today": "Hoy",
     "general": "Festivo / General",
     "classroom": "Aula"
   },
@@ -165,6 +167,9 @@
     "subtitle": "Todos los recuerdos guardados",
     "noStudent": "No se ha encontrado al alumno asociado.",
     "noPhotos": "Aún no hay fotos en la galería.",
+    "downloadAll": "Descargar todas",
+    "viewDay": "Día seleccionado",
+    "viewAll": "Todas las fotos",
     "individual": "Individual",
     "group": "Grupo",
     "photoOf": "Foto del"
