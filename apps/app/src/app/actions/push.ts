@@ -141,8 +141,14 @@ export async function notifyUser(
   return sendPushToUser(userId, payload)
 }
 
-/** Prova end-to-end: envia un push a l'usuari autenticat. */
+/**
+ * Prova end-to-end (només PRE / local). No exposar a la UI de producció.
+ */
 export async function sendTestPushToMe() {
+  if (process.env.NODE_ENV === 'production') {
+    return { error: 'unavailable' }
+  }
+
   try {
     const supabase = await createClient()
     const {

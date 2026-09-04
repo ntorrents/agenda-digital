@@ -7,7 +7,6 @@ import {
   getPushPublicKey,
   removePushSubscription,
   savePushSubscription,
-  sendTestPushToMe,
 } from '@/app/actions/push'
 import { canUseWebPush, isStandaloneDisplay, isIosDevice } from '@/lib/pwa/detect'
 
@@ -178,36 +177,14 @@ export function PushNotificationsCard() {
 
       <div className="flex flex-wrap items-center gap-2">
         {subscribed && permission === 'granted' ? (
-          <>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void disable()}
-              className="text-xs font-bold px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-60"
-            >
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Desactivar'}
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setBusy(true)
-                setMessage(null)
-                void sendTestPushToMe()
-                  .then((r) => {
-                    setMessage(
-                      r.error
-                        ? r.error
-                        : `Prova enviada (${r.result?.sent || 0} dispositiu/s)`
-                    )
-                  })
-                  .finally(() => setBusy(false))
-              }}
-              className="text-xs font-bold px-4 py-2.5 rounded-xl border border-teal-200 text-teal-700 bg-teal-50 hover:bg-teal-100 disabled:opacity-60"
-            >
-              Enviar prova
-            </button>
-          </>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void disable()}
+            className="text-xs font-bold px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-60"
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Desactivar'}
+          </button>
         ) : (
           <button
             type="button"

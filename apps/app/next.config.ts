@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  allowedDevOrigins: ['closes-hottest-solving-attract.trycloudflare.com', 'localhost:3000'],
+  // Només afecta `next dev` (túnel / localhost). No impacta el build de PRO.
+  allowedDevOrigins: ['localhost:3000'],
   async headers() {
     return [
       {
