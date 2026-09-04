@@ -17,6 +17,7 @@ export async function updateSession(request: NextRequest) {
   if (
     pathname.startsWith('/_next/') ||
     pathname === '/manifest.webmanifest' ||
+    pathname === '/sw.js' ||
     /\.(?:svg|png|jpe?g|gif|webp|ico|woff2?|txt|xml|webmanifest)$/i.test(pathname)
   ) {
     return supabaseResponse

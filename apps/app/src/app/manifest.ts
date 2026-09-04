@@ -6,6 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'Petit Diari',
     description: "El dia a dia a l'escola, a prop de la família",
     start_url: '/',
+    id: '/',
     display: 'standalone',
     background_color: '#fafaf9',
     theme_color: '#0f766e',
@@ -26,6 +27,13 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/icon-192.png',
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
       },
       {
         src: '/icon-512.png',

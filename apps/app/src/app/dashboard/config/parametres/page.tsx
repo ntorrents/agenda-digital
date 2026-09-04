@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Settings } from 'lucide-react'
 import Link from 'next/link'
 import { StaffProfileForm } from '@/components/dashboard/StaffProfileForm'
+import { PushNotificationsCard } from '@/components/pwa/PushNotificationsCard'
 import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardParametresPage() {
@@ -40,7 +41,10 @@ export default async function DashboardParametresPage() {
         </div>
       </div>
 
-      <StaffProfileForm profile={profile} />
+      <div className="max-w-3xl space-y-6">
+        <PushNotificationsCard />
+        <StaffProfileForm profile={profile} />
+      </div>
     </div>
   )
 }

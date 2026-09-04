@@ -181,6 +181,16 @@ export function SchoolSettingsForm({ initialSettings, schoolInfo }: { initialSet
             />
           </div>
         </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-stone-500 pl-1">{t('labelPhone')}</label>
+          <input
+            name="phone"
+            defaultValue={schoolInfo?.phone || ''}
+            type="tel"
+            placeholder="600 000 000"
+            className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm font-semibold text-stone-800 focus:outline-none focus:border-teal-500"
+          />
+        </div>
       </div>
       <hr className="border-stone-100" />
 

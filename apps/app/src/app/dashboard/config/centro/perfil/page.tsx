@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { UserCircle } from 'lucide-react'
 import { StaffProfileForm } from '@/components/dashboard/StaffProfileForm'
+import { PushNotificationsCard } from '@/components/pwa/PushNotificationsCard'
 import { getTranslations } from 'next-intl/server'
 
 export default async function DashboardConfigPerfilPage() {
@@ -37,6 +38,8 @@ export default async function DashboardConfigPerfilPage() {
           <p className="text-xs text-stone-500 mt-1">{t('hubProfileDesc')}</p>
         </div>
       </div>
+
+      <PushNotificationsCard />
 
       <StaffProfileForm
         profile={{

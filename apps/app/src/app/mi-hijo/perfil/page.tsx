@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { FamilyProfileForm } from '@/components/family/FamilyProfileForm'
+import { PushNotificationsCard } from '@/components/pwa/PushNotificationsCard'
 import { User, Baby, School } from 'lucide-react'
 
 import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
@@ -99,6 +100,8 @@ export default async function FamilyProfilePage(props: { searchParams: Promise<{
           </div>
         </div>
       )}
+
+      <PushNotificationsCard />
 
       {/* Formulario de Configuración Padre/Madre */}
       <FamilyProfileForm 

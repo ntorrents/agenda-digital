@@ -113,6 +113,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
   }
 
   const handleBack = () => {
+    window.scrollTo(0, 0)
     router.push(getBackHref(pathname))
   }
 
@@ -135,6 +136,8 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setIsMenuOpen(false)
+    // Layout compartit: el scroll de la finestra es manté entre rutes i deixa la home tallada.
+    window.scrollTo(0, 0)
   }, [pathname])
 
   const schoolBrand = schoolInfo?.logo_url ? (

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Bell, Pin, Clock } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
+import { FamilyHelpGuideLink } from '@/components/family/FamilyHelpGuideLink'
 
 export default async function TaulerPage(props: {
   searchParams: Promise<{ student?: string }>
@@ -112,6 +113,8 @@ export default async function TaulerPage(props: {
           ))
         )}
       </div>
+
+      <FamilyHelpGuideLink />
     </div>
   )
 }

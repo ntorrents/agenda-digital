@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Calendar, MessageCircle, Image as ImageIcon, Bell, HelpCircle } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { HomeStudentPicker } from '@/components/family/HomeStudentPicker'
+import { FamilyHelpGuideLink } from '@/components/family/FamilyHelpGuideLink'
 
 export default async function FamilyAppHome() {
   const supabase = await createClient()
@@ -18,8 +19,8 @@ export default async function FamilyAppHome() {
   const withDate = (path: string) => `${path}?date=${today}`
 
   return (
-    <main className="pt-8 pb-4 flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
-      <div className="w-full max-w-sm mx-auto space-y-8">
+    <main className="pt-4 pb-8 flex flex-col items-center">
+      <div className="w-full max-w-sm mx-auto space-y-6">
         <div className="text-center space-y-1">
           <h2 className="text-2xl font-black text-stone-900 tracking-tight">{t('title')}</h2>
           <p className="text-sm font-medium text-stone-500">{t('subtitle')}</p>
@@ -88,6 +89,8 @@ export default async function FamilyAppHome() {
             <span className="text-sm font-black text-stone-700">{t('help')}</span>
           </Link>
         </div>
+
+        <FamilyHelpGuideLink className="pt-2" />
       </div>
     </main>
   )

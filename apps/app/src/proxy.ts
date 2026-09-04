@@ -18,8 +18,9 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      * - manifest.webmanifest (PWA manifest)
+     * - sw.js (service worker)
      * - icons/ (PWA icons)
      */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|icons/|.*\\.(?:svg|png|jpe?g|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|sw\\.js|icons/|.*\\.(?:svg|png|jpe?g|gif|webp|ico)$).*)',
   ],
 }

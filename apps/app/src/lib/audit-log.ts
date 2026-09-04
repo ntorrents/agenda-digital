@@ -43,6 +43,11 @@ export type AuditAction =
   | 'error.family_agenda'
   | 'error.menu'
   | 'error.school_settings'
+  | 'error.push_send'
+  | 'error.push_subscribe'
+  | 'error.push_unsubscribe'
+  | 'push.subscribe'
+  | 'push.unsubscribe'
 
 export type AuditSeverity = 'INFO' | 'WARN' | 'ERROR'
 
@@ -120,12 +125,20 @@ export const AUDIT_CATEGORY_META: Record<
   system: {
     label: 'Sistema',
     color: 'bg-violet-500/20 text-violet-300 border-violet-500/40',
-    actions: ['impersonate.link'],
+    actions: ['impersonate.link', 'push.subscribe', 'push.unsubscribe'],
   },
   errors: {
     label: 'Errors',
     color: 'bg-red-500/20 text-red-300 border-red-500/40',
-    actions: ['error.server', 'error.family_agenda', 'error.menu', 'error.school_settings'],
+    actions: [
+      'error.server',
+      'error.family_agenda',
+      'error.menu',
+      'error.school_settings',
+      'error.push_send',
+      'error.push_subscribe',
+      'error.push_unsubscribe',
+    ],
   },
 }
 
@@ -166,6 +179,11 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   'error.family_agenda': 'Error agenda família',
   'error.menu': 'Error menú',
   'error.school_settings': 'Error settings centre',
+  'error.push_send': 'Error enviament push',
+  'error.push_subscribe': 'Error subscripció push',
+  'error.push_unsubscribe': 'Error baixar push',
+  'push.subscribe': 'Push activat',
+  'push.unsubscribe': 'Push desactivat',
 }
 
 export const AUDIT_SEVERITY_META: Record<

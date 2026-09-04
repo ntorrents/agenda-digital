@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { MessageCircle, Mail } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { FamilyHelpGuideLink } from '@/components/family/FamilyHelpGuideLink'
 
 export default async function MissatgesPage() {
   const supabase = await createClient()
@@ -76,6 +77,8 @@ export default async function MissatgesPage() {
           ))
         )}
       </div>
+
+      <FamilyHelpGuideLink />
     </div>
   )
 }

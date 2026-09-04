@@ -4,6 +4,7 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
 import { FamilyMonthCalendar } from '@/components/family/FamilyMonthCalendar'
+import { FamilyHelpGuideLink } from '@/components/family/FamilyHelpGuideLink'
 
 export default async function CalendariPage(props: {
   searchParams: Promise<{ student?: string }>
@@ -66,6 +67,8 @@ export default async function CalendariPage(props: {
       </div>
 
       <FamilyMonthCalendar events={events || []} />
+
+      <FamilyHelpGuideLink />
     </div>
   )
 }

@@ -31,6 +31,7 @@ export async function updateSchoolSettings(formData: FormData) {
     const settingsJsonStr = formData.get('settings') as string
     const cif = (formData.get('cif') as string) || null
     const contact_email = (formData.get('contact_email') as string) || null
+    const phone = (formData.get('phone') as string)?.trim() || null
     const name = formData.get('name') as string
     const address = (formData.get('address') as string) || null
     const logoFile = formData.get('logo') as File | null
@@ -66,6 +67,7 @@ export async function updateSchoolSettings(formData: FormData) {
       settings,
       cif,
       contact_email,
+      phone,
       name,
       address,
     }
@@ -80,6 +82,7 @@ export async function updateSchoolSettings(formData: FormData) {
 
     revalidatePath('/dashboard/config/centro')
     revalidatePath('/mi-hijo', 'layout')
+    revalidatePath('/mi-hijo/ayuda')
     updateTag(schoolSettingsTag(profile.school_id))
     return { success: true }
   } catch (e) {

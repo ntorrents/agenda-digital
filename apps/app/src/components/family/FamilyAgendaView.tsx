@@ -7,6 +7,7 @@ import { normalizeDiaperTypes } from '@/lib/diaper'
 import type { DiaperType } from '@/types/enums'
 import { AgendaDayNote } from '@/components/family/AgendaDayNote'
 import { PhotoStrip } from '@/components/media/PhotoStrip'
+import { FamilyHelpGuideLink } from '@/components/family/FamilyHelpGuideLink'
 import type { FamilyAgendaPayload } from '@/app/actions/family-agenda'
 
 export function FamilyAgendaView({
@@ -207,6 +208,8 @@ export function FamilyAgendaView({
           </>
         )}
       </div>
+
+      <FamilyHelpGuideLink className="pt-2 pb-2" />
     </main>
   )
 }
