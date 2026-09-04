@@ -15,19 +15,23 @@ function getResendClient() {
 
 const PRODUCTION_APP_URL = 'https://app.petitdiari.com'
 
-export function getAppLoginUrl() {
-  const candidates = [
-    process.env.APP_URL,
-    process.env.NEXT_PUBLIC_APP_URL,
-    process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : null,
-  ].filter(Boolean) as string[]
+/** PRE local: no envia correus reals (log a consola). */
+export function isEmailDryRun() {
+  if (process.env.EMAIL_DRY_RUN === 'true') return true
+  if (process.env.EMAIL_DRY_RUN === 'false') return false
+  const app = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || ''
+  return app.includes('localhost') || app.includes('127.0.0.1')
+}
 
-  for (const raw of candidates) {
-    const url = raw.replace(/\/$/, '')
-    if (!url.includes('localhost') && !url.includes('127.0.0.1')) return url
-  }
+export function getAppLoginUrl() {
+  // Respecta APP_URL sempre (inclòs localhost a PRE)
+  const explicit = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '')
+  if (explicit) return explicit
+
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : null
+  if (vercel && !vercel.includes('localhost')) return vercel.replace(/\/$/, '')
 
   return PRODUCTION_APP_URL
 }
@@ -57,11 +61,6 @@ function roleLabel(role: string) {
 }
 
 export async function sendAccessEmail({ to, fullName, tempPassword, role }: AccessEmailParams) {
-  const resend = getResendClient()
-  if (!resend) {
-    throw new Error('RESEND_API_KEY no està configurada.')
-  }
-
   const from = process.env.RESEND_FROM_EMAIL || 'Petit Diari <hola@petitdiari.com>'
   const loginUrl = getAppLoginUrl()
   const name = fullName?.trim() || 'Hola'
@@ -85,6 +84,20 @@ export async function sendAccessEmail({ to, fullName, tempPassword, role }: Acce
     </div>
   `
 
+  if (isEmailDryRun()) {
+    console.info('[email:dry-run] No s\'ha enviat correu (PRE/local). Credencials:')
+    console.info(`  to: ${to}`)
+    console.info(`  password: ${tempPassword}`)
+    console.info(`  login: ${loginUrl}/login`)
+    console.info(`  from: ${from}`)
+    return
+  }
+
+  const resend = getResendClient()
+  if (!resend) {
+    throw new Error('RESEND_API_KEY no està configurada.')
+  }
+
   const { error } = await resend.emails.send({
     from,
     to,
@@ -98,5 +111,5 @@ export async function sendAccessEmail({ to, fullName, tempPassword, role }: Acce
 }
 
 export function isEmailConfigured() {
-  return Boolean(process.env.RESEND_API_KEY)
+  return isEmailDryRun() || Boolean(process.env.RESEND_API_KEY)
 }

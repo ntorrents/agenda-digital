@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getCachedSchoolSettings } from '@/lib/cache/school-data'
 import { redirect } from 'next/navigation'
 import { DailyLogForm } from '@/components/agenda/DailyLogForm'
 import { CheckCircle2, ArrowLeft } from 'lucide-react'
@@ -35,18 +36,11 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
     .eq('id', studentId)
     .single()
 
-  if (!student || student.school_id !== schoolId || !student.classroom_id) {
+  if (!student || !schoolId || student.school_id !== schoolId || !student.classroom_id) {
     redirect('/dashboard/agendas')
   }
 
-  // Fetch school settings for agenda toggles
-  const { data: school } = await supabase
-    .from('schools')
-    .select('settings')
-    .eq('id', schoolId)
-    .single()
-    
-  const settings = school?.settings || {}
+  const settings = await getCachedSchoolSettings(schoolId)
 
   // Fetch existing log for this date if it exists
   const { data: existingLog } = await supabase

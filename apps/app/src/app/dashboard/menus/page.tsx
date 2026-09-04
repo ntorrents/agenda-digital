@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getCachedDiningMenu } from '@/lib/cache/school-data'
 import { redirect } from 'next/navigation'
 import { MenuEditorForm } from '@/components/admin/MenuEditorForm'
 import { CalendarDays, ExternalLink } from 'lucide-react'
@@ -23,14 +24,11 @@ export default async function MenusPage(props: { searchParams: Promise<{ m?: str
   const currentMonth = searchParams.m ? parseInt(searchParams.m) : today.getMonth() + 1
   const currentYear = searchParams.y ? parseInt(searchParams.y) : today.getFullYear()
 
-  // Buscar menú de ese mes
-  const { data: existingMenu } = await supabase
-    .from('dining_menus')
-    .select('*')
-    .eq('school_id', profile.school_id)
-    .eq('month', currentMonth)
-    .eq('year', currentYear)
-    .maybeSingle()
+  const existingMenu = await getCachedDiningMenu(
+    profile.school_id,
+    currentYear,
+    currentMonth
+  )
 
   const t = await getTranslations('dashboardMenus')
   const locale = await getLocale()

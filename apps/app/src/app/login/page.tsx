@@ -33,6 +33,14 @@ export default function LoginPage() {
       })
 
       if (error) {
+        void import('@/app/actions/audit').then(({ recordAuditError }) =>
+          recordAuditError({
+            action: 'auth.login_failed',
+            entityType: 'session',
+            message: error.message,
+            context: { email },
+          })
+        )
         if (error.message.includes('Invalid login credentials')) {
           setErrorMessage(t('errorCredentials'))
         } else if (error.message.includes('querying schema') || error.status === 500) {
@@ -94,7 +102,16 @@ export default function LoginPage() {
       window.location.assign(dest)
       return
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : t('errorUnexpected'))
+      const message = err instanceof Error ? err.message : t('errorUnexpected')
+      void import('@/app/actions/audit').then(({ recordAuditError }) =>
+        recordAuditError({
+          action: 'auth.login_failed',
+          entityType: 'session',
+          message,
+          context: { email },
+        })
+      )
+      setErrorMessage(message)
       setIsLoading(false)
     }
   }

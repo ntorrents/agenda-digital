@@ -1,6 +1,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+/**
+ * Refresco de sesión en el proxy de Next.js (antes middleware).
+ * Cliente por request con cookies del request/response — patrón oficial SSR.
+ * Acceso vía HTTP/PostgREST (no pool Postgres).
+ */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,

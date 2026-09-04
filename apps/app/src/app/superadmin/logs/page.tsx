@@ -1,12 +1,15 @@
 import { Suspense } from 'react'
+import { AlertTriangle } from 'lucide-react'
 import { getSuperadminDb } from '@/lib/superadmin'
 import { SaPanel, SaPanelHeader } from '@/components/superadmin/sa-ui'
 import { SuperadminLogsFilter } from '@/components/superadmin/SuperadminLogsFilter'
 import {
   AUDIT_ACTION_LABELS,
   AUDIT_CATEGORY_META,
+  AUDIT_SEVERITY_META,
   getAuditActionLabel,
   getAuditCategory,
+  normalizeAuditSeverity,
   roleLoginLabel,
   type AuditCategory,
 } from '@/lib/audit-log'
@@ -14,11 +17,19 @@ import {
 function formatPayload(action: string, payload: Record<string, unknown> | null) {
   if (!payload || Object.keys(payload).length === 0) return '—'
 
-  if (action === 'auth.login') {
+  if (action === 'auth.login' || action === 'auth.login_failed') {
     const role = roleLoginLabel(payload.role as string)
     const email = (payload.email as string) || ''
     const name = (payload.fullName as string) || ''
+    const message = (payload.message as string) || ''
+    if (action === 'auth.login_failed') {
+      return [email, message].filter(Boolean).join(' · ') || '—'
+    }
     return [role, name, email].filter(Boolean).join(' · ')
+  }
+
+  if (action.startsWith('error.') || payload.message) {
+    return String(payload.message || JSON.stringify(payload))
   }
 
   if (action.startsWith('agenda.')) {
@@ -39,6 +50,7 @@ function formatPayload(action: string, payload: Record<string, unknown> | null) 
   const compact = { ...payload }
   delete compact.actorRole
   delete compact.actorEmail
+  delete compact.stack
   if (Object.keys(compact).length === 0) return '—'
   return JSON.stringify(compact)
 }
@@ -46,12 +58,18 @@ function formatPayload(action: string, payload: Record<string, unknown> | null) 
 export default async function SuperadminLogsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; action?: string; school?: string }>
+  searchParams: Promise<{
+    category?: string
+    action?: string
+    school?: string
+    severity?: string
+  }>
 }) {
   const params = await searchParams
   const categoryFilter = (params.category || '') as AuditCategory | ''
   const actionFilter = params.action || ''
   const schoolFilter = params.school || ''
+  const errorsOnly = params.severity === 'ERROR'
 
   const supabase = await getSuperadminDb()
 
@@ -59,9 +77,13 @@ export default async function SuperadminLogsPage({
 
   let query = supabase
     .from('audit_logs')
-    .select('id, action, entity_type, entity_id, school_id, payload, created_at, actor_id')
+    .select('id, action, entity_type, entity_id, school_id, payload, severity, created_at, actor_id')
     .order('created_at', { ascending: false })
     .limit(500)
+
+  if (errorsOnly) {
+    query = query.eq('severity', 'ERROR')
+  }
 
   if (actionFilter) {
     query = query.eq('action', actionFilter)
@@ -77,6 +99,11 @@ export default async function SuperadminLogsPage({
     error?.message?.includes('audit_logs') ||
     error?.code === '42P01' ||
     error?.message?.includes('does not exist')
+
+  const severityColumnMissing =
+    !!error?.message?.includes('severity') ||
+    (!!error?.message?.toLowerCase().includes('column') &&
+      !!error?.message?.includes('severity'))
 
   const actorIds = [...new Set((logs || []).map((l) => l.actor_id).filter(Boolean))] as string[]
   const schoolIds = [...new Set((logs || []).map((l) => l.school_id).filter(Boolean))] as string[]
@@ -104,8 +131,7 @@ export default async function SuperadminLogsPage({
       <div>
         <h2 className="text-xl font-black text-white">Registre d&apos;auditoria</h2>
         <p className="text-stone-500 text-sm mt-1">
-          Logins, agendes, avisos, canvis d&apos;alumnes i accions de superadmin. Filtra per categoria o
-          acció.
+          Logins, agendes, avisos, canvis d&apos;alumnes, errors operatius i accions de superadmin.
         </p>
       </div>
 
@@ -114,8 +140,18 @@ export default async function SuperadminLogsPage({
           <SaPanelHeader title="Migració pendent" />
           <div className="p-4 text-sm text-stone-400 space-y-2">
             <p>
-              Executa <code className="text-stone-300">apps/app/scripts/audit-logs.sql</code> al SQL Editor de
-              Supabase.
+              Executa <code className="text-stone-300">apps/app/scripts/audit-logs.sql</code> al SQL
+              Editor de Supabase.
+            </p>
+          </div>
+        </SaPanel>
+      ) : severityColumnMissing ? (
+        <SaPanel>
+          <SaPanelHeader title="Migració de severitat pendent" />
+          <div className="p-4 text-sm text-stone-400 space-y-2">
+            <p>
+              Executa <code className="text-stone-300">apps/app/scripts/audit-logs-severity.sql</code>{' '}
+              a PRE i PRO per afegir la columna <code className="text-stone-300">severity</code>.
             </p>
           </div>
         </SaPanel>
@@ -125,13 +161,20 @@ export default async function SuperadminLogsPage({
         </SaPanel>
       ) : (
         <SaPanel>
-          <SaPanelHeader title={`Esdeveniments (${logs?.length || 0})`} />
+          <SaPanelHeader
+            title={
+              errorsOnly
+                ? `Errors (${logs?.length || 0})`
+                : `Esdeveniments (${logs?.length || 0})`
+            }
+          />
           <Suspense fallback={null}>
             <SuperadminLogsFilter
               schools={schools || []}
               currentCategory={categoryFilter}
               currentAction={actionFilter}
               currentSchoolId={schoolFilter}
+              errorsOnly={errorsOnly}
               actionOptions={actionOptions}
             />
           </Suspense>
@@ -140,6 +183,7 @@ export default async function SuperadminLogsPage({
               <thead>
                 <tr className="text-[11px] uppercase text-stone-500 border-b border-stone-800">
                   <th className="py-2 px-2">Quan</th>
+                  <th className="py-2 px-2">Nivell</th>
                   <th className="py-2 px-2">Qui</th>
                   <th className="py-2 px-2">Tipus</th>
                   <th className="py-2 px-2">Acció</th>
@@ -152,11 +196,29 @@ export default async function SuperadminLogsPage({
                   const actor = row.actor_id ? actorById.get(row.actor_id) : null
                   const category = getAuditCategory(row.action)
                   const catMeta = AUDIT_CATEGORY_META[category]
+                  const severity = normalizeAuditSeverity(row.severity)
+                  const severityMeta = AUDIT_SEVERITY_META[severity]
                   const payload = (row.payload || {}) as Record<string, unknown>
+                  const isError = severity === 'ERROR'
                   return (
-                    <tr key={row.id} className="border-b border-stone-800/50 hover:bg-stone-800/20">
+                    <tr
+                      key={row.id}
+                      className={`border-b border-stone-800/50 ${
+                        isError
+                          ? 'bg-red-950/35 hover:bg-red-950/50 border-l-2 border-l-red-500'
+                          : 'hover:bg-stone-800/20'
+                      }`}
+                    >
                       <td className="py-2.5 px-2 text-stone-400 whitespace-nowrap">
                         {new Date(row.created_at).toLocaleString('ca-ES')}
+                      </td>
+                      <td className="py-2.5 px-2">
+                        <span
+                          className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded border ${severityMeta.color}`}
+                        >
+                          {isError && <AlertTriangle className="h-3 w-3" />}
+                          {severityMeta.label}
+                        </span>
                       </td>
                       <td className="py-2.5 px-2 text-stone-300">
                         <div className="font-medium">{actor?.full_name || actor?.email || '—'}</div>
@@ -171,7 +233,7 @@ export default async function SuperadminLogsPage({
                           {catMeta.label}
                         </span>
                       </td>
-                      <td className="py-2.5 px-2 text-violet-300">
+                      <td className={`py-2.5 px-2 ${isError ? 'text-red-300' : 'text-violet-300'}`}>
                         <div className="font-medium">{getAuditActionLabel(row.action)}</div>
                         <div className="text-[10px] text-stone-600 font-mono">{row.action}</div>
                       </td>
@@ -179,7 +241,7 @@ export default async function SuperadminLogsPage({
                         {row.school_id ? schoolById.get(row.school_id) || row.school_id.slice(0, 8) : '—'}
                       </td>
                       <td
-                        className="py-2.5 px-2 text-stone-400 max-w-xs truncate"
+                        className={`py-2.5 px-2 max-w-xs truncate ${isError ? 'text-red-200/90' : 'text-stone-400'}`}
                         title={JSON.stringify(payload)}
                       >
                         {formatPayload(row.action, payload)}
@@ -189,9 +251,10 @@ export default async function SuperadminLogsPage({
                 })}
                 {(!logs || logs.length === 0) && (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-stone-500">
-                      Cap registre amb aquests filtres. Els nous esdeveniments apareixeran en fer login,
-                      guardar agendes, etc.
+                    <td colSpan={7} className="py-8 text-center text-stone-500">
+                      {errorsOnly
+                        ? 'Cap error registrat amb aquests filtres.'
+                        : 'Cap registre amb aquests filtres. Els nous esdeveniments apareixeran en fer login, guardar agendes, etc.'}
                     </td>
                   </tr>
                 )}

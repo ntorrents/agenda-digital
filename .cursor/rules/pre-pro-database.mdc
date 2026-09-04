@@ -1,0 +1,45 @@
+---
+description: Cambios de BBDD siempre en PRE (local) y PRO
+alwaysApply: true
+---
+
+# Bases de datos PRE + PRO
+
+Este proyecto tiene **dos entornos de base de datos**:
+
+| Entorno | Dónde | Uso |
+|---------|--------|-----|
+| **PRE** | Supabase local (Docker), `localhost:8000` | Desarrollo y pruebas |
+| **PRO** | Supabase cloud (producción) | Datos reales |
+
+## Regla obligatoria
+
+Cualquier cambio de esquema o datos estructurales debe aplicarse en **PRE y en PRO**:
+
+- Scripts SQL en `apps/app/scripts/*.sql`
+- `CREATE` / `ALTER` / índices / RLS / funciones / triggers
+- RPCs (`admin_set_user_password`, etc.)
+- Seeds de estructura (no datos reales de colegios)
+
+Si el agente o el desarrollador ejecuta o genera un SQL, **recordar explícitamente** al usuario:
+
+1. Ejecutarlo en **PRE** (Studio local / `localhost:8000`)
+2. Ejecutarlo en **PRO** (Supabase Dashboard → SQL Editor)
+
+## Control práctico (sin olvidarse)
+
+- Guardar cada cambio en un fichero versionado bajo `apps/app/scripts/` con nombre claro (`YYYY-descripcion.sql` o prefijo temático).
+- No dejar SQL solo en el chat: si se pega en el editor, también debe quedar en el repo.
+- Antes de dar por cerrado un cambio de BBDD, preguntar o listar: «¿Aplicado en PRE? ¿Aplicado en PRO?»
+- Los datos de prueba (seeds PRE) **no** se aplican en PRO salvo que el usuario lo pida (p. ej. centro DEMO showcase).
+
+## Seeds y SQL
+
+- PRE local: `apps/app/scripts/pre-local-seed.sql`
+- DEMO showcase (PRO o PRE): `apps/app/scripts/demo-showcase-seed.sql`
+
+## Quién ejecuta el SQL
+
+- **Por defecto el usuario** ejecuta las queries (PRE primero → si OK → PRO).
+- El agente indica el fichero/SQL exacto y confirma checklist PRE/PRO.
+- El agente **solo** puede ejecutar SQL en PRE local (`localhost` / Docker) si el usuario lo pide; **nunca** contra PRO sin petición explícita.

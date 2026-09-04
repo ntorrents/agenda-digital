@@ -2,6 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
+/**
+ * Cliente para Server Components, Server Actions y Route Handlers.
+ * Crear uno nuevo por request (cookies del request). NO reutilizar entre requests.
+ * Acceso vía HTTP/PostgREST (no pool Postgres).
+ */
 export async function createClient() {
   const cookieStore = await cookies()
 

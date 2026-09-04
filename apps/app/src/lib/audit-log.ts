@@ -26,6 +26,7 @@ export type AuditAction =
   | 'impersonate.link'
   // Accessos
   | 'auth.login'
+  | 'auth.login_failed'
   // Agendes
   | 'agenda.create'
   | 'agenda.update'
@@ -37,6 +38,13 @@ export type AuditAction =
   | 'notice.create'
   | 'notice.delete'
   | 'message.send'
+  // Errors operatius
+  | 'error.server'
+  | 'error.family_agenda'
+  | 'error.menu'
+  | 'error.school_settings'
+
+export type AuditSeverity = 'INFO' | 'WARN' | 'ERROR'
 
 export type AuditCategory =
   | 'access'
@@ -48,6 +56,7 @@ export type AuditCategory =
   | 'school'
   | 'commercial'
   | 'system'
+  | 'errors'
 
 export const AUDIT_CATEGORY_META: Record<
   AuditCategory,
@@ -56,7 +65,7 @@ export const AUDIT_CATEGORY_META: Record<
   access: {
     label: 'Accessos (login)',
     color: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
-    actions: ['auth.login'],
+    actions: ['auth.login', 'auth.login_failed'],
   },
   agenda: {
     label: 'Agendes',
@@ -113,10 +122,16 @@ export const AUDIT_CATEGORY_META: Record<
     color: 'bg-violet-500/20 text-violet-300 border-violet-500/40',
     actions: ['impersonate.link'],
   },
+  errors: {
+    label: 'Errors',
+    color: 'bg-red-500/20 text-red-300 border-red-500/40',
+    actions: ['error.server', 'error.family_agenda', 'error.menu', 'error.school_settings'],
+  },
 }
 
 export const AUDIT_ACTION_LABELS: Record<string, string> = {
   'auth.login': 'Login',
+  'auth.login_failed': 'Login fallit',
   'agenda.create': 'Agenda creada',
   'agenda.update': 'Agenda actualitzada',
   'agenda.bulk_lunch': 'Dinar marcat en bloc',
@@ -147,10 +162,26 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   'invoice.update': 'Factura actualitzada',
   'invoice.batch': 'Factures en lot',
   'impersonate.link': 'Impersonació',
+  'error.server': 'Error servidor',
+  'error.family_agenda': 'Error agenda família',
+  'error.menu': 'Error menú',
+  'error.school_settings': 'Error settings centre',
+}
+
+export const AUDIT_SEVERITY_META: Record<
+  AuditSeverity,
+  { label: string; color: string }
+> = {
+  INFO: { label: 'Info', color: 'bg-stone-500/20 text-stone-300 border-stone-500/40' },
+  WARN: { label: 'Avís', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+  ERROR: { label: 'Error', color: 'bg-red-500/20 text-red-300 border-red-500/40' },
 }
 
 export function getAuditCategory(action: string): AuditCategory {
-  for (const [cat, meta] of Object.entries(AUDIT_CATEGORY_META) as [AuditCategory, (typeof AUDIT_CATEGORY_META)[AuditCategory]][]) {
+  for (const [cat, meta] of Object.entries(AUDIT_CATEGORY_META) as [
+    AuditCategory,
+    (typeof AUDIT_CATEGORY_META)[AuditCategory],
+  ][]) {
     if (meta.actions.includes(action as AuditAction)) return cat
   }
   return 'system'
@@ -158,6 +189,11 @@ export function getAuditCategory(action: string): AuditCategory {
 
 export function getAuditActionLabel(action: string) {
   return AUDIT_ACTION_LABELS[action] || action
+}
+
+export function normalizeAuditSeverity(value: unknown): AuditSeverity {
+  if (value === 'ERROR' || value === 'WARN' || value === 'INFO') return value
+  return 'INFO'
 }
 
 export function roleLoginLabel(role: string | null | undefined) {
@@ -177,13 +213,24 @@ export function roleLoginLabel(role: string | null | undefined) {
   }
 }
 
+function errorMessage(error: unknown) {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
+  try {
+    return JSON.stringify(error)
+  } catch {
+    return 'Unknown error'
+  }
+}
+
 type LogAuditParams = {
-  actorId: string
+  actorId?: string | null
   action: AuditAction | string
   entityType: string
   entityId?: string | null
   schoolId?: string | null
   payload?: Record<string, unknown>
+  severity?: AuditSeverity
 }
 
 /** Registra acción en audit_logs (silencioso si la tabla no existe aún). */
@@ -191,12 +238,13 @@ export async function logAudit(params: LogAuditParams) {
   try {
     const admin = createAdminClient()
     const { error } = await admin.from('audit_logs').insert({
-      actor_id: params.actorId,
+      actor_id: params.actorId ?? null,
       action: params.action,
       entity_type: params.entityType,
       entity_id: params.entityId ?? null,
       school_id: params.schoolId ?? null,
       payload: params.payload ?? {},
+      severity: params.severity ?? 'INFO',
     })
     if (error && !error.message.includes('does not exist') && error.code !== '42P01') {
       console.error('[audit_logs]', error.message)
@@ -204,4 +252,36 @@ export async function logAudit(params: LogAuditParams) {
   } catch {
     // Tabla pendiente de migración — no bloquear operaciones.
   }
+}
+
+/**
+ * Helper per blocs catch: registra ERROR sense llançar.
+ * Ús: `await logAuditError({ action: 'error.menu', error: e, actorId, schoolId })`
+ */
+export async function logAuditError(params: {
+  error: unknown
+  action?: AuditAction | string
+  entityType?: string
+  entityId?: string | null
+  actorId?: string | null
+  schoolId?: string | null
+  context?: Record<string, unknown>
+}) {
+  const message = errorMessage(params.error)
+  const stack =
+    params.error instanceof Error ? params.error.stack?.slice(0, 2000) : undefined
+
+  await logAudit({
+    actorId: params.actorId ?? null,
+    action: params.action || 'error.server',
+    entityType: params.entityType || 'error',
+    entityId: params.entityId ?? null,
+    schoolId: params.schoolId ?? null,
+    severity: 'ERROR',
+    payload: {
+      message,
+      ...(stack ? { stack } : {}),
+      ...params.context,
+    },
+  })
 }

@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { isEmailDryRun } from '@/lib/email'
 
 const BRAND = {
   teal: '#0f766e',
@@ -162,13 +163,18 @@ function getResendClient() {
 }
 
 export async function sendCommercialOutreachEmail(params: OutreachEmailParams) {
+  const from = process.env.RESEND_FROM_EMAIL || 'Petit Diari <hola@petitdiari.com>'
+  const replyTo = process.env.RESEND_REPLY_TO || 'hola@petitdiari.com'
+
+  if (isEmailDryRun()) {
+    console.info('[email:dry-run] Outreach no enviat:', params.to, OUTREACH_SUBJECT)
+    return
+  }
+
   const resend = getResendClient()
   if (!resend) {
     throw new Error('RESEND_API_KEY no està configurada a .env.local')
   }
-
-  const from = process.env.RESEND_FROM_EMAIL || 'Petit Diari <hola@petitdiari.com>'
-  const replyTo = process.env.RESEND_REPLY_TO || 'hola@petitdiari.com'
 
   const { error } = await resend.emails.send({
     from,

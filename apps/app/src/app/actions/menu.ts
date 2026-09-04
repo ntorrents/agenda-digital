@@ -2,84 +2,103 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { revalidatePath } from 'next/cache'
+import { diningMenuTag } from '@/lib/cache/school-data'
+import { logAuditError } from '@/lib/audit-log'
+import { revalidatePath, updateTag } from 'next/cache'
 import { DOCUMENTS_BUCKET } from '@/lib/storage'
 
 export async function upsertMenu(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  let actorId: string | null = null
+  let schoolId: string | null = null
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('school_id, role')
-    .eq('id', user.id)
-    .single()
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+    actorId = user.id
 
-  if (!profile || profile.role !== 'admin') throw new Error('No autorizado')
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('school_id, role')
+      .eq('id', user.id)
+      .single()
 
-  const month = parseInt(formData.get('month') as string)
-  const year = parseInt(formData.get('year') as string)
-  const title = formData.get('title') as string
-  const description = formData.get('description') as string
-  const menuFile = formData.get('file') as File | null
+    if (!profile || profile.role !== 'admin') throw new Error('No autorizado')
+    schoolId = profile.school_id
 
-  let file_url: string | undefined
+    const month = parseInt(formData.get('month') as string)
+    const year = parseInt(formData.get('year') as string)
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string
+    const menuFile = formData.get('file') as File | null
 
-  if (menuFile && menuFile.size > 0) {
-    const admin = createAdminClient()
-    const fileExt = menuFile.name.split('.').pop() || 'jpg'
-    const fileName = `${profile.school_id}/${year}-${month}-${Date.now()}.${fileExt}`
+    let file_url: string | undefined
 
-    const { error: uploadError } = await admin.storage
-      .from(DOCUMENTS_BUCKET)
-      .upload(fileName, menuFile, {
-        contentType: menuFile.type || 'application/octet-stream',
-        upsert: true,
-      })
+    if (menuFile && menuFile.size > 0) {
+      const admin = createAdminClient()
+      const fileExt = menuFile.name.split('.').pop() || 'jpg'
+      const fileName = `${profile.school_id}/${year}-${month}-${Date.now()}.${fileExt}`
 
-    if (uploadError) throw new Error('Error pujant el menú: ' + uploadError.message)
+      const { error: uploadError } = await admin.storage
+        .from(DOCUMENTS_BUCKET)
+        .upload(fileName, menuFile, {
+          contentType: menuFile.type || 'application/octet-stream',
+          upsert: true,
+        })
 
-    const { data: { publicUrl } } = admin.storage
-      .from(DOCUMENTS_BUCKET)
-      .getPublicUrl(fileName)
+      if (uploadError) throw new Error('Error pujant el menú: ' + uploadError.message)
 
-    file_url = publicUrl
-  }
+      const {
+        data: { publicUrl },
+      } = admin.storage.from(DOCUMENTS_BUCKET).getPublicUrl(fileName)
 
-  const { data: existing } = await supabase
-    .from('dining_menus')
-    .select('id, file_url')
-    .eq('school_id', profile.school_id)
-    .eq('month', month)
-    .eq('year', year)
-    .maybeSingle()
+      file_url = publicUrl
+    }
 
-  const payload: Record<string, unknown> = {
-    school_id: profile.school_id,
-    month,
-    year,
-    title,
-    description,
-  }
-  if (file_url) {
-    payload.file_url = file_url
-  }
-
-  if (existing) {
-    const { error } = await supabase
+    const { data: existing } = await supabase
       .from('dining_menus')
-      .update(payload)
-      .eq('id', existing.id)
-    if (error) throw new Error(error.message)
-  } else {
-    const { error } = await supabase
-      .from('dining_menus')
-      .insert([payload])
-    if (error) throw new Error(error.message)
-  }
+      .select('id, file_url')
+      .eq('school_id', profile.school_id)
+      .eq('month', month)
+      .eq('year', year)
+      .maybeSingle()
 
-  revalidatePath('/dashboard/menus')
-  revalidatePath('/mi-hijo/menus')
-  return { success: true }
+    const payload: Record<string, unknown> = {
+      school_id: profile.school_id,
+      month,
+      year,
+      title,
+      description,
+    }
+    if (file_url) {
+      payload.file_url = file_url
+    }
+
+    if (existing) {
+      const { error } = await supabase
+        .from('dining_menus')
+        .update(payload)
+        .eq('id', existing.id)
+      if (error) throw new Error(error.message)
+    } else {
+      const { error } = await supabase.from('dining_menus').insert([payload])
+      if (error) throw new Error(error.message)
+    }
+
+    revalidatePath('/dashboard/menus')
+    revalidatePath('/mi-hijo/menus')
+    updateTag(diningMenuTag(profile.school_id, year, month))
+    return { success: true }
+  } catch (e) {
+    await logAuditError({
+      action: 'error.menu',
+      entityType: 'dining_menu',
+      error: e,
+      actorId,
+      schoolId,
+    })
+    throw e
+  }
 }
