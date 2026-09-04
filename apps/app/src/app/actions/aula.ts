@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { assertClassroomAccess } from '@/lib/teacher-classroom'
 import { DASHBOARD_STAFF_ROLES } from '@/lib/roles'
 import { PHOTOS_BUCKET } from '@/lib/storage'
+import { logAudit } from '@/lib/audit-log'
 
 export async function saveGlobalNoteAndPhoto(formData: FormData) {
   const supabase = await createClient()
@@ -93,6 +94,15 @@ export async function saveGlobalNoteAndPhoto(formData: FormData) {
 
       if (error) return { success: false, error: error.message }
     }
+
+    await logAudit({
+      actorId: user.id,
+      action: 'classroom_note.save',
+      entityType: 'classroom_daily_notes',
+      entityId: existingGlobal?.id || classroomId,
+      schoolId,
+      payload: { classroomId, date: dateStr, hasPhoto: !!photoUrl },
+    })
 
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/agendas')

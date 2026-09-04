@@ -7,6 +7,7 @@ import { formatDiaperTypes, parseDiaperTypes } from '@/lib/diaper'
 import { DASHBOARD_STAFF_ROLES } from '@/lib/roles'
 import { assertAgendaClassroomAccess, getSchoolClassroom, getTeacherClassroom } from '@/lib/teacher-classroom'
 import { PHOTOS_BUCKET } from '@/lib/storage'
+import { logAudit } from '@/lib/audit-log'
 
 async function uploadLogPhotos(
   files: File[],
@@ -133,12 +134,32 @@ export async function upsertDailyLog(formData: FormData) {
       .eq('id', existingLog.id)
 
     if (error) throw new Error(error.message)
+
+    await logAudit({
+      actorId: user.id,
+      action: 'agenda.update',
+      entityType: 'daily_log',
+      entityId: existingLog.id,
+      schoolId: classroom.school_id,
+      payload: { studentId: student_id, date: dateStr, classroomId: classroom.id },
+    })
   } else {
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from('daily_logs')
       .insert([payload])
+      .select('id')
+      .single()
 
     if (error) throw new Error(error.message)
+
+    await logAudit({
+      actorId: user.id,
+      action: 'agenda.create',
+      entityType: 'daily_log',
+      entityId: inserted?.id,
+      schoolId: classroom.school_id,
+      payload: { studentId: student_id, date: dateStr, classroomId: classroom.id },
+    })
   }
 
   revalidatePath('/dashboard')
@@ -198,6 +219,15 @@ export async function bulkMarkLunch(dateStr: string, classroomId?: string) {
     .eq('date', dateStr)
 
   if (error) throw new Error(error.message)
+
+  await logAudit({
+    actorId: user.id,
+    action: 'agenda.bulk_lunch',
+    entityType: 'classroom',
+    entityId: classroom.id,
+    schoolId: classroom.school_id,
+    payload: { date: dateStr, count: logs.length },
+  })
 
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/agendas')

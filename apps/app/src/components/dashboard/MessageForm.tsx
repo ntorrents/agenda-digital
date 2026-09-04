@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Send, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { recordClientAudit } from '@/app/actions/audit'
 
 export default function MessageForm({ families, senderId, schoolId }: { families: any[], senderId: string, schoolId: string }) {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function MessageForm({ families, senderId, schoolId }: { families
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from('messages')
       .insert({
         school_id: schoolId,
@@ -30,12 +31,21 @@ export default function MessageForm({ families, senderId, schoolId }: { families
         receiver_id: receiverId,
         content: content.trim()
       })
+      .select('id')
+      .single()
 
     if (error) {
       setError(error.message)
       setIsSubmitting(false)
       return
     }
+
+    void recordClientAudit({
+      action: 'message.send',
+      entityType: 'message',
+      entityId: inserted?.id,
+      payload: { receiverId },
+    })
 
     setContent('')
     setReceiverId('')

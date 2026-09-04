@@ -1,34 +1,29 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { AUDIT_CATEGORY_META, type AuditCategory } from '@/lib/audit-log'
 import { SaButton, SaField, SaSelect } from './sa-ui'
 
-const ACTION_OPTIONS = [
-  { value: '', label: 'Totes les accions' },
-  { value: 'school.create', label: 'Escola creada' },
-  { value: 'school.update', label: 'Escola actualitzada' },
-  { value: 'school.delete', label: 'Escola eliminada' },
-  { value: 'classroom.create', label: 'Aula creada' },
-  { value: 'classroom.update', label: 'Aula actualitzada' },
-  { value: 'classroom.delete', label: 'Aula eliminada' },
-  { value: 'staff.create', label: 'Personal creat' },
-  { value: 'staff.update', label: 'Personal actualitzat' },
-  { value: 'staff.archive', label: 'Personal baixa' },
-  { value: 'staff.send_access', label: 'Accés enviat' },
-  { value: 'student.create', label: 'Alumne creat' },
-  { value: 'student.update', label: 'Alumne actualitzat' },
-  { value: 'student.archive', label: 'Alumne arxivat' },
-  { value: 'import.execute', label: 'Importació Excel' },
+const CATEGORY_OPTIONS: { value: '' | AuditCategory; label: string }[] = [
+  { value: '', label: 'Totes les categories' },
+  ...((Object.keys(AUDIT_CATEGORY_META) as AuditCategory[]).map((key) => ({
+    value: key,
+    label: AUDIT_CATEGORY_META[key].label,
+  }))),
 ]
 
 export function SuperadminLogsFilter({
   schools,
+  currentCategory,
   currentAction,
   currentSchoolId,
+  actionOptions,
 }: {
   schools: { id: string; name: string }[]
+  currentCategory: string
   currentAction: string
   currentSchoolId: string
+  actionOptions: { value: string; label: string }[]
 }) {
   const router = useRouter()
 
@@ -36,8 +31,10 @@ export function SuperadminLogsFilter({
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
     const params = new URLSearchParams()
+    const category = fd.get('category') as string
     const action = fd.get('action') as string
     const school = fd.get('school') as string
+    if (category) params.set('category', category)
     if (action) params.set('action', action)
     if (school) params.set('school', school)
     router.push(`/superadmin/logs?${params.toString()}`)
@@ -47,11 +44,23 @@ export function SuperadminLogsFilter({
     router.push('/superadmin/logs')
   }
 
+  const hasFilters = !!(currentCategory || currentAction || currentSchoolId)
+
   return (
-    <form onSubmit={apply} className="p-4 grid sm:grid-cols-3 gap-3 items-end border-b border-stone-800">
-      <SaField label="Acció">
+    <form onSubmit={apply} className="p-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end border-b border-stone-800">
+      <SaField label="Categoria">
+        <SaSelect name="category" defaultValue={currentCategory}>
+          {CATEGORY_OPTIONS.map((o) => (
+            <option key={o.value || 'all'} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </SaSelect>
+      </SaField>
+      <SaField label="Acció concreta">
         <SaSelect name="action" defaultValue={currentAction}>
-          {ACTION_OPTIONS.map((o) => (
+          <option value="">Totes les accions</option>
+          {actionOptions.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
@@ -70,7 +79,7 @@ export function SuperadminLogsFilter({
       </SaField>
       <div className="flex gap-2">
         <SaButton type="submit">Filtrar</SaButton>
-        {(currentAction || currentSchoolId) && (
+        {hasFilters && (
           <SaButton type="button" variant="ghost" onClick={clear}>
             Netejar
           </SaButton>

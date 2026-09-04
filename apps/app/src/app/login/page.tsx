@@ -63,6 +63,8 @@ export default function LoginPage() {
       }
 
       if (profile?.force_password_reset) {
+        // Registre login abans del redirect (fire-and-forget)
+        void import('@/app/actions/audit').then(({ recordLoginAudit }) => recordLoginAudit())
         window.location.assign('/force-password-reset')
         return
       }
@@ -80,6 +82,13 @@ export default function LoginPage() {
         setErrorMessage(t('errorCredentials'))
         setIsLoading(false)
         return
+      }
+
+      try {
+        const { recordLoginAudit } = await import('@/app/actions/audit')
+        await recordLoginAudit()
+      } catch {
+        // no bloquejar login si falla l'audit
       }
 
       window.location.assign(dest)

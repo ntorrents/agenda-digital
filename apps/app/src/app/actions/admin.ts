@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { normalizeEmail } from '@/lib/auth-email'
 import { sendAccessEmail } from '@/lib/email'
 import { upsertGuardianFromFormData } from '@/lib/guardian-link'
+import { logAudit } from '@/lib/audit-log'
 
 async function requireStaff() {
   const supabase = await createClient()
@@ -133,7 +134,7 @@ export async function deleteClassroom(classroomId: string) {
 }
 
 export async function createStudent(formData: FormData) {
-  const { supabase, profile } = await requireStaff()
+  const { supabase, user, profile } = await requireStaff()
 
   const schoolId = profile.school_id
   if (!schoolId) throw new Error('No profile')
@@ -176,13 +177,22 @@ export async function createStudent(formData: FormData) {
   await upsertGuardianLink(supabase, { studentId, schoolId: profile.school_id, formData, prefix: 'guardian_1' })
   await upsertGuardianLink(supabase, { studentId, schoolId: profile.school_id, formData, prefix: 'guardian_2' })
 
+  await logAudit({
+    actorId: user.id,
+    action: 'student.create',
+    entityType: 'student',
+    entityId: studentId,
+    schoolId,
+    payload: { firstName, lastName, classroomId: classroomId === 'none' ? null : classroomId },
+  })
+
   revalidatePath('/dashboard/config/alumnos')
   revalidatePath(`/dashboard/config/alumnos/${studentId}`)
   return { success: true }
 }
 
 export async function updateStudent(formData: FormData) {
-  const { supabase } = await requireStaff()
+  const { supabase, user } = await requireStaff()
 
   const id = formData.get('id') as string
   const firstName = formData.get('first_name') as string
@@ -220,6 +230,15 @@ export async function updateStudent(formData: FormData) {
 
   await upsertGuardianLink(supabase, { studentId: id, schoolId: school_id, formData, prefix: 'guardian_1' })
   await upsertGuardianLink(supabase, { studentId: id, schoolId: school_id, formData, prefix: 'guardian_2' })
+
+  await logAudit({
+    actorId: user.id,
+    action: 'student.update',
+    entityType: 'student',
+    entityId: id,
+    schoolId: school_id,
+    payload: { firstName, lastName },
+  })
 
   revalidatePath('/dashboard/config/alumnos')
   revalidatePath(`/dashboard/config/alumnos/${id}`)
@@ -416,6 +435,15 @@ export async function sendWelcomeEmail(userId: string): Promise<{
     for (const row of linkedStudents || []) {
       revalidatePath(`/dashboard/config/alumnos/${row.student_id}`)
     }
+
+    await logAudit({
+      actorId: user.id,
+      action: 'staff.send_access',
+      entityType: 'profile',
+      entityId: targetUserId,
+      schoolId: adminProfile.school_id,
+      payload: { email: normalizedEmail, role: profile.role, fullName: profile.full_name },
+    })
 
     return { success: true, emailSent: true }
   } catch (e) {

@@ -6,6 +6,7 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, X, Users, Ba
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useTranslations, useLocale } from 'next-intl'
+import { recordClientAudit } from '@/app/actions/audit'
 
 export default function CalendarioPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -72,7 +73,7 @@ export default function CalendarioPage() {
     const day = selectedDate.getDate().toString().padStart(2, '0')
     const dateStr = `${year}-${month}-${day}`
     
-    const { error } = await supabase.from('events_announcements').insert([{
+    const { data: inserted, error } = await supabase.from('events_announcements').insert([{
       school_id: schoolId,
       author_id: currentUserId,
       title,
@@ -80,9 +81,15 @@ export default function CalendarioPage() {
       event_date: dateStr,
       event_type: 'event',
       audience
-    }])
+    }]).select('id').single()
 
     if (!error) {
+      void recordClientAudit({
+        action: 'calendar.event_create',
+        entityType: 'events_announcements',
+        entityId: inserted?.id,
+        payload: { title, audience, event_date: dateStr },
+      })
       setIsCreating(false)
       setTitle('')
       setDescription('')
@@ -94,6 +101,11 @@ export default function CalendarioPage() {
   const handleDeleteEvent = async (id: string) => {
     if (!confirm(t('confirmDelete'))) return
     await supabase.from('events_announcements').delete().eq('id', id)
+    void recordClientAudit({
+      action: 'calendar.event_delete',
+      entityType: 'events_announcements',
+      entityId: id,
+    })
     loadEvents()
   }
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Megaphone, Loader2, Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { recordClientAudit } from '@/app/actions/audit'
 
 export default function AvisosForm({ 
   schoolId, 
@@ -41,7 +42,7 @@ export default function AvisosForm({
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from('events_announcements')
       .insert({
         school_id: schoolId,
@@ -53,12 +54,21 @@ export default function AvisosForm({
         classroom_id: audience === 'classroom' ? classroomId : null,
         is_pinned: isPinned,
       })
+      .select('id')
+      .single()
 
     if (error) {
       setError(error.message)
       setIsSubmitting(false)
       return
     }
+
+    void recordClientAudit({
+      action: 'notice.create',
+      entityType: 'events_announcements',
+      entityId: inserted?.id,
+      payload: { title: title.trim(), audience, classroomId: audience === 'classroom' ? classroomId : null },
+    })
 
     setTitle('')
     setDescription('')

@@ -10,9 +10,8 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS audit_logs_created_at_idx ON public.audit_logs (created_at DESC);
-CREATE INDEX IF NOT EXISTS audit_logs_school_id_idx ON public.audit_logs (school_id);
-CREATE INDEX IF NOT EXISTS audit_logs_actor_id_idx ON public.audit_logs (actor_id);
+CREATE INDEX IF NOT EXISTS audit_logs_action_idx ON public.audit_logs (action);
+CREATE INDEX IF NOT EXISTS audit_logs_action_created_idx ON public.audit_logs (action, created_at DESC);
 
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
