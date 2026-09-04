@@ -290,11 +290,66 @@ export async function sendWelcomeEmail(userId: string): Promise<{
 
     const tempPassword = Math.random().toString(36).slice(-8)
 
-    // Comprovar que existeix a Auth; si no, recrear-lo vinculat al mateix profile.id
-    const { data: authLookup, error: authLookupError } =
-      await adminClient.auth.admin.getUserById(targetUserId)
+    const ensureAuthUser = async (): Promise<{ error?: string }> => {
+      const setPasswordOnly = async (id: string) => {
+        const { error: updateError } = await adminClient.auth.admin.updateUserById(id, {
+          password: tempPassword,
+        })
+        if (!updateError) return null
 
-    if (authLookupError || !authLookup?.user) {
+        // Fallback: alguns usuaris creats via RPC tenen identity trencada i l'Admin API falla
+        if (/database error checking email/i.test(updateError.message)) {
+          const { error: rpcError } = await adminClient.rpc('admin_set_user_password', {
+            p_user_id: id,
+            p_password: tempPassword,
+          })
+          if (!rpcError) return null
+          return (
+            `Auth/API: ${updateError.message}. ` +
+            `Fallback SQL: ${rpcError.message}. ` +
+            `Executa scripts/repair-danae-auth.sql (o equivalent) a Supabase per aquest usuari.`
+          )
+        }
+        return `No s'ha pogut actualitzar la contrasenya: ${updateError.message}`
+      }
+
+      const { data: byId, error: byIdError } = await adminClient.auth.admin.getUserById(targetUserId)
+
+      if (!byIdError && byId?.user) {
+        const err = await setPasswordOnly(targetUserId)
+        return err ? { error: err } : {}
+      }
+
+      // Buscar si el correu ja existeix a Auth (altre id / resta de cleanup)
+      const existingByEmail = await findAuthUserByEmail(adminClient, normalizedEmail)
+
+      if (existingByEmail) {
+        if (existingByEmail.id === targetUserId) {
+          const err = await setPasswordOnly(targetUserId)
+          return err ? { error: err } : {}
+        }
+
+        // Auth té l'email amb un altre UUID. Si no hi ha profile per aquell UUID, és un orfe → esborrar i recrear
+        const { data: conflictingProfile } = await adminClient
+          .from('profiles')
+          .select('id, full_name, role')
+          .eq('id', existingByEmail.id)
+          .maybeSingle()
+
+        if (conflictingProfile) {
+          return {
+            error: `Aquest correu ja està vinculat a un altre compte Auth (${conflictingProfile.full_name || existingByEmail.id}). Canvia el correu del professor o elimina el duplicat a Supabase Auth.`,
+          }
+        }
+
+        const { error: deleteError } = await adminClient.auth.admin.deleteUser(existingByEmail.id)
+        if (deleteError) {
+          return {
+            error: `No s'ha pogut netejar l'usuari Auth orfe: ${deleteError.message}`,
+          }
+        }
+      }
+
       const { data: created, error: createError } = await adminClient.auth.admin.createUser({
         id: targetUserId,
         email: normalizedEmail,
@@ -305,23 +360,23 @@ export async function sendWelcomeEmail(userId: string): Promise<{
       })
 
       if (createError || !created.user) {
+        // Si create falla perquè l'usuari ja existeix / identity trencada → provar reset per SQL
+        if (createError && /database error checking email|already/i.test(createError.message)) {
+          const err = await setPasswordOnly(targetUserId)
+          if (!err) return {}
+          return { error: err }
+        }
         return {
           error:
             createError?.message ||
-            'Aquest usuari no existeix a Auth. Torna a crear-lo des d\'Equip o Superadmin.',
+            'No s\'ha pogut crear l\'usuari a Auth. Torna a crear-lo des d\'Equip.',
         }
       }
-    } else {
-      const { error: updateError } = await adminClient.auth.admin.updateUserById(targetUserId, {
-        password: tempPassword,
-        email: normalizedEmail,
-        email_confirm: true,
-      })
-
-      if (updateError) {
-        return { error: `No s'ha pogut actualitzar la contrasenya: ${updateError.message}` }
-      }
+      return {}
     }
+
+    const authResult = await ensureAuthUser()
+    if (authResult.error) return { error: authResult.error }
 
     try {
       await sendAccessEmail({
@@ -367,6 +422,29 @@ export async function sendWelcomeEmail(userId: string): Promise<{
     const message = e instanceof Error ? e.message : 'Error inesperat en enviar l\'accés'
     console.error('[sendWelcomeEmail]', e)
     return { error: message }
+  }
+}
+
+async function findAuthUserByEmail(
+  adminClient: ReturnType<typeof createAdminClient>,
+  email: string
+) {
+  const target = email.toLowerCase()
+  let page = 1
+  const perPage = 200
+
+  // listUsers no filtra per email de forma fiable a totes les versions; paginem
+  for (;;) {
+    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage })
+    if (error) {
+      console.error('[findAuthUserByEmail]', error)
+      return null
+    }
+    const match = data.users.find((u) => (u.email || '').toLowerCase() === target)
+    if (match) return match
+    if (data.users.length < perPage) return null
+    page += 1
+    if (page > 20) return null // safety
   }
 }
 
