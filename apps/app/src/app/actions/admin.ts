@@ -240,35 +240,46 @@ export async function deleteStudent(studentId: string) {
   return { success: true }
 }
 
-export async function sendWelcomeEmail(userId: string) {
-  const { supabase } = await requireAdmin();
+export async function sendWelcomeEmail(userId: string): Promise<{
+  success?: boolean
+  emailSent?: boolean
+  error?: string
+}> {
+  try {
+    const { supabase, user } = await requireAdmin()
 
-  // 1. Get user details
-  const { data: adminProfile } = await supabase
-    .from('profiles')
-    .select('school_id')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id)
-    .single();
+    const { data: adminProfile } = await supabase
+      .from('profiles')
+      .select('school_id')
+      .eq('id', user.id)
+      .single()
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('email, full_name, role, school_id')
-    .eq('id', userId)
-    .single();
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('email, full_name, role, school_id')
+      .eq('id', userId)
+      .single()
 
-  if (profileError || !profile) {
-    throw new Error('User not found');
-  }
-  if (!adminProfile?.school_id || profile.school_id !== adminProfile.school_id) {
-    throw new Error('Unauthorized');
-  }
+    if (profileError || !profile) {
+      return { error: 'Usuari no trobat' }
+    }
+    if (!adminProfile?.school_id || profile.school_id !== adminProfile.school_id) {
+      return { error: 'No tens permís per enviar accés a aquest usuari' }
+    }
 
-  const normalizedEmail = normalizeEmail(profile.email || '')
-  const { createAdminClient } = await import('@/lib/supabase/admin');
-  const adminClient = createAdminClient();
+    const normalizedEmail = normalizeEmail(profile.email || '')
+    if (!normalizedEmail) {
+      return { error: 'Aquest perfil no té correu electrònic' }
+    }
 
-  let targetUserId = userId
-  if (normalizedEmail) {
+    let adminClient
+    try {
+      adminClient = createAdminClient()
+    } catch {
+      return { error: 'Falta SUPABASE_SERVICE_ROLE_KEY a les variables d\'entorn del servidor.' }
+    }
+
+    let targetUserId = userId
     const { data: canonical } = await adminClient
       .from('profiles')
       .select('id')
@@ -276,51 +287,87 @@ export async function sendWelcomeEmail(userId: string) {
       .eq('email', normalizedEmail)
       .maybeSingle()
     if (canonical?.id) targetUserId = canonical.id
+
+    const tempPassword = Math.random().toString(36).slice(-8)
+
+    // Comprovar que existeix a Auth; si no, recrear-lo vinculat al mateix profile.id
+    const { data: authLookup, error: authLookupError } =
+      await adminClient.auth.admin.getUserById(targetUserId)
+
+    if (authLookupError || !authLookup?.user) {
+      const { data: created, error: createError } = await adminClient.auth.admin.createUser({
+        id: targetUserId,
+        email: normalizedEmail,
+        password: tempPassword,
+        email_confirm: true,
+        app_metadata: { role: profile.role, school_id: adminProfile.school_id },
+        user_metadata: { full_name: profile.full_name || '' },
+      })
+
+      if (createError || !created.user) {
+        return {
+          error:
+            createError?.message ||
+            'Aquest usuari no existeix a Auth. Torna a crear-lo des d\'Equip o Superadmin.',
+        }
+      }
+    } else {
+      const { error: updateError } = await adminClient.auth.admin.updateUserById(targetUserId, {
+        password: tempPassword,
+        email: normalizedEmail,
+        email_confirm: true,
+      })
+
+      if (updateError) {
+        return { error: `No s'ha pogut actualitzar la contrasenya: ${updateError.message}` }
+      }
+    }
+
+    try {
+      await sendAccessEmail({
+        to: normalizedEmail,
+        fullName: profile.full_name || '',
+        tempPassword,
+        role: profile.role,
+      })
+    } catch (emailError) {
+      const message =
+        emailError instanceof Error ? emailError.message : 'No s\'ha pogut enviar el correu'
+      return { error: message }
+    }
+
+    const { error: dbError } = await adminClient
+      .from('profiles')
+      .update({
+        force_password_reset: true,
+        welcome_email_sent: true,
+        email: normalizedEmail,
+      })
+      .eq('id', targetUserId)
+
+    if (dbError) {
+      return {
+        error: `Correu enviat, però no s'ha pogut actualitzar el perfil: ${dbError.message}`,
+      }
+    }
+
+    const { data: linkedStudents } = await adminClient
+      .from('student_guardians')
+      .select('student_id')
+      .eq('guardian_id', targetUserId)
+
+    revalidatePath('/dashboard/equipo')
+    revalidatePath('/dashboard/config/alumnos')
+    for (const row of linkedStudents || []) {
+      revalidatePath(`/dashboard/config/alumnos/${row.student_id}`)
+    }
+
+    return { success: true, emailSent: true }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Error inesperat en enviar l\'accés'
+    console.error('[sendWelcomeEmail]', e)
+    return { error: message }
   }
-
-  // 2. Generate random password
-  const tempPassword = Math.random().toString(36).slice(-8);
-
-  // 3. Update Auth user via Admin API
-  const { error: updateError } = await adminClient.auth.admin.updateUserById(targetUserId, {
-    password: tempPassword,
-  });
-
-  if (updateError) {
-    throw new Error(updateError.message);
-  }
-
-  // 4. Enviar correu i marcar perfil
-  await sendAccessEmail({
-    to: profile.email!,
-    fullName: profile.full_name || '',
-    tempPassword,
-    role: profile.role,
-  })
-
-  const { error: dbError } = await adminClient
-    .from('profiles')
-    .update({
-      force_password_reset: true,
-      welcome_email_sent: true,
-    })
-    .eq('id', targetUserId)
-
-  if (dbError) {
-    throw new Error(dbError.message)
-  }
-
-  const { data: linkedStudents } = await adminClient
-    .from('student_guardians')
-    .select('student_id')
-    .eq('guardian_id', targetUserId)
-
-  revalidatePath('/dashboard/config/alumnos')
-  for (const row of linkedStudents || []) {
-    revalidatePath(`/dashboard/config/alumnos/${row.student_id}`)
-  }
-
-  return { success: true, emailSent: true }
 }
 
 export async function sendMassWelcomeEmails(role: 'guardian' | 'teacher') {

@@ -16,12 +16,12 @@ export default async function DashboardEquipoPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile) redirect('/login')
+  if (!profile?.school_id) redirect('/login')
 
   // Fetch only active and paused staff members (exclude inactive/archived)
   const { data: staff, error: staffError } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, school_id, full_name, role, email, phone, status, welcome_email_sent')
     .eq('school_id', profile.school_id)
     .in('role', ['admin', 'teacher', 'auxiliary'])
     .neq('status', 'inactive')

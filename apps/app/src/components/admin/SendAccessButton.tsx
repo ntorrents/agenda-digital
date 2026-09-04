@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Mail, CheckCircle2, Loader2, KeyRound } from 'lucide-react'
+import { Mail, Loader2, KeyRound } from 'lucide-react'
 import { sendWelcomeEmail } from '@/app/actions/admin'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
@@ -23,7 +23,11 @@ export function SendAccessButton({ userId, email, alreadySent }: SendAccessButto
 
   const handleSend = async () => {
     if (sent) {
-      if (!window.confirm(`¿Estás seguro de que quieres resetear la contraseña de ${email}? El usuario recibirá una nueva contraseña y se cerrará su sesión actual.`)) {
+      if (
+        !window.confirm(
+          `¿Estás seguro de que quieres resetear la contraseña de ${email}? El usuario recibirá una nueva contraseña y se cerrará su sesión actual.`
+        )
+      ) {
         return
       }
     }
@@ -31,13 +35,21 @@ export function SendAccessButton({ userId, email, alreadySent }: SendAccessButto
     setLoading(true)
     try {
       const result = await sendWelcomeEmail(userId)
-      if (result.success) {
-        setSent(true)
-        router.refresh()
-        alert(`Accés ${sent ? 'reenviat' : 'enviat'} a ${email}. Revisa la safata d'entrada (i spam).`)
+      if (result.error || !result.success) {
+        alert(result.error || 'Error al enviar acceso')
+        return
       }
-    } catch (error: any) {
-      alert(error.message || 'Error al enviar acceso')
+      setSent(true)
+      router.refresh()
+      alert(
+        `Accés ${sent ? 'reenviat' : 'enviat'} a ${email}. Revisa la safata d'entrada (i spam).`
+      )
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error && error.message && !error.message.includes('#441')
+          ? error.message
+          : 'Error al enviar l\'accés. Revisa Resend i que l\'usuari existeixi a Auth.'
+      alert(message)
     } finally {
       setLoading(false)
     }
@@ -48,11 +60,11 @@ export function SendAccessButton({ userId, email, alreadySent }: SendAccessButto
       type="button"
       onClick={handleSend}
       disabled={loading}
-      variant={sent ? "outline" : "default"}
+      variant={sent ? 'outline' : 'default'}
       size="sm"
       className={`h-9 px-3 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-2 ${
-        sent 
-          ? 'bg-stone-50 border-stone-200 text-stone-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200' 
+        sent
+          ? 'bg-stone-50 border-stone-200 text-stone-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
           : 'bg-teal-600 hover:bg-teal-700 text-white'
       }`}
     >
