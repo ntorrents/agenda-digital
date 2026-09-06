@@ -77,11 +77,12 @@ type Staff = {
 }
 
 type StudentGuardian = {
-  id?: string
+  id: string
   full_name: string | null
   email: string | null
   phone: string | null
   relation: string
+  welcome_email_sent?: boolean
 }
 
 type Student = {
@@ -949,19 +950,40 @@ function StudentTable({
                 </td>
                 <td className="py-2 px-2 text-stone-400 text-xs">{s.date_of_birth}</td>
                 <td className="py-2 px-2 text-stone-400 text-xs">{classroom?.name || '—'}</td>
-                <td className="py-2 px-2 text-stone-400 text-xs max-w-[220px]">
+                <td className="py-2 px-2 text-stone-400 text-xs max-w-[320px]">
                   {(s.guardians || []).length === 0 ? (
                     <span className="text-stone-600">Sense tutors</span>
                   ) : (
-                    <ul className="space-y-0.5">
-                      {(s.guardians || []).map((g, i) => (
-                        <li key={i}>
-                          <span className="text-stone-300">{g.full_name || '—'}</span>
-                          {g.email && (
-                            <span className="text-stone-500"> · {g.email}</span>
-                          )}
-                          {g.phone && (
-                            <span className="text-stone-600"> · {g.phone}</span>
+                    <ul className="space-y-2">
+                      {(s.guardians || []).map((g) => (
+                        <li key={g.id} className="flex flex-col gap-1">
+                          <div>
+                            <span className="text-stone-300">{g.full_name || '—'}</span>
+                            {g.email && (
+                              <span className="text-stone-500"> · {g.email}</span>
+                            )}
+                            {g.phone && (
+                              <span className="text-stone-600"> · {g.phone}</span>
+                            )}
+                          </div>
+                          {g.email ? (
+                            isDemoShowcaseEmail(g.email) ? (
+                              <span
+                                className="text-[10px] text-stone-500"
+                                title="Correu fictici — no s'envia accés"
+                              >
+                                N/A (demo)
+                              </span>
+                            ) : (
+                              <SaSendAccessButton
+                                userId={g.id}
+                                schoolId={schoolId}
+                                email={g.email}
+                                alreadySent={!!g.welcome_email_sent}
+                              />
+                            )
+                          ) : (
+                            <span className="text-[10px] text-stone-600">Sense correu</span>
                           )}
                         </li>
                       ))}

@@ -9,6 +9,7 @@ import {
   isMobileDevice,
   isStandaloneDisplay,
 } from '@/lib/pwa/detect'
+import { reportPwaClient } from '@/app/actions/pwa-telemetry'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -70,7 +71,14 @@ export function usePwaInstall(): PwaInstallState {
     if (!deferred) return
     await deferred.prompt()
     try {
-      await deferred.userChoice
+      const choice = await deferred.userChoice
+      if (choice.outcome === 'accepted') {
+        void reportPwaClient({
+          mode: 'standalone',
+          installed: true,
+          platform: 'android',
+        })
+      }
     } catch {
       /* ignore */
     }

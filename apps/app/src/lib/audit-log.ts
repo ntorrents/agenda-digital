@@ -48,6 +48,9 @@ export type AuditAction =
   | 'error.push_unsubscribe'
   | 'push.subscribe'
   | 'push.unsubscribe'
+  | 'pwa.install'
+  | 'pwa.standalone'
+  | 'pwa.browser'
 
 export type AuditSeverity = 'INFO' | 'WARN' | 'ERROR'
 
@@ -125,7 +128,14 @@ export const AUDIT_CATEGORY_META: Record<
   system: {
     label: 'Sistema',
     color: 'bg-violet-500/20 text-violet-300 border-violet-500/40',
-    actions: ['impersonate.link', 'push.subscribe', 'push.unsubscribe'],
+    actions: [
+      'impersonate.link',
+      'push.subscribe',
+      'push.unsubscribe',
+      'pwa.install',
+      'pwa.standalone',
+      'pwa.browser',
+    ],
   },
   errors: {
     label: 'Errors',
@@ -184,6 +194,9 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   'error.push_unsubscribe': 'Error baixar push',
   'push.subscribe': 'Push activat',
   'push.unsubscribe': 'Push desactivat',
+  'pwa.install': 'PWA instal·lada',
+  'pwa.standalone': 'Obre com a app (PWA)',
+  'pwa.browser': 'Obre al navegador',
 }
 
 export const AUDIT_SEVERITY_META: Record<

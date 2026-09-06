@@ -4,6 +4,8 @@ import { useEffect } from 'react'
 import { Download, Share, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { usePwaInstall } from '@/hooks/use-pwa-install'
+import { reportPwaClient } from '@/app/actions/pwa-telemetry'
+import { isStandaloneDisplay, isIosDevice, isAndroidDevice } from '@/lib/pwa/detect'
 
 export function PwaInstallPrompt() {
   const t = useTranslations('pwa')
@@ -129,10 +131,38 @@ export function PwaServiceWorkerRegister() {
   return null
 }
 
+/** Informa a audit_logs si l'usuari obre en PWA o navegador (1 cop/sessió). */
+export function PwaTelemetryReporter() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const mode = isStandaloneDisplay() ? 'standalone' : 'browser'
+    const key = `pd_pwa_mode_reported:${mode}`
+    try {
+      if (sessionStorage.getItem(key) === '1') return
+    } catch {
+      /* private mode */
+    }
+
+    const platform = isIosDevice() ? 'ios' : isAndroidDevice() ? 'android' : 'desktop'
+    void reportPwaClient({ mode, platform }).then((res) => {
+      if (!res?.ok) return
+      try {
+        sessionStorage.setItem(key, '1')
+      } catch {
+        /* private mode */
+      }
+    })
+  }, [])
+
+  return null
+}
+
 export function PwaProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       <PwaServiceWorkerRegister />
+      <PwaTelemetryReporter />
       <PwaInstallPrompt />
       {children}
     </>

@@ -7,11 +7,12 @@ import { computeOnboardingSteps } from '@/lib/superadmin-onboarding'
 import { getSchoolMonthlyPrice } from '@/lib/superadmin-billing'
 
 type GuardianSummary = {
-  id?: string
+  id: string
   full_name: string | null
   email: string | null
   phone: string | null
   relation: string
+  welcome_email_sent: boolean
 }
 
 export default async function SuperadminSchoolDetail(props: { params: Promise<{ id: string }> }) {
@@ -83,6 +84,7 @@ export default async function SuperadminSchoolDetail(props: { params: Promise<{ 
 
   const studentIds = (students || []).map((s) => s.id)
   const guardiansByStudent: Record<string, GuardianSummary[]> = {}
+  let guardiansWithAccess = 0
 
   if (studentIds.length > 0) {
     const { data: guardianRows } = await supabase
@@ -94,9 +96,17 @@ export default async function SuperadminSchoolDetail(props: { params: Promise<{ 
     const { data: guardianProfiles } = guardianIds.length
       ? await supabase
           .from('profiles')
-          .select('id, full_name, email, phone')
+          .select('id, full_name, email, phone, welcome_email_sent')
           .in('id', guardianIds)
-      : { data: [] as { id: string; full_name: string | null; email: string | null; phone: string | null }[] }
+      : {
+          data: [] as {
+            id: string
+            full_name: string | null
+            email: string | null
+            phone: string | null
+            welcome_email_sent: boolean | null
+          }[],
+        }
 
     const profileById = new Map((guardianProfiles || []).map((p) => [p.id, p]))
 
@@ -109,8 +119,11 @@ export default async function SuperadminSchoolDetail(props: { params: Promise<{ 
         email: p?.email ?? null,
         phone: p?.phone ?? null,
         relation: row.relation,
+        welcome_email_sent: !!p?.welcome_email_sent,
       })
     }
+
+    guardiansWithAccess = (guardianProfiles || []).filter((p) => p.welcome_email_sent).length
   }
 
   const studentsWithGuardians = (students || []).map((s) => ({
@@ -128,7 +141,7 @@ export default async function SuperadminSchoolDetail(props: { params: Promise<{ 
     classroomsCount: classrooms?.filter((c) => c.status === 'active').length || 0,
     studentsCount: activeStudents || 0,
     guardiansCount: guardiansCount || 0,
-    guardiansWithAccess: 0,
+    guardiansWithAccess,
     monthlyPrice: getSchoolMonthlyPrice(school.settings),
     hasContractDoc,
     commercial,
