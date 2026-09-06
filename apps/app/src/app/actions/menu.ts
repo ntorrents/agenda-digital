@@ -6,6 +6,9 @@ import { diningMenuTag } from '@/lib/cache/school-data'
 import { logAuditError } from '@/lib/audit-log'
 import { revalidatePath, updateTag } from 'next/cache'
 import { DOCUMENTS_BUCKET } from '@/lib/storage'
+import { sendPushToUsers } from '@/lib/push/send'
+import { getGuardianIdsForSchool } from '@/lib/push/recipients'
+import { PUSH_COPY, menuBody } from '@/lib/push/copy'
 
 export async function upsertMenu(formData: FormData) {
   let actorId: string | null = null
@@ -76,6 +79,8 @@ export async function upsertMenu(formData: FormData) {
       payload.file_url = file_url
     }
 
+    const isCreate = !existing
+
     if (existing) {
       const { error } = await supabase
         .from('dining_menus')
@@ -85,6 +90,21 @@ export async function upsertMenu(formData: FormData) {
     } else {
       const { error } = await supabase.from('dining_menus').insert([payload])
       if (error) throw new Error(error.message)
+    }
+
+    // Push en menú nou o quan s'actualitza (menys freqüent que l'agenda).
+    try {
+      const guardianIds = await getGuardianIdsForSchool(profile.school_id)
+      if (guardianIds.length > 0) {
+        await sendPushToUsers(guardianIds, {
+          title: isCreate ? PUSH_COPY.menu.titleCreate : PUSH_COPY.menu.titleUpdate,
+          body: menuBody(title, month, year),
+          url: '/mi-hijo/menus',
+          tag: `menu-${profile.school_id}-${year}-${month}`,
+        })
+      }
+    } catch (e) {
+      console.warn('[push] menu notify failed', e)
     }
 
     revalidatePath('/dashboard/menus')

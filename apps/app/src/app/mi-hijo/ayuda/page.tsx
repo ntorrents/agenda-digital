@@ -8,6 +8,7 @@ import { HelpCircle, Mail, Phone, ExternalLink, Shield } from 'lucide-react'
 
 export default async function AyudaPage() {
   const t = await getTranslations('familyHelp')
+  const tProfile = await getTranslations('familyProfile')
   const locale = await getLocale()
   const urls = getLegalUrls(locale)
 
@@ -46,7 +47,7 @@ export default async function AyudaPage() {
   }
   const opening = settings.opening_time || '09:00'
   const closing = settings.closing_time || '17:00'
-  const schoolName = school?.name || 'El teu centre'
+  const schoolName = school?.name || t('fallbackSchool')
   const phone = school?.phone?.trim() || null
   const email = school?.contact_email?.trim() || null
 
@@ -55,9 +56,9 @@ export default async function AyudaPage() {
       <div className="flex items-center gap-3">
         <div>
           <h2 className="text-xl font-black text-stone-900 flex items-center gap-2">
-            <HelpCircle className="h-6 w-6 text-blue-600" /> Ajuda i Centre
+            <HelpCircle className="h-6 w-6 text-blue-600" /> {t('title')}
           </h2>
-          <p className="text-sm text-stone-500 mt-1">Canals de contacte i suport tècnic.</p>
+          <p className="text-sm text-stone-500 mt-1">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -79,7 +80,7 @@ export default async function AyudaPage() {
           </div>
           <h3 className="text-lg font-black text-stone-800">{schoolName}</h3>
           <p className="text-sm font-medium text-stone-500 px-4">
-            Horari d&apos;atenció: Dilluns a Divendres de {opening} a {closing}.
+            {t('hours', { opening, closing })}
           </p>
         </div>
 
@@ -94,7 +95,7 @@ export default async function AyudaPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                  Telèfon d&apos;Urgències
+                  {t('emergencyPhone')}
                 </p>
                 <p className="text-sm font-black text-stone-800">{phone}</p>
               </div>
@@ -106,9 +107,9 @@ export default async function AyudaPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                  Telèfon d&apos;Urgències
+                  {t('emergencyPhone')}
                 </p>
-                <p className="text-sm font-medium text-stone-500">No indicat pel centre</p>
+                <p className="text-sm font-medium text-stone-500">{t('notProvided')}</p>
               </div>
             </div>
           )}
@@ -123,7 +124,7 @@ export default async function AyudaPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                  Correu de Direcció
+                  {t('directionEmail')}
                 </p>
                 <p className="text-sm font-black text-stone-800 break-all">{email}</p>
               </div>
@@ -135,9 +136,9 @@ export default async function AyudaPage() {
               </div>
               <div>
                 <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">
-                  Correu de Direcció
+                  {t('directionEmail')}
                 </p>
-                <p className="text-sm font-medium text-stone-500">No indicat pel centre</p>
+                <p className="text-sm font-medium text-stone-500">{t('notProvided')}</p>
               </div>
             </div>
           )}
@@ -180,13 +181,13 @@ export default async function AyudaPage() {
 
       <div className="px-2">
         <p className="text-[10px] font-bold text-stone-400 text-center uppercase tracking-wider mb-3">
-          Opcions de l&apos;Aplicació
+          {t('appOptions')}
         </p>
         <Link
           href="/mi-hijo/perfil"
           className="flex items-center justify-between p-4 rounded-[20px] bg-white border border-stone-200/60 shadow-xs active:scale-95 transition-all"
         >
-          <span className="text-sm font-black text-stone-700">El Meu Perfil</span>
+          <span className="text-sm font-black text-stone-700">{tProfile('title')}</span>
           <ExternalLink className="h-4 w-4 text-stone-400" />
         </Link>
       </div>

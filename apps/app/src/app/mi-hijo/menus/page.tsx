@@ -3,9 +3,12 @@ import { getCachedDiningMenu } from '@/lib/cache/school-data'
 import { redirect } from 'next/navigation'
 import { CalendarDays, Download } from 'lucide-react'
 import Link from 'next/link'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 export default async function MenusViewPage(props: { searchParams: Promise<{ m?: string, y?: string }> }) {
   const searchParams = await props.searchParams
+  const t = await getTranslations('familyMenus')
+  const locale = await getLocale()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -28,17 +31,24 @@ export default async function MenusViewPage(props: { searchParams: Promise<{ m?:
     currentMonth
   )
 
-  const monthName = new Date(currentYear, currentMonth - 1).toLocaleString('ca', { month: 'long' })
+  const dateLocaleMap: Record<string, string> = {
+    ca: 'ca-ES',
+    es: 'es-ES',
+    en: 'en-GB',
+    fr: 'fr-FR',
+  }
+  const dateLocale = dateLocaleMap[locale] || 'ca-ES'
+  const monthName = new Date(currentYear, currentMonth - 1).toLocaleString(dateLocale, { month: 'long' })
 
   return (
     <div className="space-y-6 pt-6 max-w-4xl mx-auto">
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-black text-stone-800 tracking-tight flex items-center gap-2">
           <CalendarDays className="h-6 w-6 text-teal-600" />
-          Menú Comedor
+          {t('title')}
         </h2>
         <p className="text-sm text-stone-500 font-medium">
-          Consulta el menú mensual preparat pel centre.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -47,9 +57,9 @@ export default async function MenusViewPage(props: { searchParams: Promise<{ m?:
           {monthName} {currentYear}
         </span>
         <div className="flex gap-2">
-          <Link replace={true} href={`?m=${currentMonth === 1 ? 12 : currentMonth - 1}&y=${currentMonth === 1 ? currentYear - 1 : currentYear}`} className="px-3 py-1.5 text-xs font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-lg">Anterior</Link>
-          <Link replace={true} href={`?m=${today.getMonth() + 1}&y=${today.getFullYear()}`} className="px-3 py-1.5 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg">Mes Actual</Link>
-          <Link replace={true} href={`?m=${currentMonth === 12 ? 1 : currentMonth + 1}&y=${currentMonth === 12 ? currentYear + 1 : currentYear}`} className="px-3 py-1.5 text-xs font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-lg">Següent</Link>
+          <Link replace={true} href={`?m=${currentMonth === 1 ? 12 : currentMonth - 1}&y=${currentMonth === 1 ? currentYear - 1 : currentYear}`} className="px-3 py-1.5 text-xs font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-lg">{t('prev')}</Link>
+          <Link replace={true} href={`?m=${today.getMonth() + 1}&y=${today.getFullYear()}`} className="px-3 py-1.5 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg">{t('current')}</Link>
+          <Link replace={true} href={`?m=${currentMonth === 12 ? 1 : currentMonth + 1}&y=${currentMonth === 12 ? currentYear + 1 : currentYear}`} className="px-3 py-1.5 text-xs font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-lg">{t('next')}</Link>
         </div>
       </div>
 
@@ -57,8 +67,8 @@ export default async function MenusViewPage(props: { searchParams: Promise<{ m?:
         <div className="bg-stone-50 border border-stone-200 p-8 rounded-[28px] text-center space-y-3">
           <CalendarDays className="h-10 w-10 text-stone-300 mx-auto" />
           <div>
-            <h3 className="font-bold text-stone-700">Encara no hi ha cap menú</h3>
-            <p className="text-sm text-stone-500">L'escola no ha publicat cap menú per aquest mes.</p>
+            <h3 className="font-bold text-stone-700">{t('emptyTitle')}</h3>
+            <p className="text-sm text-stone-500">{t('emptyDesc')}</p>
           </div>
         </div>
       ) : (
@@ -74,15 +84,15 @@ export default async function MenusViewPage(props: { searchParams: Promise<{ m?:
             <div className="pt-4 border-t border-stone-100">
               {existingMenu.file_url.endsWith('.pdf') ? (
                 <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl flex items-center justify-between">
-                  <span className="text-sm font-semibold text-teal-800">Menú complet en PDF</span>
+                  <span className="text-sm font-semibold text-teal-800">{t('pdfLabel')}</span>
                   <a href={existingMenu.file_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-xl transition-colors">
                     <Download className="h-4 w-4" />
-                    Descarregar
+                    {t('download')}
                   </a>
                 </div>
               ) : (
                 <div className="rounded-2xl overflow-hidden border border-stone-200 bg-stone-50">
-                  <img src={existingMenu.file_url} alt="Menú del mes" className="w-full object-contain max-h-[80vh]" />
+                  <img src={existingMenu.file_url} alt={t('imageAlt')} className="w-full object-contain max-h-[80vh]" />
                 </div>
               )}
             </div>

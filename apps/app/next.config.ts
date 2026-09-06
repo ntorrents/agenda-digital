@@ -9,8 +9,12 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // Només afecta `next dev` (túnel / localhost). No impacta el build de PRO. en PRE añadir la url de cloudlfare para hacer pruebas.
-  allowedDevOrigins: ['localhost:3000'],
+  // Només afecta `next dev`. Amb túnel Cloudflare: hostname SENSE https://
+  // (veure apps/app/docs/pre-pwa-cloudflare.md).
+  allowedDevOrigins: [
+    'lindsay-concerning-advocate-mug.trycloudflare.com',
+    'localhost:3000',
+  ],
   async headers() {
     return [
       {

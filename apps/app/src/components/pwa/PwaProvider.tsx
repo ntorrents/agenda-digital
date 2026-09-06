@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react'
 import { Download, Share, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { usePwaInstall } from '@/hooks/use-pwa-install'
 
 export function PwaInstallPrompt() {
+  const t = useTranslations('pwa')
   const {
     ready,
     shouldPrompt,
@@ -31,9 +33,9 @@ export function PwaInstallPrompt() {
           </div>
           <div className="flex-1 min-w-0 space-y-3 pr-6">
             <div>
-              <p className="text-base font-black text-stone-900">Instal·la Petit Diari</p>
+              <p className="text-base font-black text-stone-900">{t('installTitle')}</p>
               <p className="text-sm text-stone-500 leading-relaxed mt-1">
-                Accedeix més ràpid des de la pantalla d&apos;inici, com una app.
+                {t('installDesc')}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -43,7 +45,7 @@ export function PwaInstallPrompt() {
                   onClick={openIosHelp}
                   className="text-xs font-bold bg-teal-600 text-white px-4 py-2.5 rounded-xl"
                 >
-                  Com instal·lar
+                  {t('howToInstall')}
                 </button>
               ) : (
                 <button
@@ -51,7 +53,7 @@ export function PwaInstallPrompt() {
                   onClick={() => void promptInstall()}
                   className="text-xs font-bold bg-teal-600 text-white px-4 py-2.5 rounded-xl"
                 >
-                  Instal·lar
+                  {t('install')}
                 </button>
               )}
               <button
@@ -59,7 +61,7 @@ export function PwaInstallPrompt() {
                 onClick={dismiss}
                 className="text-xs font-bold text-stone-500 px-4 py-2.5 rounded-xl hover:bg-stone-100"
               >
-                Ara no
+                {t('notNow')}
               </button>
             </div>
           </div>
@@ -67,7 +69,7 @@ export function PwaInstallPrompt() {
             type="button"
             onClick={dismiss}
             className="absolute top-3 right-3 text-stone-400 hover:text-stone-600 p-1"
-            aria-label="Tancar"
+            aria-label={t('close')}
           >
             <X className="h-4 w-4" />
           </button>
@@ -79,31 +81,22 @@ export function PwaInstallPrompt() {
           <div className="bg-white rounded-[28px] max-w-sm w-full p-6 space-y-4 shadow-2xl">
             <div className="flex items-center gap-2">
               <Share className="h-5 w-5 text-teal-600" />
-              <h3 className="text-base font-black text-stone-900">Afegeix a l&apos;inici (iPhone)</h3>
+              <h3 className="text-base font-black text-stone-900">{t('iosTitle')}</h3>
             </div>
             <ol className="space-y-3 text-sm text-stone-600 list-decimal list-inside">
-              <li>
-                Prem el botó <span className="font-bold text-stone-800">Compartir</span> (quadrat amb
-                fletxa) a Safari.
-              </li>
-              <li>
-                Desplaça&apos;t i tria{' '}
-                <span className="font-bold text-stone-800">Afegeix a la pantalla d&apos;inici</span>.
-              </li>
-              <li>
-                Confirma amb <span className="font-bold text-stone-800">Afegeix</span>.
-              </li>
+              <li>{t('iosStep1')}</li>
+              <li>{t('iosStep2')}</li>
+              <li>{t('iosStep3')}</li>
             </ol>
             <p className="text-[11px] text-stone-400">
-              Les notificacions push a iOS requereixen haver instal·lat l&apos;app a l&apos;inici i
-              iOS 16.4+.
+              {t('iosNote')}
             </p>
             <button
               type="button"
               onClick={closeIosHelp}
               className="w-full text-sm font-bold bg-stone-900 text-white py-3 rounded-xl"
             >
-              Entès
+              {t('understood')}
             </button>
           </div>
         </div>
@@ -116,9 +109,21 @@ export function PwaInstallPrompt() {
 export function PwaServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+
     void navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch((err) => {
       console.warn('[pwa] SW register failed', err)
     })
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type !== 'PUSH_NAVIGATE') return
+      const url = event.data.url
+      if (typeof url !== 'string' || !url) return
+      // Navega a la ruta de la notificació (agenda, menú, avisos…).
+      window.location.assign(url)
+    }
+
+    navigator.serviceWorker.addEventListener('message', onMessage)
+    return () => navigator.serviceWorker.removeEventListener('message', onMessage)
   }, [])
 
   return null

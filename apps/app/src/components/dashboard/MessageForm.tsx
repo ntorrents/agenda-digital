@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Send, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { recordClientAudit } from '@/app/actions/audit'
+import { notifyUserOfPrivateMessage } from '@/app/actions/notify-families'
 
 export default function MessageForm({ families, senderId, schoolId }: { families: any[], senderId: string, schoolId: string }) {
   const router = useRouter()
@@ -45,6 +46,12 @@ export default function MessageForm({ families, senderId, schoolId }: { families
       entityType: 'message',
       entityId: inserted?.id,
       payload: { receiverId },
+    })
+
+    void notifyUserOfPrivateMessage({
+      receiverId,
+      messageId: inserted?.id,
+      content: content.trim(),
     })
 
     setContent('')

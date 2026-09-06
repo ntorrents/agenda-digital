@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Bell, CheckCircle2, Circle, Download, Smartphone } from 'lucide-react'
 import { canUseWebPush, isStandaloneDisplay } from '@/lib/pwa/detect'
 
 export function FamilyHelpOnboarding() {
+  const t = useTranslations('familyHelp')
   const [installed, setInstalled] = useState(false)
   const [notificationsOn, setNotificationsOn] = useState(false)
 
@@ -21,33 +23,35 @@ export function FamilyHelpOnboarding() {
       <div>
         <h3 className="text-base font-black text-stone-900 flex items-center gap-2">
           <Smartphone className="h-5 w-5 text-teal-600" />
-          Recomanacions per utilitzar l&apos;app
+          {t('onboardingTitle')}
         </h3>
         <p className="text-xs text-stone-500 mt-1 leading-relaxed">
-          Dos passos senzills per rebre l&apos;agenda i els avisos al moment.
+          {t('onboardingDesc')}
         </p>
       </div>
 
       <div className="space-y-3">
         <OnboardingStep
           done={installed}
+          doneLabel={t('done')}
           icon={<Download className="h-4 w-4" />}
-          title="Pas 1: Instal·la l'aplicació al teu mòbil"
-          body="A iPhone (Safari): Compartir → «Afegeix a la pantalla d'inici». A Android: accepta l'avís d'instal·lació o el menú del navegador → «Instal·lar app»."
+          title={t('step1Title')}
+          body={t('step1Body')}
           accent="teal"
         />
         <OnboardingStep
           done={notificationsOn}
+          doneLabel={t('done')}
           icon={<Bell className="h-4 w-4" />}
-          title="Pas 2: Activa les notificacions"
-          body="Ves a Perfil i activa les notificacions per rebre avisos de l'agenda, el menjador i el centre a l'instant."
+          title={t('step2Title')}
+          body={t('step2Body')}
           accent="sky"
           cta={
             <Link
               href="/mi-hijo/perfil"
               className="inline-flex text-[11px] font-bold text-sky-700 hover:text-sky-900 underline underline-offset-2"
             >
-              Anar al Perfil
+              {t('goToProfile')}
             </Link>
           }
         />
@@ -58,6 +62,7 @@ export function FamilyHelpOnboarding() {
 
 function OnboardingStep({
   done,
+  doneLabel,
   icon,
   title,
   body,
@@ -65,6 +70,7 @@ function OnboardingStep({
   cta,
 }: {
   done: boolean
+  doneLabel: string
   icon: React.ReactNode
   title: string
   body: string
@@ -87,7 +93,7 @@ function OnboardingStep({
           <p className="text-sm font-black text-stone-800 leading-snug">{title}</p>
           {done ? (
             <span className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 shrink-0">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Fet
+              <CheckCircle2 className="h-3.5 w-3.5" /> {doneLabel}
             </span>
           ) : (
             <Circle className="h-3.5 w-3.5 text-stone-300 shrink-0 mt-0.5" />

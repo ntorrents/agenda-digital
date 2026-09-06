@@ -48,8 +48,33 @@
     "panelAuxiliary": "Panneau Auxiliaire"
   },
   "familyProfile": {
+    "title": "Mon profil",
+    "subtitle": "Gérez vos informations personnelles et les paramètres.",
+    "childSection": "Données de l'enfant",
+    "officialName": "Nom officiel",
+    "birthDate": "Date de naissance",
+    "classroom": "Classe",
+    "officialNote": "* Ces données sont officielles et gérées par l'établissement. En cas d'erreur, contactez la direction.",
+    "yourData": "Vos informations",
+    "fullName": "Nom complet",
+    "phone": "Téléphone de contact",
+    "phonePlaceholder": "Ex. : 600 000 000",
+    "email": "E-mail",
+    "emailHint": "Cet e-mail sert à vous connecter à l'application.",
+    "personalization": "Personnalisation",
+    "alias": "Surnom de l'enfant (facultatif)",
+    "aliasHint": "Nom court ou affectueux utilisé par l'application pour l'enfant.",
+    "security": "Sécurité",
+    "currentPassword": "Mot de passe actuel",
+    "currentPasswordPlaceholder": "Laisser vide pour ne pas le changer",
+    "newPassword": "Nouveau mot de passe",
+    "newPasswordPlaceholder": "Minimum 6 caractères",
+    "passwordCurrentRequired": "Pour changer le mot de passe, saisissez l’actuel.",
+    "saved": "Enregistré avec succès",
+    "errorGeneric": "Erreur lors de l'opération",
+    "saveChanges": "Enregistrer",
     "languageTitle": "Langue de l'application",
-    "languageDesc": "Sélectionnez la langue préférée pour l'interface de l'application."
+    "languageDesc": "Choisissez la langue préférée pour l'interface."
   },
   "common": {
     "login": "Connexion",
@@ -95,10 +120,9 @@
       "irritable": "Irritable"
     },
     "diaper": {
-      "pee": "Pipi",
-      "poo": "Caca",
-      "both": "Pipi + Caca",
-      "dry": "Sec"
+      "soft": "Molle",
+      "normal": "Normale",
+      "liquid": "Liquide"
     },
     "sleep": "Sieste",
     "slept": "A dormi",
@@ -551,7 +575,8 @@
     "diaperOption": "Activer le suivi du contrôle des sphincters",
     "moodOption": "Activer le suivi de l'Humeur",
     "optionsNote": "Remarque : Les photos quotidiennes et les notes globales seront toujours activées.",
-    "btnSave": "Enregistrer les Paramètres"
+    "btnSave": "Enregistrer les Paramètres",
+    "labelPhone": "Téléphone"
   },
   "dashboardTeacher": {
     "welcomeName": "Bonjour, {name} !",
@@ -600,6 +625,79 @@
     "privacyBody": "L'école est responsable des données de votre enfant. Petit Diari traite ces données uniquement pour fournir le service contracté avec l'école, en tant que sous-traitant.",
     "privacyRights": "Pour accéder, rectifier ou supprimer les données de votre enfant, contactez d'abord la direction de l'école. Pour des questions techniques ou sur l'application : hola@petitdiari.com",
     "privacyLink": "Politique de confidentialité",
-    "termsLink": "Conditions d'utilisation"
+    "termsLink": "Conditions d'utilisation",
+    "title": "Aide et établissement",
+    "subtitle": "Canaux de contact et conseils pour l'application.",
+    "fallbackSchool": "Votre établissement",
+    "hours": "Horaires : du lundi au vendredi de {opening} à {closing}.",
+    "emergencyPhone": "Téléphone d'urgence",
+    "directionEmail": "E-mail de la direction",
+    "notProvided": "Non indiqué par l'établissement",
+    "appOptions": "Options de l'application",
+    "guideLink": "Envie d'installer l'app et de recevoir des notifications ? Consultez le guide d'aide.",
+    "onboardingTitle": "Conseils pour utiliser l'app",
+    "onboardingDesc": "Deux étapes simples pour recevoir l'agenda et les avis immédiatement.",
+    "step1Title": "Étape 1 : Installez l'application sur votre téléphone",
+    "step1Body": "Sur iPhone (Safari) : Partager → « Sur l'écran d'accueil ». Sur Android : acceptez l'invite d'installation ou le menu du navigateur → « Installer l'app ».",
+    "step2Title": "Étape 2 : Activez les notifications",
+    "step2Body": "Allez dans Profil et activez les notifications pour recevoir l'agenda, la cantine et les infos de l'école tout de suite.",
+    "goToProfile": "Aller au profil",
+    "done": "Fait"
+  },
+  "push": {
+    "title": "Notifications",
+    "subtitle": "Agenda du jour, avis, messages et menu de la cantine.",
+    "loading": "Chargement…",
+    "unsupported": "Ce navigateur ne prend pas en charge les notifications push.",
+    "iosInstallRequired": "Sur iPhone, ajoutez l'app à l'écran d'accueil avant d'activer les notifications.",
+    "iosHint": "Sous iOS, installez Petit Diari sur l'écran d'accueil (Safari → Partager) avant d'activer les notifications.",
+    "vapidMissing": "Notifications non configurées sur le serveur (VAPID).",
+    "permissionDenied": "Vous avez refusé l’autorisation de notifications.",
+    "subscribeFailed": "Impossible de créer l'abonnement.",
+    "enabled": "Notifications activées.",
+    "disabled": "Notifications désactivées.",
+    "enableError": "Erreur lors de l'activation",
+    "disableError": "Erreur lors de la désactivation",
+    "enable": "Activer les notifications",
+    "disable": "Désactiver",
+    "statusActive": "Actives sur cet appareil",
+    "statusDenied": "Autorisation refusée dans le navigateur",
+    "statusPending": "En attente"
+  },
+  "pwa": {
+    "installTitle": "Installer Petit Diari",
+    "installDesc": "Accédez plus vite depuis l'écran d'accueil, comme une app.",
+    "howToInstall": "Comment installer",
+    "install": "Installer",
+    "notNow": "Pas maintenant",
+    "close": "Fermer",
+    "iosTitle": "Ajouter à l'écran d'accueil (iPhone)",
+    "iosStep1": "Appuyez sur Partager (carré avec flèche) dans Safari.",
+    "iosStep2": "Faites défiler et choisissez « Sur l'écran d'accueil ».",
+    "iosStep3": "Confirmez avec « Ajouter ».",
+    "iosNote": "Les notifications push sous iOS nécessitent d'installer l'app sur l'écran d'accueil et iOS 16.4+.",
+    "understood": "Compris"
+  },
+  "familyMenus": {
+    "title": "Menu de la cantine",
+    "subtitle": "Consultez le menu mensuel préparé par l'établissement.",
+    "prev": "Précédent",
+    "current": "Mois en cours",
+    "next": "Suivant",
+    "emptyTitle": "Pas encore de menu",
+    "emptyDesc": "L'école n'a pas publié de menu pour ce mois.",
+    "pdfLabel": "Menu complet en PDF",
+    "download": "Télécharger",
+    "imageAlt": "Menu du mois"
+  },
+  "familyLayout": {
+    "defaultGuardian": "Famille",
+    "backToMenu": "Retour au menu"
+  },
+  "familyStudent": {
+    "viewing": "Affichage",
+    "switchChild": "Changer d’enfant",
+    "pickChild": "Sélectionnez l’enfant pour voir ses informations",
+    "childFallback": "Enfant"
   }
 }

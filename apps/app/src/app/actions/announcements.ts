@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { logAudit } from '@/lib/audit-log'
+import { notifyFamiliesOfAnnouncement } from '@/app/actions/notify-families'
 
 export async function createAnnouncement(formData: FormData) {
   const supabase = await createClient()
@@ -54,6 +55,19 @@ export async function createAnnouncement(formData: FormData) {
     schoolId: classroom.school_id,
     payload: { title: title.trim(), event_type, audience: 'classroom' },
   })
+
+  try {
+    await notifyFamiliesOfAnnouncement({
+      id: inserted?.id,
+      schoolId: classroom.school_id,
+      title: title.trim(),
+      eventType: event_type === 'event' ? 'event' : 'announcement',
+      audience: 'classroom',
+      classroomId: classroom.id,
+    })
+  } catch (e) {
+    console.warn('[push] announcement notify failed', e)
+  }
 
   revalidatePath('/dashboard/avisos')
   revalidatePath('/mi-hijo/avisos')

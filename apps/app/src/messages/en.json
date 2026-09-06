@@ -63,8 +63,33 @@
     "panelAuxiliary": "Auxiliary Panel"
   },
   "familyProfile": {
-    "languageTitle": "Application Language",
-    "languageDesc": "Select your preferred language for the application interface."
+    "title": "My Profile",
+    "subtitle": "Manage your personal details and settings.",
+    "childSection": "Child details",
+    "officialName": "Official name",
+    "birthDate": "Date of birth",
+    "classroom": "Classroom",
+    "officialNote": "* These details are official and managed by the school. If something is wrong, contact the school office.",
+    "yourData": "Your details",
+    "fullName": "Full name",
+    "phone": "Contact phone",
+    "phonePlaceholder": "e.g. 600 000 000",
+    "email": "Email",
+    "emailHint": "This email is what you use to sign in to the app.",
+    "personalization": "Personalization",
+    "alias": "Child nickname (optional)",
+    "aliasHint": "A short or affectionate name for how the app refers to your child.",
+    "security": "Security",
+    "currentPassword": "Current password",
+    "currentPasswordPlaceholder": "Leave blank if you do not want to change it",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "At least 6 characters",
+    "passwordCurrentRequired": "To change your password, enter your current one.",
+    "saved": "Saved successfully",
+    "errorGeneric": "Something went wrong",
+    "saveChanges": "Save changes",
+    "languageTitle": "App language",
+    "languageDesc": "Choose your preferred language for the app interface."
   },
   "common": {
     "login": "Log In",
@@ -95,7 +120,8 @@
   "familyStudent": {
     "viewing": "Viewing",
     "switchChild": "Switch child",
-    "pickChild": "Select a child to view their information"
+    "pickChild": "Select a child to view their information",
+    "childFallback": "Child"
   },
   "agenda": {
     "food": "Food",
@@ -115,10 +141,9 @@
       "irritable": "Irritable"
     },
     "diaper": {
-      "pee": "Pee",
-      "poo": "Poo",
-      "both": "Pee + Poo",
-      "dry": "Dry"
+      "soft": "Soft",
+      "normal": "Normal",
+      "liquid": "Liquid"
     },
     "sleep": "Nap",
     "slept": "Slept",
@@ -570,7 +595,8 @@
     "diaperOption": "Enable Diaper / Toilet tracking",
     "moodOption": "Enable Mood tracking",
     "optionsNote": "Note: Daily photos and global notes will always be enabled.",
-    "btnSave": "Save Settings"
+    "btnSave": "Save Settings",
+    "labelPhone": "Phone"
   },
   "dashboardTeacher": {
     "welcomeName": "Good morning, {name}!",
@@ -619,6 +645,73 @@
     "privacyBody": "The school is responsible for your child's data. Petit Diari processes this data only to provide the service contracted with the school, as data processor.",
     "privacyRights": "To access, rectify or delete your child's data, contact the school first. For technical questions or about the app: hola@petitdiari.com",
     "privacyLink": "Privacy policy",
-    "termsLink": "Terms of use"
+    "termsLink": "Terms of use",
+    "title": "Help & school",
+    "subtitle": "Contact channels and tips for using the app.",
+    "fallbackSchool": "Your school",
+    "hours": "Office hours: Monday to Friday from {opening} to {closing}.",
+    "emergencyPhone": "Emergency phone",
+    "directionEmail": "School email",
+    "notProvided": "Not provided by the school",
+    "appOptions": "App options",
+    "guideLink": "Want to install the app and get notifications? See the help guide.",
+    "onboardingTitle": "Tips for using the app",
+    "onboardingDesc": "Two simple steps to get the agenda and notices right away.",
+    "step1Title": "Step 1: Install the app on your phone",
+    "step1Body": "On iPhone (Safari): Share → «Add to Home Screen». On Android: accept the install prompt or browser menu → «Install app».",
+    "step2Title": "Step 2: Enable notifications",
+    "step2Body": "Go to Profile and turn on notifications to get agenda, cafeteria and school updates instantly.",
+    "goToProfile": "Go to Profile",
+    "done": "Done"
+  },
+  "push": {
+    "title": "Notifications",
+    "subtitle": "Daily agenda, notices, messages and cafeteria menu.",
+    "loading": "Loading…",
+    "unsupported": "This browser does not support push notifications.",
+    "iosInstallRequired": "On iPhone, add the app to your Home Screen before enabling notifications.",
+    "iosHint": "On iOS, install Petit Diari on the Home Screen (Safari → Share) before enabling notifications.",
+    "vapidMissing": "Notifications are not configured on the server (VAPID).",
+    "permissionDenied": "You denied notification permission.",
+    "subscribeFailed": "Could not create the subscription.",
+    "enabled": "Notifications enabled.",
+    "disabled": "Notifications disabled.",
+    "enableError": "Error enabling notifications",
+    "disableError": "Error disabling",
+    "enable": "Enable notifications",
+    "disable": "Disable",
+    "statusActive": "Active on this device",
+    "statusDenied": "Permission denied in the browser",
+    "statusPending": "Pending"
+  },
+  "pwa": {
+    "installTitle": "Install Petit Diari",
+    "installDesc": "Open it faster from your Home Screen, like an app.",
+    "howToInstall": "How to install",
+    "install": "Install",
+    "notNow": "Not now",
+    "close": "Close",
+    "iosTitle": "Add to Home Screen (iPhone)",
+    "iosStep1": "Tap Share (square with arrow) in Safari.",
+    "iosStep2": "Scroll and choose «Add to Home Screen».",
+    "iosStep3": "Confirm with «Add».",
+    "iosNote": "Push notifications on iOS require installing the app to the Home Screen and iOS 16.4+.",
+    "understood": "Got it"
+  },
+  "familyMenus": {
+    "title": "Cafeteria menu",
+    "subtitle": "View the monthly menu prepared by the school.",
+    "prev": "Previous",
+    "current": "This month",
+    "next": "Next",
+    "emptyTitle": "No menu yet",
+    "emptyDesc": "The school has not published a menu for this month.",
+    "pdfLabel": "Full menu (PDF)",
+    "download": "Download",
+    "imageAlt": "Monthly menu"
+  },
+  "familyLayout": {
+    "defaultGuardian": "Family",
+    "backToMenu": "Back to menu"
   }
 }

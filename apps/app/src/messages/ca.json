@@ -63,6 +63,31 @@
     "panelAuxiliary": "Panell Auxiliar"
   },
   "familyProfile": {
+    "title": "El Meu Perfil",
+    "subtitle": "Gestiona les teves dades personals i la configuració.",
+    "childSection": "Dades de l'Infant",
+    "officialName": "Nom Oficial",
+    "birthDate": "Data de Naixement",
+    "classroom": "Aula",
+    "officialNote": "* Aquestes dades són oficials i estan gestionades pel centre. Si hi ha algun error, posa't en contacte amb la direcció.",
+    "yourData": "Les Teves Dades",
+    "fullName": "Nom Complet",
+    "phone": "Telèfon de Contacte",
+    "phonePlaceholder": "Ex: 600 000 000",
+    "email": "Correu Electrònic",
+    "emailHint": "Aquest correu és el que faràs servir per entrar a l'app.",
+    "personalization": "Personalització",
+    "alias": "Àlies de l'Infant (Opcional)",
+    "aliasHint": "Aquest és el nom curt o afectuós amb el qual vols que l'app es refereixi a l'infant.",
+    "security": "Seguretat",
+    "currentPassword": "Contrasenya Actual",
+    "currentPasswordPlaceholder": "Deixar buit si no es vol canviar",
+    "newPassword": "Nova Contrasenya",
+    "newPasswordPlaceholder": "Mínim 6 caràcters",
+    "passwordCurrentRequired": "Per canviar la contrasenya has d'introduir l'actual.",
+    "saved": "Dades desades correctament",
+    "errorGeneric": "Error a l'operació",
+    "saveChanges": "Desar Canvis",
     "languageTitle": "Idioma de l'aplicació",
     "languageDesc": "Selecciona l'idioma preferit per a la interfície de l'aplicació."
   },
@@ -95,7 +120,8 @@
   "familyStudent": {
     "viewing": "Veient",
     "switchChild": "Canviar fill/a",
-    "pickChild": "Selecciona el fill/a per veure la seva informació"
+    "pickChild": "Selecciona el fill/a per veure la seva informació",
+    "childFallback": "Infant"
   },
   "agenda": {
     "food": "Alimentació",
@@ -606,7 +632,8 @@
     "diaperOption": "Habilitar registre de Control d'Esfínters",
     "moodOption": "Habilitar registre d'Estat d'Ànim",
     "optionsNote": "Nota: Les fotos del dia i la nota global estaran sempre activades.",
-    "btnSave": "Desar Configuració"
+    "btnSave": "Desar Configuració",
+    "labelPhone": "Telèfon"
   },
   "legal": {
     "brandTagline": "Agenda digital per a escoles i famílies",
@@ -619,6 +646,73 @@
     "privacyBody": "El centre escolar és el responsable de les dades del teu fill o filla. Petit Diari tracta aquestes dades només per prestar el servei contractat amb l'escola, com a encarregat del tractament.",
     "privacyRights": "Per accedir, rectificar o suprimir dades del teu fill, contacta primer amb la direcció del centre. Per a dubtes tècnics o sobre el funcionament de l'app: hola@petitdiari.com",
     "privacyLink": "Política de privacitat",
-    "termsLink": "Termes d'ús"
+    "termsLink": "Termes d'ús",
+    "title": "Ajuda i Centre",
+    "subtitle": "Canals de contacte i recomanacions per a l’app.",
+    "fallbackSchool": "El teu centre",
+    "hours": "Horari d'atenció: Dilluns a Divendres de {opening} a {closing}.",
+    "emergencyPhone": "Telèfon d'Urgències",
+    "directionEmail": "Correu de Direcció",
+    "notProvided": "No indicat pel centre",
+    "appOptions": "Opcions de l'Aplicació",
+    "guideLink": "Vols instal·lar l'app i rebre notificacions? Consulta la guia d'ajuda.",
+    "onboardingTitle": "Recomanacions per utilitzar l'app",
+    "onboardingDesc": "Dos passos senzills per rebre l'agenda i els avisos al moment.",
+    "step1Title": "Pas 1: Instal·la l'aplicació al teu mòbil",
+    "step1Body": "A iPhone (Safari): Compartir → «Afegeix a la pantalla d'inici». A Android: accepta l'avís d'instal·lació o el menú del navegador → «Instal·lar app».",
+    "step2Title": "Pas 2: Activa les notificacions",
+    "step2Body": "Ves a Perfil i activa les notificacions per rebre avisos de l'agenda, el menjador i el centre a l'instant.",
+    "goToProfile": "Anar al Perfil",
+    "done": "Fet"
+  },
+  "push": {
+    "title": "Notificacions",
+    "subtitle": "Agenda diària, avisos, missatges i menú del menjador.",
+    "loading": "Carregant…",
+    "unsupported": "Aquest navegador no suporta notificacions push.",
+    "iosInstallRequired": "A iPhone cal instal·lar l'app a l'inici abans d'activar les notificacions.",
+    "iosHint": "A iOS, instal·la Petit Diari a la pantalla d'inici (Safari → Compartir) abans d'activar les notificacions.",
+    "vapidMissing": "Notificacions no configurades al servidor (VAPID).",
+    "permissionDenied": "Has denegat el permís de notificacions.",
+    "subscribeFailed": "No s'ha pogut crear la subscripció.",
+    "enabled": "Notificacions activades.",
+    "disabled": "Notificacions desactivades.",
+    "enableError": "Error activant notificacions",
+    "disableError": "Error desactivant",
+    "enable": "Activar notificacions",
+    "disable": "Desactivar",
+    "statusActive": "Actives en aquest dispositiu",
+    "statusDenied": "Permís denegat al navegador",
+    "statusPending": "Pendents"
+  },
+  "pwa": {
+    "installTitle": "Instal·la Petit Diari",
+    "installDesc": "Accedeix més ràpid des de la pantalla d'inici, com una app.",
+    "howToInstall": "Com instal·lar",
+    "install": "Instal·lar",
+    "notNow": "Ara no",
+    "close": "Tancar",
+    "iosTitle": "Afegeix a l'inici (iPhone)",
+    "iosStep1": "Prem el botó Compartir (quadrat amb fletxa) a Safari.",
+    "iosStep2": "Desplaça't i tria «Afegeix a la pantalla d'inici».",
+    "iosStep3": "Confirma amb «Afegeix».",
+    "iosNote": "Les notificacions push a iOS requereixen haver instal·lat l'app a l'inici i iOS 16.4+.",
+    "understood": "Entès"
+  },
+  "familyMenus": {
+    "title": "Menú del menjador",
+    "subtitle": "Consulta el menú mensual preparat pel centre.",
+    "prev": "Anterior",
+    "current": "Mes actual",
+    "next": "Següent",
+    "emptyTitle": "Encara no hi ha cap menú",
+    "emptyDesc": "L'escola no ha publicat cap menú per aquest mes.",
+    "pdfLabel": "Menú complet en PDF",
+    "download": "Descarregar",
+    "imageAlt": "Menú del mes"
+  },
+  "familyLayout": {
+    "defaultGuardian": "Família",
+    "backToMenu": "Tornar al menú"
   }
 }

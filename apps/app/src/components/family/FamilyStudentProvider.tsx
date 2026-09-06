@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import {
   ACTIVE_STUDENT_COOKIE,
@@ -35,6 +36,7 @@ function setActiveStudentCookie(studentId: string) {
 }
 
 export function FamilyStudentProvider({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('familyStudent')
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -129,10 +131,10 @@ export function FamilyStudentProvider({ children }: { children: React.ReactNode 
       activeStudentId: activeStudent?.id ?? null,
       hasMultiple: students.length > 1,
       setActiveStudent,
-      displayName: activeStudent ? displayStudentName(activeStudent) : 'Infant',
+      displayName: activeStudent ? displayStudentName(activeStudent) : t('childFallback'),
       classroomName: activeStudent ? classroomLabel(activeStudent) : '',
     }),
-    [students, activeStudent, setActiveStudent]
+    [students, activeStudent, setActiveStudent, t]
   )
 
   return (

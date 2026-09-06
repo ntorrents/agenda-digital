@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     default: 'Petit Diari',
     template: '%s | Petit Diari',
   },
+  applicationName: 'Petit Diari',
   description:
     "El dia a dia a l'escola, a prop de la família. Registra l'alimentació, el son, l'estat d'ànim i més.",
   appleWebApp: {

@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { LogOut, Home, Calendar, Image as ImageIcon, Bell, Menu, X, ArrowLeft, MessageCircle, HelpCircle, Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { DatePickerNav } from '@/components/ui/DatePickerNav'
 import { PetitDiariLoader } from '@/components/ui/PetitDiariLoader'
 import { FamilyStudentProvider, useFamilyStudent } from '@/components/family/FamilyStudentProvider'
@@ -37,12 +37,28 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams()
   const tNav = useTranslations('navigation')
   const tCommon = useTranslations('common')
+  const tLayout = useTranslations('familyLayout')
+  const locale = useLocale()
   const { displayName, classroomName, activeStudentId, hasMultiple } = useFamilyStudent()
   const [schoolInfo, setSchoolInfo] = useState<{ name: string; logo_url: string | null } | null>(null)
-  const [guardianName, setGuardianName] = useState('Família')
+  const [guardianName, setGuardianName] = useState(() => tLayout('defaultGuardian'))
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isReady, setIsReady] = useState(false)
   const currentDate = searchParams.get('date') || new Date().toISOString().split('T')[0]
+
+  const dateLocaleMap: Record<string, string> = {
+    ca: 'ca-ES',
+    es: 'es-ES',
+    en: 'en-GB',
+    fr: 'fr-FR',
+  }
+  const dateLocale = dateLocaleMap[locale] || 'ca-ES'
+  const todayRaw = new Date().toLocaleDateString(dateLocale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+  const todayFormatted = todayRaw.charAt(0).toUpperCase() + todayRaw.slice(1)
 
   useEffect(() => {
     async function loadProfile() {
@@ -91,12 +107,6 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut()
     router.push('/login')
   }
-
-  const todayFormatted = new Date().toLocaleDateString('ca-ES', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
 
   const isHome = pathname === '/mi-hijo'
 
@@ -312,7 +322,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
               size="icon"
               onClick={handleBack}
               className="rounded-full text-stone-600 hover:text-stone-900 hover:bg-stone-100 h-10 w-10 shrink-0"
-              title="Tornar al menú"
+              title={tLayout('backToMenu')}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>

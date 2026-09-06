@@ -8,6 +8,9 @@ import { DASHBOARD_STAFF_ROLES } from '@/lib/roles'
 import { assertAgendaClassroomAccess, getSchoolClassroom, getTeacherClassroom } from '@/lib/teacher-classroom'
 import { PHOTOS_BUCKET } from '@/lib/storage'
 import { logAudit } from '@/lib/audit-log'
+import { sendPushToUsers } from '@/lib/push/send'
+import { getGuardianIdsForStudent } from '@/lib/push/recipients'
+import { PUSH_COPY, agendaBody } from '@/lib/push/copy'
 
 async function uploadLogPhotos(
   files: File[],
@@ -63,13 +66,16 @@ export async function upsertDailyLog(formData: FormData) {
 
   const { data: student } = await supabase
     .from('students')
-    .select('id, school_id, classroom_id')
+    .select('id, school_id, classroom_id, first_name, last_name')
     .eq('id', student_id)
     .single()
 
   if (!student?.classroom_id) {
     throw new Error('Alumne sense aula assignada')
   }
+
+  const studentLabel =
+    [student.first_name, student.last_name].filter(Boolean).join(' ').trim() || 'el teu fill/a'
 
   const classroom = await assertAgendaClassroomAccess(
     supabase,
@@ -127,6 +133,8 @@ export async function upsertDailyLog(formData: FormData) {
     photos: photoUrls,
   }
 
+  const isCreate = !existingLog
+
   if (existingLog) {
     const { error } = await supabase
       .from('daily_logs')
@@ -160,6 +168,23 @@ export async function upsertDailyLog(formData: FormData) {
       schoolId: classroom.school_id,
       payload: { studentId: student_id, date: dateStr, classroomId: classroom.id },
     })
+  }
+
+  // Push només en la primera creació del dia (no en edicions posteriors).
+  if (isCreate) {
+    try {
+      const guardianIds = await getGuardianIdsForStudent(student_id)
+      if (guardianIds.length > 0) {
+        await sendPushToUsers(guardianIds, {
+          title: PUSH_COPY.agenda.title,
+          body: agendaBody(studentLabel, dateStr),
+          url: `/mi-hijo/agenda?date=${dateStr}&student=${student_id}`,
+          tag: `agenda-${student_id}-${dateStr}`,
+        })
+      }
+    } catch (e) {
+      console.warn('[push] agenda create notify failed', e)
+    }
   }
 
   revalidatePath('/dashboard')

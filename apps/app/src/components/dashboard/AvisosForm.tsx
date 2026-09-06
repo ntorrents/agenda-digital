@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Megaphone, Loader2, Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { recordClientAudit } from '@/app/actions/audit'
+import { notifyFamiliesOfAnnouncement } from '@/app/actions/notify-families'
 
 export default function AvisosForm({ 
   schoolId, 
@@ -68,6 +69,15 @@ export default function AvisosForm({
       entityType: 'events_announcements',
       entityId: inserted?.id,
       payload: { title: title.trim(), audience, classroomId: audience === 'classroom' ? classroomId : null },
+    })
+
+    void notifyFamiliesOfAnnouncement({
+      id: inserted?.id,
+      schoolId,
+      title: title.trim(),
+      eventType: 'announcement',
+      audience,
+      classroomId: audience === 'classroom' ? classroomId : null,
     })
 
     setTitle('')

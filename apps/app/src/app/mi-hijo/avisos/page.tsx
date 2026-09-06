@@ -1,9 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Bell, Pin, Clock } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
 import { FamilyHelpGuideLink } from '@/components/family/FamilyHelpGuideLink'
+
+const DATE_LOCALES: Record<string, string> = {
+  ca: 'ca-ES',
+  es: 'es-ES',
+  en: 'en-GB',
+  fr: 'fr-FR',
+}
 
 export default async function TaulerPage(props: {
   searchParams: Promise<{ student?: string }>
@@ -17,6 +24,8 @@ export default async function TaulerPage(props: {
   if (!user) redirect('/login')
 
   const t = await getTranslations('notices')
+  const locale = await getLocale()
+  const dateLocale = DATE_LOCALES[locale] || 'ca-ES'
 
   const { activeStudentId } = await getActiveStudentForGuardian(
     supabase,
@@ -95,7 +104,7 @@ export default async function TaulerPage(props: {
                   </span>
                   <div className="flex items-center gap-1 text-xs text-stone-400 font-medium">
                     <Clock className="h-3 w-3" />
-                    {new Date(announcement.created_at).toLocaleDateString('ca-ES')}
+                    {new Date(announcement.created_at).toLocaleDateString(dateLocale)}
                   </div>
                 </div>
 

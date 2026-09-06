@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Bell, BellOff, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import {
   getMyPushSubscriptionStatus,
   getPushPublicKey,
@@ -22,6 +23,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export function PushNotificationsCard() {
+  const t = useTranslations('push')
   const [supported, setSupported] = useState(false)
   const [permission, setPermission] = useState<NotificationPermission>('default')
   const [subscribed, setSubscribed] = useState(false)
@@ -53,14 +55,14 @@ export function PushNotificationsCard() {
     setMessage(null)
     try {
       if (isIosDevice() && !isStandaloneDisplay()) {
-        setMessage("A iPhone cal instal·lar l'app a l'inici abans d'activar les notificacions.")
+        setMessage(t('iosInstallRequired'))
         setBusy(false)
         return
       }
 
       const { publicKey } = await getPushPublicKey()
       if (!publicKey) {
-        setMessage('Notificacions no configurades al servidor (VAPID).')
+        setMessage(t('vapidMissing'))
         setBusy(false)
         return
       }
@@ -68,7 +70,7 @@ export function PushNotificationsCard() {
       const perm = await Notification.requestPermission()
       setPermission(perm)
       if (perm !== 'granted') {
-        setMessage('Has denegat el permís de notificacions.')
+        setMessage(t('permissionDenied'))
         setBusy(false)
         return
       }
@@ -87,7 +89,7 @@ export function PushNotificationsCard() {
       const p256dh = json.keys?.p256dh
       const auth = json.keys?.auth
       if (!endpoint || !p256dh || !auth) {
-        setMessage('No s\'ha pogut crear la subscripció.')
+        setMessage(t('subscribeFailed'))
         setBusy(false)
         return
       }
@@ -103,10 +105,10 @@ export function PushNotificationsCard() {
         setMessage(result.error)
       } else {
         setSubscribed(true)
-        setMessage('Notificacions activades.')
+        setMessage(t('enabled'))
       }
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Error activant notificacions')
+      setMessage(e instanceof Error ? e.message : t('enableError'))
     } finally {
       setBusy(false)
     }
@@ -123,9 +125,9 @@ export function PushNotificationsCard() {
         await sub.unsubscribe()
       }
       setSubscribed(false)
-      setMessage('Notificacions desactivades.')
+      setMessage(t('disabled'))
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Error desactivant')
+      setMessage(e instanceof Error ? e.message : t('disableError'))
     } finally {
       setBusy(false)
     }
@@ -134,7 +136,7 @@ export function PushNotificationsCard() {
   if (loading) {
     return (
       <div className="rounded-[28px] border border-stone-200 bg-white p-5 flex items-center gap-2 text-stone-400 text-sm">
-        <Loader2 className="h-4 w-4 animate-spin" /> Carregant…
+        <Loader2 className="h-4 w-4 animate-spin" /> {t('loading')}
       </div>
     )
   }
@@ -143,10 +145,10 @@ export function PushNotificationsCard() {
     return (
       <div className="rounded-[28px] border border-stone-200 bg-stone-50 p-5 space-y-1">
         <h3 className="text-sm font-black text-stone-800 flex items-center gap-2">
-          <BellOff className="h-4 w-4" /> Notificacions
+          <BellOff className="h-4 w-4" /> {t('title')}
         </h3>
         <p className="text-xs text-stone-500">
-          Aquest navegador no suporta notificacions push.
+          {t('unsupported')}
         </p>
       </div>
     )
@@ -160,18 +162,17 @@ export function PushNotificationsCard() {
         </div>
         <div>
           <h3 className="text-sm font-black text-stone-800 uppercase tracking-wider">
-            Notificacions
+            {t('title')}
           </h3>
           <p className="text-[11px] text-stone-500">
-            Avisos quan hi hagi novetats a l&apos;agenda o missatges.
+            {t('subtitle')}
           </p>
         </div>
       </div>
 
       {iosHint && (
         <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
-          A iOS, instal·la Petit Diari a la pantalla d&apos;inici (Safari → Compartir) abans
-          d&apos;activar les notificacions.
+          {t('iosHint')}
         </p>
       )}
 
@@ -183,7 +184,7 @@ export function PushNotificationsCard() {
             onClick={() => void disable()}
             className="text-xs font-bold px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 disabled:opacity-60"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Desactivar'}
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : t('disable')}
           </button>
         ) : (
           <button
@@ -192,15 +193,15 @@ export function PushNotificationsCard() {
             onClick={() => void enable()}
             className="text-xs font-bold px-4 py-2.5 rounded-xl bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-60"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin inline" /> : 'Activar notificacions'}
+            {busy ? <Loader2 className="h-4 w-4 animate-spin inline" /> : t('enable')}
           </button>
         )}
         <span className="text-[11px] text-stone-400">
           {subscribed && permission === 'granted'
-            ? 'Actives en aquest dispositiu'
+            ? t('statusActive')
             : permission === 'denied'
-              ? 'Permís denegat al navegador'
-              : 'Pendents'}
+              ? t('statusDenied')
+              : t('statusPending')}
         </span>
       </div>
 

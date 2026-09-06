@@ -44,7 +44,11 @@ self.addEventListener('push', (event) => {
     },
   }
 
-  event.waitUntil(self.registration.showNotification(data.title || 'Petit Diari', options))
+  // Títol = missatge de la notificació (Agenda / Avís / …).
+  // El nom de l'app el mostra el SO (ha de ser "Petit Diari" al manifest).
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Petit Diari', options)
+  )
 })
 
 self.addEventListener('notificationclick', (event) => {
@@ -53,6 +57,9 @@ self.addEventListener('notificationclick', (event) => {
   const rawUrl =
     (event.notification.data && event.notification.data.url) || '/'
   const targetUrl = new URL(rawUrl, self.location.origin).href
+  const relativePath = targetUrl.startsWith(self.location.origin)
+    ? targetUrl.slice(self.location.origin.length) || '/'
+    : rawUrl
 
   event.waitUntil(
     (async () => {
@@ -62,15 +69,18 @@ self.addEventListener('notificationclick', (event) => {
       })
 
       for (const client of allClients) {
+        if (!client.url.startsWith(self.location.origin)) continue
         if ('focus' in client) {
           await client.focus()
           if ('navigate' in client) {
             try {
               await client.navigate(targetUrl)
+              return
             } catch {
-              /* alguns navegadors no permeten navigate */
+              /* iOS / alguns navegadors: fallback postMessage */
             }
           }
+          client.postMessage({ type: 'PUSH_NAVIGATE', url: relativePath })
           return
         }
       }
