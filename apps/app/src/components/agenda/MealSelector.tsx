@@ -3,16 +3,14 @@
 import { useState } from 'react'
 import { Check, ChevronDown, ChevronsDown, X } from 'lucide-react'
 import { PillSelector, type PillOption } from '@/components/shared/PillSelector'
-import type { MealAmount, MealType } from '@/types/enums'
+import type { MealAmount } from '@/types/enums'
 import { MEAL_TYPE_OPTIONS } from '@/types/enums'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 
-interface MealValues {
-  breakfast: MealAmount | null
-  lunch: MealAmount | null
-  snack: MealAmount | null
-}
+type SelectableMealType = (typeof MEAL_TYPE_OPTIONS)[number]
+
+type MealValues = Record<SelectableMealType, MealAmount | null>
 
 interface MealSelectorProps {
   value: MealValues
@@ -23,7 +21,7 @@ interface MealSelectorProps {
 export function MealSelector({ value, onChange, className }: MealSelectorProps) {
   const t = useTranslations('meals')
   const tLog = useTranslations('dailyLog')
-  const [activeTab, setActiveTab] = useState<MealType>('breakfast')
+  const [activeTab, setActiveTab] = useState<SelectableMealType>('breakfast')
 
   const amountOptions: PillOption<MealAmount>[] = [
     { value: 'all', label: t('all'), icon: <Check className="h-4 w-4" /> },

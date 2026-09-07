@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Agenda del día — ciclo draft / published",
+    "quality_profile": "showcase",
+    "output": "agenda-status-lifecycle.html",
+    "viewBox": [
+      920,
+      580
+    ]
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "Estados de la agenda"
+    },
+    {
+      "id": "visibility",
+      "label": "Familia"
+    },
+    {
+      "id": "exceptions",
+      "label": "Recuperación"
+    }
+  ],
+  "states": [
+    {
+      "id": "pendiente",
+      "type": "start",
+      "label": "Pendiente",
+      "sublabel": "sin fila",
+      "lane": "main",
+      "col": 0,
+      "step": "01",
+      "tag": "lista"
+    },
+    {
+      "id": "borrador",
+      "type": "active",
+      "label": "Borrador",
+      "sublabel": "status=draft",
+      "lane": "main",
+      "col": 1,
+      "step": "02",
+      "tag": "atras"
+    },
+    {
+      "id": "decidir",
+      "type": "decision",
+      "label": "Enviar?",
+      "sublabel": "Desar i enviar",
+      "lane": "main",
+      "col": 2,
+      "step": "03",
+      "tag": "staff"
+    },
+    {
+      "id": "publicada",
+      "type": "success",
+      "label": "Publicada",
+      "sublabel": "status=published",
+      "lane": "main",
+      "col": 3,
+      "step": "04",
+      "tag": "published_at"
+    },
+    {
+      "id": "oculta",
+      "type": "waiting",
+      "label": "Oculta",
+      "sublabel": "RLS guardian",
+      "lane": "visibility",
+      "col": 0,
+      "tag": "familia"
+    },
+    {
+      "id": "error_save",
+      "type": "failure",
+      "label": "Error guardar",
+      "sublabel": "reintento",
+      "lane": "exceptions",
+      "col": 0,
+      "yOffset": 78,
+      "tag": "retryable"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "hidden-while-draft",
+      "from": "decidir",
+      "to": "oculta",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "straight"
+    },
+    {
+      "id": "save-fail",
+      "from": "decidir",
+      "to": "error_save",
+      "variant": "security",
+      "fromSide": "left",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          157
+        ],
+        [
+          320,
+          385
+        ]
+      ]
+    },
+    {
+      "id": "retry",
+      "from": "error_save",
+      "to": "borrador",
+      "variant": "emphasis",
+      "fromSide": "left",
+      "toSide": "top",
+      "via": [
+        [
+          20,
+          385
+        ],
+        [
+          20,
+          80
+        ],
+        [
+          248,
+          80
+        ]
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Draft → published",
+      "items": [
+        "Pendiente → borrador → enviar → publicada",
+        "Familia solo published; tras enviar no vuelve a draft",
+        "SQL 2026-agenda-meals-and-draft.sql · PRE y PRO"
+      ]
+    }
+  ]
+}

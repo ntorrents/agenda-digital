@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Publicar agenda — Server Action + Push",
+    "quality_profile": "showcase",
+    "output": "agenda-publish-sequence.html",
+    "viewBox": [
+      980,
+      560
+    ],
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "teacher",
+      "type": "external",
+      "label": "Educador",
+      "sublabel": "browser"
+    },
+    {
+      "id": "form",
+      "type": "frontend",
+      "label": "DailyLogForm",
+      "sublabel": "UI"
+    },
+    {
+      "id": "action",
+      "type": "backend",
+      "label": "upsertDailyLog",
+      "sublabel": "action"
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Auth",
+      "sublabel": "JWT"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "RLS"
+    },
+    {
+      "id": "push",
+      "type": "messagebus",
+      "label": "Web Push",
+      "sublabel": "VAPID"
+    },
+    {
+      "id": "family",
+      "type": "external",
+      "label": "Familia",
+      "sublabel": "PWA"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 320,
+      "label": "Escribir"
+    },
+    {
+      "from": 340,
+      "to": 480,
+      "label": "Notificar"
+    }
+  ],
+  "messages": [
+    {
+      "id": "tap-send",
+      "from": "teacher",
+      "to": "form",
+      "y": 165,
+      "label": "Desar i enviar",
+      "variant": "emphasis"
+    },
+    {
+      "id": "call-action",
+      "from": "form",
+      "to": "action",
+      "y": 200,
+      "label": "status=published",
+      "variant": "emphasis"
+    },
+    {
+      "id": "check-user",
+      "from": "action",
+      "to": "auth",
+      "y": 235,
+      "label": "getUser + aula",
+      "variant": "security"
+    },
+    {
+      "id": "auth-ok",
+      "from": "auth",
+      "to": "action",
+      "y": 268,
+      "label": "ok",
+      "variant": "return"
+    },
+    {
+      "id": "upsert",
+      "from": "action",
+      "to": "db",
+      "y": 310,
+      "label": "upsert daily_logs",
+      "variant": "emphasis"
+    },
+    {
+      "id": "row",
+      "from": "db",
+      "to": "action",
+      "y": 342,
+      "label": "published_at",
+      "variant": "return"
+    },
+    {
+      "id": "notify",
+      "from": "action",
+      "to": "push",
+      "y": 390,
+      "label": "notify guardians",
+      "variant": "dashed"
+    },
+    {
+      "id": "sw",
+      "from": "push",
+      "to": "family",
+      "y": 425,
+      "label": "push -> SW",
+      "variant": "dashed"
+    },
+    {
+      "id": "redirect",
+      "from": "action",
+      "to": "form",
+      "y": 465,
+      "label": "success",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "form",
+      "from": 195,
+      "to": 475,
+      "type": "frontend"
+    },
+    {
+      "participant": "action",
+      "from": 200,
+      "to": 470,
+      "type": "backend"
+    },
+    {
+      "participant": "auth",
+      "from": 230,
+      "to": 275,
+      "type": "security"
+    },
+    {
+      "participant": "db",
+      "from": 305,
+      "to": 350,
+      "type": "database"
+    },
+    {
+      "participant": "push",
+      "from": 385,
+      "to": 435,
+      "type": "messagebus"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Despues del envio",
+      "items": [
+        "Push solo becomingPublished; fallo no deshace upsert",
+        "Familia: fetchFamilyAgendaDay + RLS status=published"
+      ]
+    }
+  ]
+}

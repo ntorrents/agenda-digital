@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Linaje de datos — agenda diaria",
+    "quality_profile": "showcase",
+    "output": "agenda-dataflow.html",
+    "viewBox": [1080, 560],
+    "views": [
+      {
+        "id": "write-path",
+        "label": "Escritura",
+        "focus": ["form", "action", "logs", "photos"],
+        "note": "Formulario → action → fila + fotos."
+      },
+      {
+        "id": "gate",
+        "label": "Puerta published",
+        "focus": ["logs", "rls", "family_ui"],
+        "note": "Solo published llega a la familia."
+      },
+      {
+        "id": "notify",
+        "label": "Senal async",
+        "focus": ["logs", "push", "family_ui"],
+        "note": "Push avisa; no es la fuente de verdad."
+      }
+    ]
+  },
+  "stages": [
+    { "label": "Entrada" },
+    { "label": "Proceso" },
+    { "label": "Persistencia" },
+    { "label": "Gobierno" },
+    { "label": "Consumo" }
+  ],
+  "nodes": [
+    { "id": "form", "type": "frontend", "label": "DailyLogForm", "sublabel": "platos · mood", "stage": 0, "row": 1, "tag": "staff" },
+    { "id": "action", "type": "backend", "label": "upsertDailyLog", "sublabel": "Server Action", "stage": 1, "row": 1, "tag": "use server" },
+    { "id": "logs", "type": "database", "label": "daily_logs", "sublabel": "alumno · dia", "stage": 2, "row": 1, "tag": "draft|published" },
+    { "id": "photos", "type": "cloud", "label": "Storage", "sublabel": "daily-photos", "stage": 2, "row": 2, "tag": "URLs" },
+    { "id": "rls", "type": "security", "label": "RLS guardian", "sublabel": "published only", "stage": 3, "row": 1, "tag": "tenant" },
+    { "id": "push", "type": "messagebus", "label": "Web Push", "sublabel": "aviso", "stage": 3, "row": 2, "tag": "async" },
+    { "id": "family_ui", "type": "frontend", "label": "Agenda familia", "sublabel": "/mi-hijo", "stage": 4, "row": 1, "tag": "published" }
+  ],
+  "flows": [
+    { "id": "form-action", "from": "form", "to": "action", "label": "FormData", "classification": "input staff", "variant": "emphasis", "route": "straight", "labelDy": -22 },
+    { "id": "action-logs", "from": "action", "to": "logs", "label": "upsert fila", "classification": "estado + comidas", "variant": "emphasis", "route": "straight", "labelDy": -22 },
+    { "id": "action-photos", "from": "action", "to": "photos", "label": "upload", "classification": "binarios", "variant": "dashed", "labelDy": 28 },
+    { "id": "logs-rls", "from": "logs", "to": "rls", "label": "filtro published", "classification": "gobierno", "variant": "security", "route": "straight", "labelDy": -22 },
+    { "id": "rls-family", "from": "rls", "to": "family_ui", "label": "lectura segura", "classification": "familia", "variant": "emphasis", "route": "straight", "labelDy": -22 },
+    { "id": "logs-push", "from": "logs", "to": "push", "label": "primer publish", "classification": "senal", "variant": "dashed", "labelDy": 28 },
+    { "id": "push-family", "from": "push", "to": "family_ui", "label": "abrir agenda", "classification": "notificacion", "variant": "dashed", "labelDy": 24 }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Linaje",
+      "items": [
+        "Form → action → daily_logs → RLS → familia",
+        "Storage y Push son ramas (URLs / aviso)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Gobierno",
+      "items": [
+        "Draft no sale a familia",
+        "published es la puerta de consumo"
+      ]
+    }
+  ]
+}
