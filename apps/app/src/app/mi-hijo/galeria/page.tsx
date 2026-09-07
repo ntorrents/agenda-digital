@@ -44,6 +44,7 @@ export default async function GaleriaPage(props: {
     .from('daily_logs')
     .select('date, photos')
     .eq('student_id', activeStudentId)
+    .eq('status', 'published')
     .not('photos', 'is', null)
     .order('date', { ascending: false })
 

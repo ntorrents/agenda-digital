@@ -87,8 +87,13 @@ export interface DailyLog {
 
   // Alimentación
   meal_breakfast: MealAmount | null
-  meal_lunch: MealAmount | null
-  meal_snack: MealAmount | null
+  meal_first_course: MealAmount | null
+  meal_second_course: MealAmount | null
+  meal_dessert: MealAmount | null
+  /** @deprecated usar meal_first_course */
+  meal_lunch?: MealAmount | null
+  /** @deprecated ya no se usa en UI */
+  meal_snack?: MealAmount | null
 
   // Pañal
   diaper_type: DiaperType | null
@@ -101,6 +106,10 @@ export interface DailyLog {
   // Extras
   photos: string[] // URLs de Supabase Storage
   notes: string | null
+
+  /** draft = borrador interno; published = visible para familias */
+  status: 'draft' | 'published'
+  published_at: string | null
 
   created_at: string
   updated_at: string

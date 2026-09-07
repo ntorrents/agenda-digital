@@ -7,6 +7,9 @@ import { logAuditError } from '@/lib/audit-log'
 export type FamilyAgendaDailyLog = {
   photos?: (string | null)[] | null
   meal_breakfast?: string | null
+  meal_first_course?: string | null
+  meal_second_course?: string | null
+  meal_dessert?: string | null
   meal_lunch?: string | null
   meal_snack?: string | null
   nap_start?: string | null
@@ -15,6 +18,7 @@ export type FamilyAgendaDailyLog = {
   diaper_type?: string | null
   notes?: string | null
   mood?: string | null
+  status?: string | null
   teacher?: { full_name?: string | null } | null
 }
 
@@ -79,6 +83,7 @@ export async function fetchFamilyAgendaDay(
         )
         .eq('student_id', studentId)
         .eq('date', dateStr)
+        .eq('status', 'published')
         .maybeSingle()
       dailyLog = log
 

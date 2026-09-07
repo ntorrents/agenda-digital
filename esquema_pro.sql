@@ -464,12 +464,17 @@ CREATE TABLE IF NOT EXISTS "public"."daily_logs" (
     "meal_breakfast" "public"."meal_amount",
     "meal_lunch" "public"."meal_amount",
     "meal_snack" "public"."meal_amount",
+    "meal_first_course" "public"."meal_amount",
+    "meal_second_course" "public"."meal_amount",
+    "meal_dessert" "public"."meal_amount",
     "diaper_type" "text",
     "diaper_changes" integer DEFAULT 0 NOT NULL,
     "nap_start" time without time zone,
     "nap_end" time without time zone,
     "photos" "text"[] DEFAULT '{}'::"text"[],
     "notes" "text",
+    "status" "text" DEFAULT 'draft'::"text" NOT NULL,
+    "published_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
@@ -1132,7 +1137,7 @@ CREATE POLICY "daily_logs_insert_teacher" ON "public"."daily_logs" FOR INSERT TO
 
 CREATE POLICY "daily_logs_select_guardian" ON "public"."daily_logs" FOR SELECT TO "authenticated" USING ((("school_id" = "public"."auth_school_id"()) AND ("public"."auth_role"() = 'guardian'::"text") AND ("student_id" IN ( SELECT "student_guardians"."student_id"
    FROM "public"."student_guardians"
-  WHERE ("student_guardians"."guardian_id" = "auth"."uid"())))));
+  WHERE ("student_guardians"."guardian_id" = "auth"."uid"()))) AND ("status" = 'published'::"text")));
 
 
 

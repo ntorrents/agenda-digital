@@ -115,19 +115,27 @@ export function FamilyAgendaView({
                       </span>
                     </div>
                   )}
-                  {dailyLog.meal_lunch && (
+                  {(dailyLog.meal_first_course || dailyLog.meal_lunch) && (
                     <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl border border-white">
-                      <span className="text-xs font-bold text-stone-700">{t('lunch')}</span>
+                      <span className="text-xs font-bold text-stone-700">{t('firstCourse')}</span>
                       <span className="text-xs font-black bg-white px-3 py-1 rounded-full text-[#6b992f] shadow-sm">
-                        {mealMap[dailyLog.meal_lunch]}
+                        {mealMap[dailyLog.meal_first_course || dailyLog.meal_lunch || '']}
                       </span>
                     </div>
                   )}
-                  {dailyLog.meal_snack && (
+                  {dailyLog.meal_second_course && (
                     <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl border border-white">
-                      <span className="text-xs font-bold text-stone-700">{t('snack')}</span>
+                      <span className="text-xs font-bold text-stone-700">{t('secondCourse')}</span>
                       <span className="text-xs font-black bg-white px-3 py-1 rounded-full text-[#6b992f] shadow-sm">
-                        {mealMap[dailyLog.meal_snack]}
+                        {mealMap[dailyLog.meal_second_course]}
+                      </span>
+                    </div>
+                  )}
+                  {dailyLog.meal_dessert && (
+                    <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl border border-white">
+                      <span className="text-xs font-bold text-stone-700">{t('dessert')}</span>
+                      <span className="text-xs font-black bg-white px-3 py-1 rounded-full text-[#6b992f] shadow-sm">
+                        {mealMap[dailyLog.meal_dessert]}
                       </span>
                     </div>
                   )}

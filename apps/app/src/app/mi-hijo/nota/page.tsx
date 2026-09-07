@@ -24,6 +24,7 @@ export default async function NotaPage(props: { searchParams: Promise<{ student?
     .from('daily_logs')
     .select('id, date, notes, teacher:profiles!teacher_id(full_name)')
     .eq('student_id', activeStudentId)
+    .eq('status', 'published')
     .not('notes', 'is', null)
     .order('date', { ascending: false })
 

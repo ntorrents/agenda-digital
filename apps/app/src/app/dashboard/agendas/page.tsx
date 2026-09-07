@@ -1,9 +1,11 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, AlertCircle, Baby, ChevronRight } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Baby, ChevronRight, FilePenLine } from 'lucide-react'
 import { BulkActionsWidget } from '@/components/agenda/BulkActionsWidget'
 import { AgendaFilters } from '@/components/agenda/AgendaFilters'
+import { AgendaListToast } from '@/components/agenda/AgendaListToast'
 import { getTeacherClassroom } from '@/lib/teacher-classroom'
 import { getTranslations, getLocale } from 'next-intl/server'
 
@@ -11,7 +13,7 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
   const searchParams = await props.searchParams
   const dateStr = searchParams.date || new Date().toISOString().split('T')[0]
   const queryClassroomId = searchParams.classroom_id
-  
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -28,7 +30,6 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
 
   if (!profile) redirect('/login')
 
-  // Get all classrooms for the school
   const { data: classrooms } = await supabase
     .from('classrooms')
     .select('id, name, level, teacher_id, school_id')
@@ -44,9 +45,8 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
     )
   }
 
-  // Determine the active classroom
   let classroom = queryClassroomId ? classrooms.find(c => c.id === queryClassroomId) : null
-  
+
   if (!classroom) {
     if (profile.role === 'teacher' || profile.role === 'auxiliary') {
       const assigned = await getTeacherClassroom(supabase, user.id, profile.role)
@@ -69,7 +69,6 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
     )
   }
 
-  // Get all active students in the classroom
   const { data: students } = await supabase
     .from('students')
     .select('id, first_name, last_name')
@@ -77,17 +76,19 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
     .eq('status', 'active')
     .order('first_name', { ascending: true })
 
-  // Get all logs for today
   const { data: logs } = await supabase
     .from('daily_logs')
-    .select('student_id')
+    .select('student_id, status')
     .eq('classroom_id', classroom.id)
     .eq('date', dateStr)
 
-  const loggedStudentIds = new Set(logs?.map(l => l.student_id) || [])
+  const logByStudent = new Map(
+    (logs || []).map((l) => [l.student_id, (l.status as string) || 'published'])
+  )
 
-  const pendingStudents = students?.filter(s => !loggedStudentIds.has(s.id)) || []
-  const completedStudents = students?.filter(s => loggedStudentIds.has(s.id)) || []
+  const pendingStudents = students?.filter(s => !logByStudent.has(s.id)) || []
+  const draftStudents = students?.filter(s => logByStudent.get(s.id) === 'draft') || []
+  const sentStudents = students?.filter(s => logByStudent.get(s.id) === 'published') || []
 
   const dateLocaleMap: Record<string, string> = {
     ca: 'ca-ES',
@@ -98,17 +99,39 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
   const dateLocale = dateLocaleMap[locale] || 'ca-ES'
   const formattedDate = new Date(dateStr).toLocaleDateString(dateLocale)
 
+  const studentLink = (student: { id: string; first_name: string; last_name: string }, tone: 'amber' | 'orange' | 'emerald') => {
+    const tones = {
+      amber: 'bg-amber-100 text-amber-700',
+      orange: 'bg-orange-100 text-orange-700',
+      emerald: 'bg-emerald-100 text-emerald-700',
+    }
+    return (
+      <Link
+        key={student.id}
+        href={`/dashboard/agendas/${student.id}?date=${dateStr}`}
+        className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 border border-transparent hover:border-stone-200 transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className={`${tones[tone]} h-8 w-8 rounded-full flex items-center justify-center shrink-0`}>
+            <Baby className="h-4 w-4" />
+          </div>
+          <span className="text-sm font-bold text-stone-700">{student.first_name} {student.last_name}</span>
+        </div>
+        <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-stone-600 transition-colors" />
+      </Link>
+    )
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
-      
-      {/* Header */}
+
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
         <div className="min-w-0">
           <h2 className="text-2xl font-black text-stone-800">{t('title')}</h2>
           <p className="text-sm font-medium text-stone-500 mt-1">{t('subtitle', { name: classroom.name, date: formattedDate })}</p>
         </div>
         <div className="flex flex-col gap-3 w-full md:w-auto md:flex-row md:items-end md:shrink-0">
-          <AgendaFilters 
+          <AgendaFilters
             classrooms={visibleClassrooms}
             currentClassroomId={classroom.id}
             currentDate={dateStr}
@@ -121,64 +144,53 @@ export default async function AgendasIndexPage(props: { searchParams: Promise<{ 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {/* Pending List */}
+      <Suspense fallback={null}>
+        <AgendaListToast />
+      </Suspense>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
         <div className="bg-white border border-stone-200 rounded-[24px] p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <AlertCircle className="h-5 w-5 text-amber-500" />
             <h3 className="font-bold text-stone-800">{t('pending', { count: pendingStudents.length })}</h3>
           </div>
-          
+
           {pendingStudents.length === 0 ? (
             <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">{t('noPending')}</p>
           ) : (
             <div className="space-y-2">
-              {pendingStudents.map(student => (
-                <Link 
-                  key={student.id} 
-                  href={`/dashboard/agendas/${student.id}?date=${dateStr}`}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 border border-transparent hover:border-stone-200 transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-amber-100 text-amber-700 h-8 w-8 rounded-full flex items-center justify-center shrink-0">
-                      <Baby className="h-4 w-4" />
-                    </div>
-                    <span className="text-sm font-bold text-stone-700">{student.first_name} {student.last_name}</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-stone-600 transition-colors" />
-                </Link>
-              ))}
+              {pendingStudents.map(student => studentLink(student, 'amber'))}
             </div>
           )}
         </div>
 
-        {/* Completed List */}
+        <div className="bg-white border border-stone-200 rounded-[24px] p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <FilePenLine className="h-5 w-5 text-orange-500" />
+            <h3 className="font-bold text-stone-800">{t('drafts', { count: draftStudents.length })}</h3>
+          </div>
+
+          {draftStudents.length === 0 ? (
+            <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">{t('noDrafts')}</p>
+          ) : (
+            <div className="space-y-2">
+              {draftStudents.map(student => studentLink(student, 'orange'))}
+            </div>
+          )}
+        </div>
+
         <div className="bg-white border border-stone-200 rounded-[24px] p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-            <h3 className="font-bold text-stone-800">{t('completed', { count: completedStudents.length })}</h3>
+            <h3 className="font-bold text-stone-800">{t('completed', { count: sentStudents.length })}</h3>
           </div>
-          
-          {completedStudents.length === 0 ? (
+
+          {sentStudents.length === 0 ? (
             <p className="text-sm text-stone-500 text-center py-6 bg-stone-50 rounded-xl">{t('noCompleted')}</p>
           ) : (
             <div className="space-y-2">
-              {completedStudents.map(student => (
-                <Link 
-                  key={student.id} 
-                  href={`/dashboard/agendas/${student.id}?date=${dateStr}`}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 border border-transparent hover:border-stone-200 transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="bg-emerald-100 text-emerald-700 h-8 w-8 rounded-full flex items-center justify-center shrink-0">
-                      <Baby className="h-4 w-4" />
-                    </div>
-                    <span className="text-sm font-bold text-stone-700">{student.first_name} {student.last_name}</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-stone-600 transition-colors" />
-                </Link>
-              ))}
+              {sentStudents.map(student => studentLink(student, 'emerald'))}
             </div>
           )}
         </div>

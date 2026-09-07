@@ -63,6 +63,7 @@ export async function upsertDailyLog(formData: FormData) {
 
   const student_id = formData.get('student_id') as string
   const dateStr = formData.get('date') as string
+  const requestedStatus = formData.get('status') === 'published' ? 'published' : 'draft'
 
   const { data: student } = await supabase
     .from('students')
@@ -88,8 +89,9 @@ export async function upsertDailyLog(formData: FormData) {
 
   const mood = getNullIfEmpty(formData.get('mood') as string | null)
   const meal_breakfast = getNullIfEmpty(formData.get('meal_breakfast') as string | null)
-  const meal_lunch = getNullIfEmpty(formData.get('meal_lunch') as string | null)
-  const meal_snack = getNullIfEmpty(formData.get('meal_snack') as string | null)
+  const meal_first_course = getNullIfEmpty(formData.get('meal_first_course') as string | null)
+  const meal_second_course = getNullIfEmpty(formData.get('meal_second_course') as string | null)
+  const meal_dessert = getNullIfEmpty(formData.get('meal_dessert') as string | null)
   const diaperRaw = formData.get('diaper_type') as string | null
   const diaper_type = formatDiaperTypes(parseDiaperTypes(diaperRaw))
   const diaper_changes = parseInt(formData.get('diaper_changes') as string || '0', 10)
@@ -104,7 +106,7 @@ export async function upsertDailyLog(formData: FormData) {
 
   const { data: existingLog } = await supabase
     .from('daily_logs')
-    .select('id, photos')
+    .select('id, photos, status, published_at')
     .eq('student_id', student_id)
     .eq('date', dateStr)
     .maybeSingle()
@@ -115,6 +117,12 @@ export async function upsertDailyLog(formData: FormData) {
     photoUrls = [...photoUrls, ...uploaded]
   }
 
+  const wasPublished = existingLog?.status === 'published'
+  // Si ja estava enviada i tornen enrere (draft), mantenim published perquè la família no la perdi.
+  const status =
+    requestedStatus === 'draft' && wasPublished ? 'published' : requestedStatus
+  const becomingPublished = status === 'published' && !wasPublished
+
   const payload = {
     student_id,
     school_id: classroom.school_id,
@@ -123,14 +131,22 @@ export async function upsertDailyLog(formData: FormData) {
     teacher_id: user.id,
     mood,
     meal_breakfast,
-    meal_lunch,
-    meal_snack,
+    meal_first_course,
+    meal_second_course,
+    meal_dessert,
+    // Compat: meal_lunch = 1.er plato (columnes antigues)
+    meal_lunch: meal_first_course,
+    meal_snack: null as string | null,
     diaper_type,
     diaper_changes,
     nap_start,
     nap_end,
     notes,
     photos: photoUrls,
+    status,
+    published_at: becomingPublished
+      ? new Date().toISOString()
+      : existingLog?.published_at ?? (status === 'published' ? new Date().toISOString() : null),
   }
 
   const isCreate = !existingLog
@@ -149,7 +165,13 @@ export async function upsertDailyLog(formData: FormData) {
       entityType: 'daily_log',
       entityId: existingLog.id,
       schoolId: classroom.school_id,
-      payload: { studentId: student_id, date: dateStr, classroomId: classroom.id },
+      payload: {
+        studentId: student_id,
+        date: dateStr,
+        classroomId: classroom.id,
+        status,
+        becomingPublished,
+      },
     })
   } else {
     const { data: inserted, error } = await supabase
@@ -166,12 +188,17 @@ export async function upsertDailyLog(formData: FormData) {
       entityType: 'daily_log',
       entityId: inserted?.id,
       schoolId: classroom.school_id,
-      payload: { studentId: student_id, date: dateStr, classroomId: classroom.id },
+      payload: {
+        studentId: student_id,
+        date: dateStr,
+        classroomId: classroom.id,
+        status,
+      },
     })
   }
 
-  // Push només en la primera creació del dia (no en edicions posteriors).
-  if (isCreate) {
+  // Push només el primer cop que s'envia (passa a published).
+  if (becomingPublished || (isCreate && status === 'published')) {
     try {
       const guardianIds = await getGuardianIdsForStudent(student_id)
       if (guardianIds.length > 0) {
@@ -183,7 +210,7 @@ export async function upsertDailyLog(formData: FormData) {
         })
       }
     } catch (e) {
-      console.warn('[push] agenda create notify failed', e)
+      console.warn('[push] agenda publish notify failed', e)
     }
   }
 
@@ -193,7 +220,11 @@ export async function upsertDailyLog(formData: FormData) {
   revalidatePath('/mi-hijo/agenda')
   revalidatePath('/mi-hijo/galeria')
 
-  return { success: true }
+  return {
+    success: true as const,
+    status,
+    savedAsDraft: status === 'draft',
+  }
 }
 
 async function resolveClassroomForBulk(
@@ -239,7 +270,12 @@ export async function bulkMarkLunch(dateStr: string, classroomId?: string) {
 
   const { error } = await supabase
     .from('daily_logs')
-    .update({ meal_lunch: 'all' })
+    .update({
+      meal_first_course: 'all',
+      meal_second_course: 'all',
+      meal_dessert: 'all',
+      meal_lunch: 'all',
+    })
     .eq('classroom_id', classroom.id)
     .eq('date', dateStr)
 
@@ -260,4 +296,3 @@ export async function bulkMarkLunch(dateStr: string, classroomId?: string) {
 
   return { success: true, count: logs.length }
 }
-

@@ -15,7 +15,16 @@ export type Mood = 'happy' | 'calm' | 'sad' | 'irritable'
 export type MealAmount = 'all' | 'most' | 'little' | 'none'
 
 /** Tipo de toma/comida */
-export type MealType = 'breakfast' | 'lunch' | 'snack'
+export type MealType =
+  | 'breakfast'
+  | 'first_course'
+  | 'second_course'
+  | 'dessert'
+  | 'lunch'
+  | 'snack'
+
+/** Estado de la agenda del día */
+export type DailyLogStatus = 'draft' | 'published'
 
 /** Tipus de deposició (pot ser múltiple, guardat com CSV) */
 export type DiaperType = 'soft' | 'normal' | 'liquid'
@@ -35,5 +44,11 @@ export type EventAudience = 'school' | 'classroom' | 'individual'
 
 export const MOOD_OPTIONS: Mood[] = ['happy', 'calm', 'sad', 'irritable']
 export const MEAL_AMOUNT_OPTIONS: MealAmount[] = ['all', 'most', 'little', 'none']
-export const MEAL_TYPE_OPTIONS: MealType[] = ['breakfast', 'lunch', 'snack']
+export const MEAL_TYPE_OPTIONS: MealType[] = [
+  'breakfast',
+  'first_course',
+  'second_course',
+  'dessert',
+]
+export const DAILY_LOG_STATUS_OPTIONS: DailyLogStatus[] = ['draft', 'published']
 export const DIAPER_TYPE_OPTIONS: DiaperType[] = ['soft', 'normal', 'liquid']

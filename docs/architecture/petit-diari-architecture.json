@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Petit Diari — arquitectura de alto nivel",
+    "quality_profile": "showcase",
+    "output": "petit-diari-architecture.html",
+    "viewBox": [1180, 560],
+    "repository": {
+      "url": "https://github.com/ntorrents/agenda-digital.git",
+      "revision": "da3233d77ece8d7ae7305fc4a916469253603bfc"
+    },
+    "views": [
+      {
+        "id": "ruta-agenda",
+        "label": "Ruta de la agenda",
+        "focus": ["staff", "nextapp", "actions", "postgres", "family"],
+        "note": "Educador escribe → upsertDailyLog → daily_logs → familia lee solo published."
+      },
+      {
+        "id": "confianza",
+        "label": "Límites de confianza",
+        "focus": ["proxy", "actions", "sb_auth", "postgres", "storage"],
+        "note": "Sesión en Next, JWT hacia PostgREST/RLS, service role solo en servidor."
+      },
+      {
+        "id": "laterales",
+        "label": "Ramas laterales",
+        "focus": ["actions", "storage", "webpush", "resend", "landing"],
+        "note": "Fotos, Web Push al publicar, Resend y landing de marketing."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "landing",
+      "type": "frontend",
+      "label": "Landing",
+      "sublabel": "Vite · marketing",
+      "pos": [36, 36],
+      "size": [130, 52],
+      "sources": [{ "path": "apps/web/package.json", "label": "apps/web" }]
+    },
+    {
+      "id": "staff",
+      "type": "external",
+      "label": "Educadores",
+      "sublabel": "admin / teacher",
+      "pos": [36, 150],
+      "size": [130, 56],
+      "tag": "/dashboard",
+      "sources": [{ "path": "apps/app/src/app/dashboard/page.tsx", "label": "UI staff" }]
+    },
+    {
+      "id": "family",
+      "type": "external",
+      "label": "Familias",
+      "sublabel": "guardian + PWA",
+      "pos": [36, 310],
+      "size": [130, 56],
+      "tag": "/mi-hijo",
+      "sources": [{ "path": "apps/app/src/app/mi-hijo/page.tsx", "label": "UI familia" }]
+    },
+    {
+      "id": "nextapp",
+      "type": "frontend",
+      "label": "Next.js App",
+      "sublabel": "Vercel · apps/app",
+      "brand": "next-js",
+      "pos": [230, 220],
+      "size": [148, 60],
+      "sources": [
+        { "path": "apps/app/package.json", "label": "Next 16" },
+        { "path": "apps/app/next.config.ts", "label": "config" }
+      ]
+    },
+    {
+      "id": "proxy",
+      "type": "security",
+      "label": "Session proxy",
+      "sublabel": "gate + refresh",
+      "pos": [450, 100],
+      "size": [132, 56],
+      "tag": "proxy.ts",
+      "sources": [
+        { "path": "apps/app/src/proxy.ts", "label": "edge gate" },
+        { "path": "apps/app/src/lib/supabase/proxy.ts", "label": "SSR cookies" }
+      ]
+    },
+    {
+      "id": "actions",
+      "type": "backend",
+      "label": "Server Actions",
+      "sublabel": "sin API REST",
+      "pos": [450, 220],
+      "size": [132, 60],
+      "tag": "use server",
+      "sources": [
+        { "path": "apps/app/src/app/actions/daily-logs.ts", "label": "upsertDailyLog" },
+        { "path": "apps/app/src/app/actions/family-agenda.ts", "label": "familia lee" }
+      ]
+    },
+    {
+      "id": "sb_auth",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "JWT + roles",
+      "brand": "supabase",
+      "pos": [670, 60],
+      "size": [136, 56],
+      "sources": [{ "path": "apps/app/src/lib/supabase/server.ts", "label": "user client" }]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "Postgres + RLS",
+      "sublabel": "daily_logs",
+      "brand": "supabase",
+      "pos": [670, 220],
+      "size": [146, 60],
+      "tag": "draft|published",
+      "sources": [
+        { "path": "esquema_pro.sql", "label": "esquema PRO" },
+        { "path": "apps/app/src/types/index.ts", "label": "DailyLog" }
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "cloud",
+      "label": "Storage",
+      "sublabel": "daily-photos",
+      "brand": "supabase",
+      "pos": [670, 380],
+      "size": [136, 56],
+      "tag": "service role",
+      "sources": [
+        { "path": "apps/app/src/lib/storage.ts", "label": "uploads" },
+        { "path": "apps/app/scripts/pre-storage-buckets.sql", "label": "buckets" }
+      ]
+    },
+    {
+      "id": "resend",
+      "type": "external",
+      "label": "Resend",
+      "sublabel": "email",
+      "pos": [900, 60],
+      "size": [120, 52]
+    },
+    {
+      "id": "webpush",
+      "type": "messagebus",
+      "label": "Web Push",
+      "sublabel": "VAPID → SW",
+      "pos": [900, 220],
+      "size": [130, 56],
+      "tag": "al publicar",
+      "sources": [
+        { "path": "apps/app/src/lib/push/send.ts", "label": "send push" },
+        { "path": "apps/app/public/sw.js", "label": "SW" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Next.js (Vercel)",
+      "wraps": ["nextapp", "proxy", "actions"],
+      "pad": 18
+    },
+    {
+      "kind": "security-group",
+      "label": "Supabase + RLS",
+      "wraps": ["sb_auth", "postgres", "storage"],
+      "pad": 16
+    }
+  ],
+  "connections": [
+    {
+      "id": "staff-to-next",
+      "from": "staff",
+      "to": "nextapp",
+      "label": "HTTPS escribe",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [198, 146]
+    },
+    {
+      "id": "family-to-next",
+      "from": "family",
+      "to": "nextapp",
+      "label": "HTTPS lee",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [198, 360]
+    },
+    {
+      "id": "next-to-proxy",
+      "from": "nextapp",
+      "to": "proxy",
+      "label": "sesión",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "proxy-to-actions",
+      "from": "proxy",
+      "to": "actions",
+      "label": "usuario OK",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [560, 176]
+    },
+    {
+      "id": "actions-auth",
+      "from": "actions",
+      "to": "sb_auth",
+      "label": "getUser JWT",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "left",
+      "labelDy": -14
+    },
+    {
+      "id": "actions-db",
+      "from": "actions",
+      "to": "postgres",
+      "label": "PostgREST + RLS",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": -20
+    },
+    {
+      "id": "actions-storage",
+      "from": "actions",
+      "to": "storage",
+      "label": "fotos",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "labelDy": 14
+    },
+    {
+      "id": "actions-push",
+      "from": "actions",
+      "to": "webpush",
+      "label": "notify publicar",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [[516, 460], [965, 460]],
+      "labelAt": [740, 448]
+    },
+    {
+      "id": "push-to-family",
+      "from": "webpush",
+      "to": "family",
+      "label": "push → SW",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [[965, 510], [101, 510]],
+      "labelAt": [520, 528]
+    },
+    {
+      "id": "sb-auth-email",
+      "from": "sb_auth",
+      "to": "resend",
+      "label": "email",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [850, 48]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Flujo daily_logs",
+      "items": [
+        "DailyLogForm → upsertDailyLog (draft | published)",
+        "Familia solo published (query + RLS guardian)",
+        "Push en la primera publicación"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Confianza",
+      "items": [
+        "proxy.ts → /login sin sesión",
+        "Actions: rol + escuela/aula; RLS por school_id",
+        "Service role solo servidor (storage, push, audit, superadmin)"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Externos y extras",
+      "items": [
+        "PRE Docker :8000 · PRO cloud · deploy Vercel",
+        "Landing Vite aislada; Cloudflare solo PRE PWA",
+        "También: avisos, mensajes, menús, galería, superadmin ERP"
+      ]
+    }
+  ]
+}
