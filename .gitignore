@@ -42,5 +42,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# supabase CLI local (opcional)
-/supabase/
+# Supabase CLI — versionar config/migrations; ignorar estado local y dumps
+supabase/.branches
+supabase/.temp
+.supabase-migration-backup/

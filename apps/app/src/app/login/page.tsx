@@ -27,6 +27,9 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient()
+      // Evita que un refresh token stale (cookie rota) bloquee el login
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined)
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -92,12 +95,10 @@ export default function LoginPage() {
         return
       }
 
-      try {
-        const { recordLoginAudit } = await import('@/app/actions/audit')
-        await recordLoginAudit()
-      } catch {
-        // no bloquejar login si falla l'audit
-      }
+      // Audit no ha de bloquejar el login (PRO a vegades torna 502/504 a audit_logs)
+      void import('@/app/actions/audit')
+        .then(({ recordLoginAudit }) => recordLoginAudit())
+        .catch(() => undefined)
 
       window.location.assign(dest)
       return
