@@ -49,6 +49,7 @@ export const MEAL_TYPE_OPTIONS: MealType[] = [
   'first_course',
   'second_course',
   'dessert',
+  'snack',
 ]
 export const DAILY_LOG_STATUS_OPTIONS: DailyLogStatus[] = ['draft', 'published']
 export const DIAPER_TYPE_OPTIONS: DiaperType[] = ['soft', 'normal', 'liquid']

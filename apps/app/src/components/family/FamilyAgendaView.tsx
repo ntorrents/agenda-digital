@@ -139,6 +139,14 @@ export function FamilyAgendaView({
                       </span>
                     </div>
                   )}
+                  {dailyLog.meal_snack && (
+                    <div className="flex items-center justify-between bg-white/60 p-3 rounded-2xl border border-white">
+                      <span className="text-xs font-bold text-stone-700">{t('snack')}</span>
+                      <span className="text-xs font-black bg-white px-3 py-1 rounded-full text-[#6b992f] shadow-sm">
+                        {mealMap[dailyLog.meal_snack]}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

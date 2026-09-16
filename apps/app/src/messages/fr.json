@@ -447,7 +447,7 @@
     "btnGallery": "Galerie",
     "btnSave": "Enregistrer l'Agenda",
     "btnSaveSend": "Enregistrer et envoyer",
-    "btnBackDraft": "Enregistrer le brouillon et revenir",
+    "btnBackDraft": "Retour et enregistrer le brouillon",
     "saveHint": "Retour enregistre un brouillon. Ce bouton envoie l'agenda à la famille.",
     "draftBadge": "Brouillon (pas encore envoyé à la famille)",
     "diaperSoft": "Molle",

@@ -471,7 +471,7 @@
     "btnGallery": "Galería",
     "btnSave": "Guardar Agenda",
     "btnSaveSend": "Guardar y enviar",
-    "btnBackDraft": "Guardar borrador y volver",
+    "btnBackDraft": "Atrás y guardar borrador",
     "saveHint": "Atrás guarda borrador. Este botón envía la agenda a la familia.",
     "draftBadge": "Borrador (aún no enviada a la familia)"
   },

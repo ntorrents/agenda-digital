@@ -467,7 +467,7 @@
     "btnGallery": "Gallery",
     "btnSave": "Save Agenda",
     "btnSaveSend": "Save and send",
-    "btnBackDraft": "Save draft and go back",
+    "btnBackDraft": "Back and save draft",
     "saveHint": "Back saves a draft. This button sends the agenda to the family.",
     "draftBadge": "Draft (not sent to the family yet)",
     "diaperSoft": "Soft",

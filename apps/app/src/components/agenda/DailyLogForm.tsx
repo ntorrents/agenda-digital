@@ -35,6 +35,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
   )
   const [secondCourse, setSecondCourse] = useState<string | null>(initialData?.meal_second_course || null)
   const [dessert, setDessert] = useState<string | null>(initialData?.meal_dessert || null)
+  const [snack, setSnack] = useState<string | null>(initialData?.meal_snack || null)
   const [diaperTypes, setDiaperTypes] = useState<DiaperType[]>(
     normalizeDiaperTypes(initialData?.diaper_type)
   )
@@ -94,6 +95,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
       if (firstCourse) formData.append('meal_first_course', firstCourse)
       if (secondCourse) formData.append('meal_second_course', secondCourse)
       if (dessert) formData.append('meal_dessert', dessert)
+      if (snack) formData.append('meal_snack', snack)
       const diaperValue = formatDiaperTypes(diaperTypes)
       if (diaperValue) formData.append('diaper_type', diaperValue)
       formData.append('diaper_changes', diaperChanges.toString())
@@ -172,18 +174,17 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
 
   return (
     <div className="bg-white rounded-[32px] p-4 sm:p-6 shadow-sm border border-stone-200/80 mb-6 animate-in slide-in-from-bottom-4 duration-300">
-      <div className="flex items-center gap-3 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
+      <div className="mb-6 space-y-3">
+        <button
+          type="button"
           disabled={isSaving}
           onClick={() => void handleSave('draft')}
-          className="h-10 w-10 rounded-full hover:bg-stone-100 -ml-2 shrink-0 cursor-pointer text-stone-500 hover:text-stone-900 transition-colors"
-          aria-label={t('btnBackDraft')}
+          className="inline-flex items-center gap-1.5 -ml-1 px-2 py-1.5 rounded-xl text-sm font-bold text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer disabled:opacity-50"
         >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="min-w-0 flex-1">
+          <ArrowLeft className="h-4 w-4 shrink-0" />
+          <span>{t('btnBackDraft')}</span>
+        </button>
+        <div className="min-w-0">
           <h2 className="text-xl font-black text-stone-900 leading-tight truncate">
             {studentName}
           </h2>
@@ -248,6 +249,10 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
             {renderMealRow(t('mealFirstCourse'), firstCourse, setFirstCourse)}
             {renderMealRow(t('mealSecondCourse'), secondCourse, setSecondCourse)}
             {renderMealRow(t('mealDessert'), dessert, setDessert)}
+          </div>
+
+          <div className="space-y-3">
+            {renderMealRow(t('mealSnack'), snack, setSnack)}
           </div>
         </section>
         )}

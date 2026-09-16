@@ -210,7 +210,15 @@ export default async function SuperadminLogsPage({
                       }`}
                     >
                       <td className="py-2.5 px-2 text-stone-400 whitespace-nowrap">
-                        {new Date(row.created_at).toLocaleString('ca-ES')}
+                        {new Date(row.created_at).toLocaleString('ca-ES', {
+                          timeZone: 'Europe/Madrid',
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
                       </td>
                       <td className="py-2.5 px-2">
                         <span

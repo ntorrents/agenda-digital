@@ -92,6 +92,7 @@ export async function upsertDailyLog(formData: FormData) {
   const meal_first_course = getNullIfEmpty(formData.get('meal_first_course') as string | null)
   const meal_second_course = getNullIfEmpty(formData.get('meal_second_course') as string | null)
   const meal_dessert = getNullIfEmpty(formData.get('meal_dessert') as string | null)
+  const meal_snack = getNullIfEmpty(formData.get('meal_snack') as string | null)
   const diaperRaw = formData.get('diaper_type') as string | null
   const diaper_type = formatDiaperTypes(parseDiaperTypes(diaperRaw))
   const diaper_changes = parseInt(formData.get('diaper_changes') as string || '0', 10)
@@ -134,9 +135,9 @@ export async function upsertDailyLog(formData: FormData) {
     meal_first_course,
     meal_second_course,
     meal_dessert,
+    meal_snack,
     // Compat: meal_lunch = 1.er plato (columnes antigues)
     meal_lunch: meal_first_course,
-    meal_snack: null as string | null,
     diaper_type,
     diaper_changes,
     nap_start,

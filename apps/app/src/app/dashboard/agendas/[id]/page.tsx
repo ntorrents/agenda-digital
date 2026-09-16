@@ -2,8 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCachedSchoolSettings } from '@/lib/cache/school-data'
 import { redirect } from 'next/navigation'
 import { DailyLogForm } from '@/components/agenda/DailyLogForm'
-import { CheckCircle2, ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import { CheckCircle2 } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
 export default async function StudentLogPage(props: { params: Promise<{ id: string }>, searchParams: Promise<{ date?: string, success?: string }> }) {
@@ -67,14 +66,6 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
 
   return (
     <main className="px-4 sm:px-6 pt-4 pb-8 w-full max-w-2xl mx-auto space-y-6">
-      
-      <Link 
-        href="/dashboard/agendas"
-        className="inline-flex items-center text-sm font-bold text-stone-500 hover:text-stone-800 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" /> {t('backToList')}
-      </Link>
-
       {guardiansData && guardiansData.length > 0 && (
         <div className="bg-white border border-stone-200/80 rounded-[28px] p-5 shadow-xs">
           <h3 className="text-[11px] font-black uppercase text-stone-400 tracking-wider mb-4">{t('guardianTitle')}</h3>

@@ -90,10 +90,9 @@ export interface DailyLog {
   meal_first_course: MealAmount | null
   meal_second_course: MealAmount | null
   meal_dessert: MealAmount | null
+  meal_snack: MealAmount | null
   /** @deprecated usar meal_first_course */
   meal_lunch?: MealAmount | null
-  /** @deprecated ya no se usa en UI */
-  meal_snack?: MealAmount | null
 
   // Pañal
   diaper_type: DiaperType | null
