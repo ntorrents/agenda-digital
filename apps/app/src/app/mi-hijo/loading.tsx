@@ -1,9 +1,6 @@
-import { PetitDiariLoader } from '@/components/ui/PetitDiariLoader'
+import { PageContentSkeleton } from '@/components/ui/skeleton'
 
+/** Loading del segmento /mi-hijo (home). Las subrutas tienen su propio loading.tsx */
 export default function FamilyLoading() {
-  return (
-    <div className="flex min-h-[40vh] items-center justify-center p-8">
-      <PetitDiariLoader message="Carregant..." fullScreen />
-    </div>
-  )
+  return <PageContentSkeleton variant="home" />
 }

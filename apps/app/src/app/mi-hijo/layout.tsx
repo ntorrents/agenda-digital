@@ -9,7 +9,7 @@ import { LogOut, Home, Calendar, Image as ImageIcon, Bell, Menu, X, ArrowLeft, M
 import { cn } from '@/lib/utils'
 import { useTranslations, useLocale } from 'next-intl'
 import { DatePickerNav } from '@/components/ui/DatePickerNav'
-import { PetitDiariLoader } from '@/components/ui/PetitDiariLoader'
+import { AppShellSkeleton } from '@/components/ui/skeleton'
 import { FamilyStudentProvider, useFamilyStudent } from '@/components/family/FamilyStudentProvider'
 import { StudentSwitcher } from '@/components/family/StudentSwitcher'
 import { PetitDiariBrandAvatar } from '@/components/brand/PetitDiariBrand'
@@ -17,13 +17,7 @@ import { PetitDiariBrandMark } from '@/components/brand/PetitDiariBrandFooter'
 
 export default function FamilyLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center">
-          <PetitDiariLoader fullScreen />
-        </div>
-      }
-    >
+    <Suspense fallback={<AppShellSkeleton />}>
       <FamilyStudentProvider>
         <FamilyLayoutShell>{children}</FamilyLayoutShell>
       </FamilyStudentProvider>
@@ -163,11 +157,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
   )
 
   if (!isReady) {
-    return (
-      <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center">
-        <PetitDiariLoader message={tCommon('loading')} fullScreen />
-      </div>
-    )
+    return <AppShellSkeleton />
   }
 
   return (
