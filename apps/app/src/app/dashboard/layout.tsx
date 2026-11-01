@@ -23,7 +23,7 @@ import {
   X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { PetitDiariLoader } from '@/components/ui/PetitDiariLoader'
+import { AppShellSkeleton } from '@/components/ui/skeleton'
 import { PetitDiariBrandAvatar } from '@/components/brand/PetitDiariBrand'
 import { PetitDiariBrandMark } from '@/components/brand/PetitDiariBrandFooter'
 
@@ -130,11 +130,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         : teacherNavItems
 
   if (!isReady) {
-    return (
-      <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center">
-        <PetitDiariLoader message={tCommon('loading')} fullScreen />
-      </div>
-    )
+    return <AppShellSkeleton />
   }
 
   const SidebarContent = () => (
