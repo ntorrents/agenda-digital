@@ -28,12 +28,10 @@ type PdfPage = {
  * con `import('pdfjs-dist')`.
  */
 async function loadPdfjs(): Promise<PdfjsModule> {
-  // webpackIgnore / turbopackIgnore: no resolver como dependencia de node_modules
-  const mod = await import(
-    /* webpackIgnore: true */
-    /* turbopackIgnore: true */
-    '/pdf.min.mjs'
-  )
+  // Servido desde apps/app/public — no pasa por el bundler de Turbopack/npm
+  const href = new URL('/pdf.min.mjs', window.location.origin).href
+  // @ts-expect-error URL dinámica a /public; no es un módulo de node_modules
+  const mod = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ href)
   return (mod as { default?: PdfjsModule } & PdfjsModule).default ?? (mod as PdfjsModule)
 }
 
