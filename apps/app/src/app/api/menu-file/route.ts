@@ -33,21 +33,36 @@ export async function GET(request: Request) {
     )
   }
 
-  let upstream: Response
+  // Intentar URL tal cual; si falla en PRE, probar localhost ↔ 127.0.0.1
+  const candidates = [fileUrl]
   try {
-    upstream = await fetch(fileUrl, {
-      // Evitar cache agresivo de Next sobre ficheros que se reemplazan
-      cache: 'no-store',
-    })
+    const u = new URL(fileUrl)
+    if (u.hostname === 'localhost') {
+      u.hostname = '127.0.0.1'
+      candidates.push(u.toString())
+    } else if (u.hostname === '127.0.0.1') {
+      u.hostname = 'localhost'
+      candidates.push(u.toString())
+    }
   } catch {
-    return NextResponse.json({ error: 'Upstream unreachable' }, { status: 502 })
+    // ignore
   }
 
-  if (!upstream.ok || !upstream.body) {
-    return NextResponse.json(
-      { error: 'Upstream failed', status: upstream.status },
-      { status: 502 }
-    )
+  let upstream: Response | null = null
+  for (const candidate of candidates) {
+    try {
+      const res = await fetch(candidate, { cache: 'no-store' })
+      if (res.ok && res.body) {
+        upstream = res
+        break
+      }
+    } catch {
+      // probar siguiente candidato
+    }
+  }
+
+  if (!upstream?.body) {
+    return NextResponse.json({ error: 'Upstream failed' }, { status: 502 })
   }
 
   const contentType = upstream.headers.get('content-type') || 'application/octet-stream'
