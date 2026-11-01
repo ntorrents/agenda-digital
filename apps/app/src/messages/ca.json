@@ -507,7 +507,12 @@
     "draftBadge": "Esborrany (encara no enviada a la família)",
     "autosaveSaving": "Desant esborrany…",
     "autosaveSaved": "Esborrany desat",
-    "autosaveError": "No s'ha pogut autodesar. Usa Enrere o Desar."
+    "autosaveError": "No s'ha pogut autodesar. Usa Enrere o Desar.",
+    "photosCount": "{current}/{max} fotos",
+    "photosLimitReached": "Màxim {max} fotos per agenda",
+    "photosTruncated": "Només s'han afegit {added} (màxim {max} fotos)",
+    "photosCompressing": "Preparant fotos…",
+    "photosCompressError": "No s'han pogut preparar les fotos. Prova amb menys o de menor mida."
   },
   "dashboardAgendas": {
     "noClassroom": "No tens cap aula assignada.",

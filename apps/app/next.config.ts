@@ -6,7 +6,8 @@ const withNextIntl = createNextIntlPlugin('./src/i18n.ts')
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      bodySizeLimit: '2mb',
+      // Hasta 10 fotos comprimidas (~750KB c/u) + campos del formulario
+      bodySizeLimit: '10mb',
     },
   },
   // Només afecta `next dev`. Amb túnel Cloudflare: hostname SENSE https://

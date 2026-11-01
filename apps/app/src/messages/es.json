@@ -476,7 +476,12 @@
     "draftBadge": "Borrador (aún no enviada a la familia)",
     "autosaveSaving": "Guardando borrador…",
     "autosaveSaved": "Borrador guardado",
-    "autosaveError": "No se pudo autoguardar. Usa Atrás o Guardar."
+    "autosaveError": "No se pudo autoguardar. Usa Atrás o Guardar.",
+    "photosCount": "{current}/{max} fotos",
+    "photosLimitReached": "Máximo {max} fotos por agenda",
+    "photosTruncated": "Solo se han añadido {added} (máximo {max} fotos)",
+    "photosCompressing": "Preparando fotos…",
+    "photosCompressError": "No se han podido preparar las fotos. Prueba con menos o de menor tamaño."
   },
   "dashboardAgendas": {
     "noClassroom": "No tienes ninguna aula asignada.",

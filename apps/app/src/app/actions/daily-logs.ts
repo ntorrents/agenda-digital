@@ -7,6 +7,7 @@ import { formatDiaperTypes, parseDiaperTypes } from '@/lib/diaper'
 import { DASHBOARD_STAFF_ROLES } from '@/lib/roles'
 import { assertAgendaClassroomAccess, getSchoolClassroom, getTeacherClassroom } from '@/lib/teacher-classroom'
 import { PHOTOS_BUCKET } from '@/lib/storage'
+import { MAX_DAILY_LOG_PHOTOS } from '@/lib/daily-log-photos'
 import { logAudit } from '@/lib/audit-log'
 import { sendPushToUsers } from '@/lib/push/send'
 import { getGuardianIdsForStudent } from '@/lib/push/recipients'
@@ -112,7 +113,13 @@ export async function upsertDailyLog(formData: FormData) {
     .eq('date', dateStr)
     .maybeSingle()
 
-  let photoUrls: string[] = existingLog?.photos || []
+  let photoUrls: string[] = (existingLog?.photos || []).filter(Boolean)
+  const remainingSlots = Math.max(0, MAX_DAILY_LOG_PHOTOS - photoUrls.length)
+  if (photoFiles.length > remainingSlots) {
+    throw new Error(
+      `Máximo ${MAX_DAILY_LOG_PHOTOS} fotos por agenda (cabén ${remainingSlots} más)`
+    )
+  }
   if (photoFiles.length > 0) {
     const uploaded = await uploadLogPhotos(photoFiles, classroom.school_id, student_id, dateStr)
     photoUrls = [...photoUrls, ...uploaded]

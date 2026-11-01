@@ -453,6 +453,11 @@
     "autosaveSaving": "Enregistrement du brouillon…",
     "autosaveSaved": "Brouillon enregistré",
     "autosaveError": "Échec de l'auto-enregistrement. Utilisez Retour ou Enregistrer.",
+    "photosCount": "{current}/{max} photos",
+    "photosLimitReached": "Maximum {max} photos par agenda",
+    "photosTruncated": "Seules {added} ont été ajoutées (max. {max} photos)",
+    "photosCompressing": "Préparation des photos…",
+    "photosCompressError": "Impossible de préparer les photos. Essayez avec moins ou plus petites.",
     "diaperSoft": "Molle",
     "diaperNormal": "Normale",
     "diaperLiquid": "Liquide"

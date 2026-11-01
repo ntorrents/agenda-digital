@@ -473,6 +473,11 @@
     "autosaveSaving": "Saving draft…",
     "autosaveSaved": "Draft saved",
     "autosaveError": "Autosave failed. Use Back or Save.",
+    "photosCount": "{current}/{max} photos",
+    "photosLimitReached": "Maximum {max} photos per agenda",
+    "photosTruncated": "Only {added} were added (max {max} photos)",
+    "photosCompressing": "Preparing photos…",
+    "photosCompressError": "Could not prepare the photos. Try fewer or smaller ones.",
     "diaperSoft": "Soft",
     "diaperNormal": "Normal",
     "diaperLiquid": "Liquid"
