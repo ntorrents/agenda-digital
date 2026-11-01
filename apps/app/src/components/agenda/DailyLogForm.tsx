@@ -10,8 +10,10 @@ import { CameraCapture } from '@/components/media/CameraCapture'
 import { formatDiaperTypes, normalizeDiaperTypes, toggleDiaperType } from '@/lib/diaper'
 import { compressImageFiles } from '@/lib/compress-image'
 import { PhotoLightbox } from '@/components/media/PhotoLightbox'
-import { sendDraftBeacon } from '@/lib/agenda-draft-beacon'
 import type { DiaperType } from '@/types/enums'
+
+const HISTORY_GUARD = '__dailyLogDraftGuard'
+const AUTOSAVE_MS = 700
 
 interface DailyLogFormProps {
   studentId: string
@@ -26,10 +28,12 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   const [isCompressingPhotos, setIsCompressingPhotos] = useState(false)
+  const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const t = useTranslations('dailyLogForm')
   const locale = useLocale()
-  /** Evita doble guardado (botón app + pagehide, o doble popstate). */
   const isExitingRef = useRef(false)
+  const skipAutosaveRef = useRef(true)
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const galleryRef = useRef<HTMLInputElement>(null)
 
   const [mood, setMood] = useState<string | null>(initialData?.mood || null)
@@ -81,6 +85,26 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
     return formData
   }
 
+  const clearAutosaveTimer = () => {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current)
+      autosaveTimerRef.current = null
+    }
+  }
+
+  const goToAgendaList = (status: 'draft' | 'published', savedAsDraft: boolean) => {
+    const params = new URLSearchParams({
+      date: dateStr,
+      classroom_id: classroomId,
+    })
+    if (savedAsDraft || status === 'draft') {
+      params.set('draftSaved', studentName)
+    } else {
+      params.set('sent', studentName)
+    }
+    router.replace(`/dashboard/agendas?${params.toString()}`)
+  }
+
   const addPhotoFiles = async (files: File[]) => {
     if (files.length === 0) return
     const remaining = Math.max(0, 5 - photoFiles.length - photoPreviews.length)
@@ -114,21 +138,11 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
   const handleSave = async (status: 'draft' | 'published') => {
     if (isExitingRef.current) return
     isExitingRef.current = true
+    clearAutosaveTimer()
     setIsSaving(true)
     try {
       const result = await upsertDailyLog(buildFormData(status, true))
-
-      const params = new URLSearchParams({
-        date: dateStr,
-        classroom_id: classroomId,
-      })
-      if (result.savedAsDraft) {
-        params.set('draftSaved', studentName)
-      } else if (status === 'published') {
-        params.set('sent', studentName)
-      }
-
-      router.push(`/dashboard/agendas?${params.toString()}`)
+      goToAgendaList(status, Boolean(result.savedAsDraft))
     } catch (error) {
       console.error('Error saving log:', error)
       isExitingRef.current = false
@@ -137,30 +151,84 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
     }
   }
 
-  /**
-   * Safari/Next cancelan Server Actions al ir atrás.
-   * En popstate (síncrono, aún montados) disparamos fetch keepalive.
-   * Sin fotos nuevas: el body keepalive tiene límite ~64KB.
-   */
-  const persistDraftOnLeave = useEffectEvent(() => {
+  /** Autoguardado mientras editas: al ir atrás los datos ya están en BBDD. */
+  const runAutosave = useEffectEvent(async () => {
     if (isExitingRef.current) return
-    isExitingRef.current = true
-    sendDraftBeacon(buildFormData('draft', false), studentName)
+    setAutosaveState('saving')
+    try {
+      await upsertDailyLog(buildFormData('draft', false))
+      if (!isExitingRef.current) setAutosaveState('saved')
+    } catch (error) {
+      console.error('Autosave draft failed:', error)
+      if (!isExitingRef.current) setAutosaveState('error')
+    }
   })
 
+  /**
+   * Atrás del navegador: interceptar ANTES que Next (capture + stopImmediatePropagation),
+   * guardar y salir nosotros a la lista.
+   */
+  const handleBrowserBack = useEffectEvent(() => {
+    if (isExitingRef.current) return
+    isExitingRef.current = true
+    clearAutosaveTimer()
+    setIsSaving(true)
+
+    void (async () => {
+      try {
+        const result = await upsertDailyLog(buildFormData('draft', true))
+        goToAgendaList('draft', Boolean(result.savedAsDraft))
+      } catch (error) {
+        console.error('Browser-back draft save failed:', error)
+        isExitingRef.current = false
+        setIsSaving(false)
+        setAutosaveState('error')
+        alert(t('errorSaving'))
+      }
+    })()
+  })
+
+  // Debounce autosave on field changes
   useEffect(() => {
-    const onPopState = () => {
-      persistDraftOnLeave()
+    if (skipAutosaveRef.current) {
+      skipAutosaveRef.current = false
+      return
     }
-    const onPageHide = () => {
-      persistDraftOnLeave()
+    clearAutosaveTimer()
+    autosaveTimerRef.current = setTimeout(() => {
+      void runAutosave()
+    }, AUTOSAVE_MS)
+    return clearAutosaveTimer
+  }, [
+    mood,
+    breakfast,
+    firstCourse,
+    secondCourse,
+    dessert,
+    snack,
+    diaperTypes,
+    diaperChanges,
+    didNap,
+    napStart,
+    napEnd,
+    notes,
+  ])
+
+  // History trap for browser / system back (web + mobile)
+  useEffect(() => {
+    const guardState = { ...(window.history.state as object | null), [HISTORY_GUARD]: true }
+    window.history.pushState(guardState, '', window.location.href)
+
+    const onPopState = (event: PopStateEvent) => {
+      // Impide que el App Router de Next se coma el atrás sin guardar
+      event.stopImmediatePropagation()
+      window.history.pushState(guardState, '', window.location.href)
+      handleBrowserBack()
     }
 
-    window.addEventListener('popstate', onPopState)
-    window.addEventListener('pagehide', onPageHide)
+    window.addEventListener('popstate', onPopState, true)
     return () => {
-      window.removeEventListener('popstate', onPopState)
-      window.removeEventListener('pagehide', onPageHide)
+      window.removeEventListener('popstate', onPopState, true)
     }
   }, [])
 
@@ -228,8 +296,17 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
           <p className="text-xs font-semibold text-stone-400 capitalize">
             {t('agendaOf', { date: formattedDate })}
           </p>
-          {initialData?.status === 'draft' && (
+          {(initialData?.status === 'draft' || autosaveState === 'saved') && (
             <p className="text-[11px] font-bold text-amber-600 mt-0.5">{t('draftBadge')}</p>
+          )}
+          {autosaveState === 'saving' && (
+            <p className="text-[11px] font-semibold text-stone-400 mt-0.5">{t('autosaveSaving')}</p>
+          )}
+          {autosaveState === 'saved' && (
+            <p className="text-[11px] font-semibold text-teal-600 mt-0.5">{t('autosaveSaved')}</p>
+          )}
+          {autosaveState === 'error' && (
+            <p className="text-[11px] font-semibold text-red-600 mt-0.5">{t('autosaveError')}</p>
           )}
         </div>
       </div>

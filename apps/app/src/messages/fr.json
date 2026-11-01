@@ -448,8 +448,11 @@
     "btnSave": "Enregistrer l'Agenda",
     "btnSaveSend": "Enregistrer et envoyer",
     "btnBackDraft": "Retour et enregistrer le brouillon",
-    "saveHint": "Tout retour (flèche, bouton du téléphone ou geste) enregistre un brouillon. Ce bouton envoie l'agenda à la famille.",
+    "saveHint": "Enregistrement auto en éditant. Tout retour enregistre aussi un brouillon. Ce bouton envoie l'agenda à la famille.",
     "draftBadge": "Brouillon (pas encore envoyé à la famille)",
+    "autosaveSaving": "Enregistrement du brouillon…",
+    "autosaveSaved": "Brouillon enregistré",
+    "autosaveError": "Échec de l'auto-enregistrement. Utilisez Retour ou Enregistrer.",
     "diaperSoft": "Molle",
     "diaperNormal": "Normale",
     "diaperLiquid": "Liquide"

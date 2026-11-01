@@ -472,8 +472,11 @@
     "btnSave": "Guardar Agenda",
     "btnSaveSend": "Guardar y enviar",
     "btnBackDraft": "Atrás y guardar borrador",
-    "saveHint": "Cualquier atrás (flecha, botón del móvil o gesto) guarda borrador. Este botón envía la agenda a la familia.",
-    "draftBadge": "Borrador (aún no enviada a la familia)"
+    "saveHint": "Se guarda solo al editar. Cualquier atrás también guarda borrador. Este botón envía la agenda a la familia.",
+    "draftBadge": "Borrador (aún no enviada a la familia)",
+    "autosaveSaving": "Guardando borrador…",
+    "autosaveSaved": "Borrador guardado",
+    "autosaveError": "No se pudo autoguardar. Usa Atrás o Guardar."
   },
   "dashboardAgendas": {
     "noClassroom": "No tienes ninguna aula asignada.",
