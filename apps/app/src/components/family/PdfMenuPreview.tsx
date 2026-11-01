@@ -4,8 +4,41 @@ import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+type PdfjsModule = {
+  GlobalWorkerOptions: { workerSrc: string }
+  getDocument: (src: { data: Uint8Array }) => { promise: Promise<PdfDocument> }
+}
+
+type PdfDocument = {
+  numPages: number
+  getPage: (n: number) => Promise<PdfPage>
+}
+
+type PdfPage = {
+  getViewport: (opts: { scale: number }) => { width: number; height: number }
+  render: (opts: {
+    canvasContext: CanvasRenderingContext2D
+    viewport: { width: number; height: number }
+    canvas: HTMLCanvasElement
+  }) => { promise: Promise<void> }
+}
+
 /**
- * Renderiza el PDF como imágenes (canvas → JPEG) con pdf.js.
+ * Carga pdf.js desde /public (no npm) para evitar fallos de Turbopack
+ * con `import('pdfjs-dist')`.
+ */
+async function loadPdfjs(): Promise<PdfjsModule> {
+  // webpackIgnore / turbopackIgnore: no resolver como dependencia de node_modules
+  const mod = await import(
+    /* webpackIgnore: true */
+    /* turbopackIgnore: true */
+    '/pdf.min.mjs'
+  )
+  return (mod as { default?: PdfjsModule } & PdfjsModule).default ?? (mod as PdfjsModule)
+}
+
+/**
+ * Renderiza el PDF como imágenes (canvas → JPEG).
  * Fiable en Safari/móvil donde iframe/object de PDF no funciona.
  */
 export function PdfMenuPreview({
@@ -29,13 +62,12 @@ export function PdfMenuPreview({
       setPages([])
 
       try {
-        const pdfjs = await import('pdfjs-dist')
+        const pdfjs = await loadPdfjs()
         pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
         const proxyUrl = `/api/menu-file?url=${encodeURIComponent(fileUrl)}`
         let res = await fetch(proxyUrl, { credentials: 'same-origin' })
         if (!res.ok) {
-          // Fallback: URL directa (PRO / storage público)
           res = await fetch(fileUrl)
         }
         if (!res.ok) {
