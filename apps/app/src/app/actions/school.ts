@@ -1,9 +1,35 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { schoolSettingsTag } from '@/lib/cache/school-data'
+import {
+  getCachedSchoolBrand,
+  schoolBrandTag,
+  schoolSettingsTag,
+} from '@/lib/cache/school-data'
 import { logAuditError } from '@/lib/audit-log'
 import { revalidatePath, updateTag } from 'next/cache'
+
+/**
+ * Nombre + logo del centro de la sesión (unstable_cache 24h).
+ * Solo devuelve brand si schoolId pertenece al usuario autenticado.
+ */
+export async function getSchoolBrandCached(schoolId: string) {
+  if (!schoolId) return null
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('school_id')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (!profile?.school_id || profile.school_id !== schoolId) return null
+  return getCachedSchoolBrand(schoolId)
+}
 
 export async function updateSchoolSettings(formData: FormData) {
   let actorId: string | null = null
@@ -84,6 +110,7 @@ export async function updateSchoolSettings(formData: FormData) {
     revalidatePath('/mi-hijo', 'layout')
     revalidatePath('/mi-hijo/ayuda')
     updateTag(schoolSettingsTag(profile.school_id))
+    updateTag(schoolBrandTag(profile.school_id))
     return { success: true }
   } catch (e) {
     await logAuditError({

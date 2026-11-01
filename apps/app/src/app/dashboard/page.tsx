@@ -23,57 +23,66 @@ export default async function DashboardSummaryPage() {
   const schoolId = profile.school_id
   const todayDateStr = new Date().toISOString().split('T')[0]
 
-  // 1. Total Students
-  const { count: studentCount } = await supabase
-    .from('students')
-    .select('*', { count: 'exact', head: true })
-    .eq('school_id', schoolId)
-    .eq('status', 'active')
+  // Profes / auxiliares: no cargar KPIs de dirección
+  if (profile.role === 'teacher' || profile.role === 'auxiliary') {
+    return (
+      <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <TeacherDashboard
+          schoolId={schoolId!}
+          userId={user.id}
+          userName={profile.full_name}
+          role={profile.role}
+        />
+      </main>
+    )
+  }
+
+  const [
+    { count: studentCount },
+    { count: staffTotal },
+    { count: classCount },
+    { count: logCount },
+    { data: staffOnLeave },
+    { data: intolerantStudents },
+  ] = await Promise.all([
+    supabase
+      .from('students')
+      .select('*', { count: 'exact', head: true })
+      .eq('school_id', schoolId)
+      .eq('status', 'active'),
+    supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('school_id', schoolId)
+      .in('role', ['teacher', 'admin', 'auxiliary'])
+      .eq('status', 'active'),
+    supabase
+      .from('classrooms')
+      .select('*', { count: 'exact', head: true })
+      .eq('school_id', schoolId),
+    supabase
+      .from('daily_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('school_id', schoolId)
+      .eq('date', todayDateStr),
+    supabase
+      .from('profiles')
+      .select('id, full_name')
+      .eq('school_id', schoolId)
+      .in('role', ['teacher', 'admin', 'auxiliary'])
+      .eq('status', 'paused'),
+    supabase
+      .from('students')
+      .select('id, first_name, last_name, intolerances, classrooms(name)')
+      .eq('school_id', schoolId)
+      .not('intolerances', 'is', null)
+      .neq('intolerances', ''),
+  ])
 
   const totalS = studentCount || 0
-
-  // 2. Total Staff
-  const { count: staffTotal } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
-    .eq('school_id', schoolId)
-    .in('role', ['teacher', 'admin', 'auxiliary'])
-    .eq('status', 'active')
-
   const totalTeachers = staffTotal || 0
-
-  // 3. Classrooms
-  const { count: classCount } = await supabase
-    .from('classrooms')
-    .select('*', { count: 'exact', head: true })
-    .eq('school_id', schoolId)
-
   const totalClassrooms = classCount || 0
-
-  // 4. Today's Logs (Agendas)
-  const { count: logCount } = await supabase
-    .from('daily_logs')
-    .select('*', { count: 'exact', head: true })
-    .eq('school_id', schoolId)
-    .eq('date', todayDateStr)
-
   const missingLogs = totalS - (logCount || 0)
-
-  // 5. Staff on leave (profiles.status = paused)
-  const { data: staffOnLeave } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .eq('school_id', schoolId)
-    .in('role', ['teacher', 'admin', 'auxiliary'])
-    .eq('status', 'paused')
-
-  // 6. Intolerances
-  const { data: intolerantStudents } = await supabase
-    .from('students')
-    .select('id, first_name, last_name, intolerances, classrooms(name)')
-    .eq('school_id', schoolId)
-    .not('intolerances', 'is', null)
-    .neq('intolerances', '')
 
   const todayFormatted = new Date().toLocaleDateString('ca-ES', {
     weekday: 'long',
@@ -118,14 +127,6 @@ export default async function DashboardSummaryPage() {
       stat: null
     }
   ]
-
-  if (profile.role === 'teacher' || profile.role === 'auxiliary') {
-    return (
-      <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-        <TeacherDashboard schoolId={schoolId!} userId={user.id} userName={profile.full_name} />
-      </main>
-    )
-  }
 
   const displayName = firstName(profile.full_name) || profile.full_name || ''
 
