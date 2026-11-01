@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setIsReady(true)
     }
     void loadProfile()
-  }, [router])
+  }, [router, bootCache])
 
   const handleLogout = async () => {
     clearShellCaches()

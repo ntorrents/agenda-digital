@@ -145,7 +145,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
       setIsReady(true)
     }
     void loadProfile()
-  }, [router, tLayout])
+  }, [router, tLayout, bootCache])
 
   const handleLogout = async () => {
     clearShellCaches()
