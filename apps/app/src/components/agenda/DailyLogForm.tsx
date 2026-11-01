@@ -10,9 +10,8 @@ import { CameraCapture } from '@/components/media/CameraCapture'
 import { formatDiaperTypes, normalizeDiaperTypes, toggleDiaperType } from '@/lib/diaper'
 import { compressImageFiles } from '@/lib/compress-image'
 import { PhotoLightbox } from '@/components/media/PhotoLightbox'
+import { sendDraftBeacon } from '@/lib/agenda-draft-beacon'
 import type { DiaperType } from '@/types/enums'
-
-const HISTORY_GUARD_KEY = '__dailyLogDraftGuard'
 
 interface DailyLogFormProps {
   studentId: string
@@ -29,6 +28,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
   const [isCompressingPhotos, setIsCompressingPhotos] = useState(false)
   const t = useTranslations('dailyLogForm')
   const locale = useLocale()
+  /** Evita doble guardado (botón app + pagehide, o doble popstate). */
   const isExitingRef = useRef(false)
   const galleryRef = useRef<HTMLInputElement>(null)
 
@@ -55,6 +55,31 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
     initialData?.photos?.filter(Boolean) || []
   )
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
+  const buildFormData = (status: 'draft' | 'published', includeNewPhotos: boolean) => {
+    const formData = new FormData()
+    formData.append('student_id', studentId)
+    formData.append('date', dateStr)
+    formData.append('status', status)
+    if (mood) formData.append('mood', mood)
+    if (breakfast) formData.append('meal_breakfast', breakfast)
+    if (firstCourse) formData.append('meal_first_course', firstCourse)
+    if (secondCourse) formData.append('meal_second_course', secondCourse)
+    if (dessert) formData.append('meal_dessert', dessert)
+    if (snack) formData.append('meal_snack', snack)
+    const diaperValue = formatDiaperTypes(diaperTypes)
+    if (diaperValue) formData.append('diaper_type', diaperValue)
+    formData.append('diaper_changes', diaperChanges.toString())
+    if (didNap) {
+      formData.append('nap_start', napStart)
+      formData.append('nap_end', napEnd)
+    }
+    if (notes) formData.append('notes', notes)
+    if (includeNewPhotos) {
+      photoFiles.forEach(file => formData.append('photos', file))
+    }
+    return formData
+  }
 
   const addPhotoFiles = async (files: File[]) => {
     if (files.length === 0) return
@@ -86,50 +111,12 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
     setPhotoPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
-  const navigateToAgendaList = (href: string) => {
-    const state = window.history.state as Record<string, unknown> | null
-    const onGuardEntry = Boolean(state?.[HISTORY_GUARD_KEY])
-
-    if (!onGuardEntry) {
-      router.replace(href)
-      return
-    }
-
-    // Quitar la entrada del guard del historial y luego sustituir el formulario por la lista
-    const onPop = () => {
-      window.removeEventListener('popstate', onPop)
-      router.replace(href)
-    }
-    window.addEventListener('popstate', onPop)
-    window.history.back()
-  }
-
   const handleSave = async (status: 'draft' | 'published') => {
     if (isExitingRef.current) return
     isExitingRef.current = true
     setIsSaving(true)
     try {
-      const formData = new FormData()
-      formData.append('student_id', studentId)
-      formData.append('date', dateStr)
-      formData.append('status', status)
-      if (mood) formData.append('mood', mood)
-      if (breakfast) formData.append('meal_breakfast', breakfast)
-      if (firstCourse) formData.append('meal_first_course', firstCourse)
-      if (secondCourse) formData.append('meal_second_course', secondCourse)
-      if (dessert) formData.append('meal_dessert', dessert)
-      if (snack) formData.append('meal_snack', snack)
-      const diaperValue = formatDiaperTypes(diaperTypes)
-      if (diaperValue) formData.append('diaper_type', diaperValue)
-      formData.append('diaper_changes', diaperChanges.toString())
-      if (didNap) {
-        formData.append('nap_start', napStart)
-        formData.append('nap_end', napEnd)
-      }
-      if (notes) formData.append('notes', notes)
-      photoFiles.forEach(file => formData.append('photos', file))
-
-      const result = await upsertDailyLog(formData)
+      const result = await upsertDailyLog(buildFormData(status, true))
 
       const params = new URLSearchParams({
         date: dateStr,
@@ -141,7 +128,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
         params.set('sent', studentName)
       }
 
-      navigateToAgendaList(`/dashboard/agendas?${params.toString()}`)
+      router.push(`/dashboard/agendas?${params.toString()}`)
     } catch (error) {
       console.error('Error saving log:', error)
       isExitingRef.current = false
@@ -150,27 +137,30 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
     }
   }
 
-  const saveDraftFromBrowserBack = useEffectEvent(() => {
-    void handleSave('draft')
+  /**
+   * Safari/Next cancelan Server Actions al ir atrás.
+   * En popstate (síncrono, aún montados) disparamos fetch keepalive.
+   * Sin fotos nuevas: el body keepalive tiene límite ~64KB.
+   */
+  const persistDraftOnLeave = useEffectEvent(() => {
+    if (isExitingRef.current) return
+    isExitingRef.current = true
+    sendDraftBeacon(buildFormData('draft', false), studentName)
   })
 
-  // Cualquier "atrás" del dispositivo (botón SO o gesto swipe) guarda borrador,
-  // igual que el botón de la app.
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    window.history.pushState({ [HISTORY_GUARD_KEY]: true }, '', window.location.href)
-
     const onPopState = () => {
-      if (isExitingRef.current) return
-      // Reponer el guard mientras guardamos, para no perder la pantalla a medias
-      window.history.pushState({ [HISTORY_GUARD_KEY]: true }, '', window.location.href)
-      saveDraftFromBrowserBack()
+      persistDraftOnLeave()
+    }
+    const onPageHide = () => {
+      persistDraftOnLeave()
     }
 
     window.addEventListener('popstate', onPopState)
+    window.addEventListener('pagehide', onPageHide)
     return () => {
       window.removeEventListener('popstate', onPopState)
+      window.removeEventListener('pagehide', onPageHide)
     }
   }, [])
 

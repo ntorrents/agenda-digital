@@ -4,15 +4,35 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle2, FilePenLine, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { DRAFT_SAVED_STORAGE_KEY } from '@/lib/agenda-draft-beacon'
 
 export function AgendaListToast() {
   const t = useTranslations('dashboardAgendas')
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
-  const draftSaved = searchParams.get('draftSaved')
+  const draftSavedParam = searchParams.get('draftSaved')
   const sent = searchParams.get('sent')
+  const [beaconName, setBeaconName] = useState<string | null>(null)
   const [visible, setVisible] = useState(false)
+
+  // Toast tras atrás del navegador (sin query param; usa sessionStorage)
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_SAVED_STORAGE_KEY)
+      if (!raw) return
+      sessionStorage.removeItem(DRAFT_SAVED_STORAGE_KEY)
+      const parsed = JSON.parse(raw) as { name?: string; at?: number }
+      if (!parsed.name) return
+      // Ignorar señales viejas (>30s)
+      if (parsed.at && Date.now() - parsed.at > 30_000) return
+      setBeaconName(parsed.name)
+    } catch {
+      // ignore
+    }
+  }, [])
+
+  const draftSaved = draftSavedParam || beaconName
 
   useEffect(() => {
     if (!draftSaved && !sent) {
@@ -26,6 +46,7 @@ export function AgendaListToast() {
 
   const dismiss = () => {
     setVisible(false)
+    setBeaconName(null)
     const next = new URLSearchParams(searchParams.toString())
     next.delete('draftSaved')
     next.delete('sent')
