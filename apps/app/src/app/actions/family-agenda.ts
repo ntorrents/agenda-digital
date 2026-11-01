@@ -72,38 +72,47 @@ export async function fetchFamilyAgendaDay(
     let globalNote: string | null = null
     let globalNotePhoto: string | null = null
 
-    if (!isFuture) {
-      const { data: log } = await supabase
-        .from('daily_logs')
-        .select(
-          `
+    // Paralelizar: log del día + nota de aula + settings (agenda del día sigue fresca)
+    const logPromise = !isFuture
+      ? supabase
+          .from('daily_logs')
+          .select(
+            `
         *,
         teacher:profiles!teacher_id(full_name)
       `
-        )
-        .eq('student_id', studentId)
-        .eq('date', dateStr)
-        .eq('status', 'published')
-        .maybeSingle()
-      dailyLog = log
-
-      if (student?.classroom_id) {
-        const { data: gn } = await supabase
-          .from('classroom_daily_notes')
-          .select('note, photo_url')
-          .eq('classroom_id', student.classroom_id)
+          )
+          .eq('student_id', studentId)
           .eq('date', dateStr)
+          .eq('status', 'published')
           .maybeSingle()
-        if (gn) {
-          globalNote = gn.note?.trim() || null
-          globalNotePhoto = gn.photo_url || null
-        }
-      }
-    }
+      : Promise.resolve({ data: null as FamilyAgendaDailyLog | null })
 
-    const settings = student?.school_id
-      ? await getCachedSchoolSettings(student.school_id)
-      : {}
+    const notePromise =
+      !isFuture && student?.classroom_id
+        ? supabase
+            .from('classroom_daily_notes')
+            .select('note, photo_url')
+            .eq('classroom_id', student.classroom_id)
+            .eq('date', dateStr)
+            .maybeSingle()
+        : Promise.resolve({ data: null as { note?: string | null; photo_url?: string | null } | null })
+
+    const settingsPromise = student?.school_id
+      ? getCachedSchoolSettings(student.school_id)
+      : Promise.resolve({} as Record<string, unknown>)
+
+    const [logRes, noteRes, settings] = await Promise.all([
+      logPromise,
+      notePromise,
+      settingsPromise,
+    ])
+
+    dailyLog = logRes.data
+    if (noteRes.data) {
+      globalNote = noteRes.data.note?.trim() || null
+      globalNotePhoto = noteRes.data.photo_url || null
+    }
 
     return {
       studentName: student?.first_name || '',

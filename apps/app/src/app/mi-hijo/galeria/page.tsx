@@ -40,7 +40,7 @@ export default async function GaleriaPage(props: {
     .eq('id', activeStudentId)
     .maybeSingle()
 
-  const { data: logsWithPhotos } = await supabase
+  const logsQuery = supabase
     .from('daily_logs')
     .select('date, photos')
     .eq('student_id', activeStudentId)
@@ -48,26 +48,28 @@ export default async function GaleriaPage(props: {
     .not('photos', 'is', null)
     .order('date', { ascending: false })
 
-  let classroomPhotos: GalleryPhoto[] = []
-  if (student?.classroom_id) {
-    const { data: classNotes } = await supabase
-      .from('classroom_daily_notes')
-      .select('date, photo_url')
-      .eq('classroom_id', student.classroom_id)
-      .not('photo_url', 'is', null)
-      .order('date', { ascending: false })
+  const notesQuery = student?.classroom_id
+    ? supabase
+        .from('classroom_daily_notes')
+        .select('date, photo_url')
+        .eq('classroom_id', student.classroom_id)
+        .not('photo_url', 'is', null)
+        .order('date', { ascending: false })
+    : Promise.resolve({ data: null as { date: string; photo_url: string | null }[] | null })
 
-    if (classNotes) {
-      classroomPhotos = classNotes.flatMap((note) =>
-        photosFromClassNote(note).map((photo) => ({
-          url: photo.url,
-          date: photo.date,
-          type: 'group' as const,
-          typeLabel: t('group'),
-        }))
-      )
-    }
-  }
+  const [{ data: logsWithPhotos }, { data: classNotes }] = await Promise.all([
+    logsQuery,
+    notesQuery,
+  ])
+
+  const classroomPhotos: GalleryPhoto[] = (classNotes || []).flatMap((note) =>
+    photosFromClassNote(note).map((photo) => ({
+      url: photo.url,
+      date: photo.date,
+      type: 'group' as const,
+      typeLabel: t('group'),
+    }))
+  )
 
   const individualPhotos: GalleryPhoto[] = (logsWithPhotos || []).flatMap((log) =>
     photosFromDailyLog(log).map((photo) => ({

@@ -8,10 +8,12 @@ import { getTranslations, getLocale } from 'next-intl/server'
 export async function TeacherDashboard({
   userId,
   userName,
+  role: roleProp,
 }: {
   schoolId: string
   userId: string
   userName: string | null
+  role?: string
 }) {
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
@@ -26,28 +28,24 @@ export async function TeacherDashboard({
   }
   const dateLocale = dateLocaleMap[locale] || 'ca-ES'
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single()
+  let role = roleProp
+  if (!role) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single()
+    role = profile?.role
+  }
 
-  const classroom = profile
-    ? await getTeacherClassroom(supabase, userId, profile.role)
+  const classroom = role
+    ? await getTeacherClassroom(supabase, userId, role)
     : null
 
   let totalStudents = 0
   let agendasCompleted = 0
 
   if (classroom) {
-    const { count: studentCount } = await supabase
-      .from('students')
-      .select('id', { count: 'exact', head: true })
-      .eq('classroom_id', classroom.id)
-      .eq('status', 'active')
-
-    totalStudents = studentCount || 0
-
     const { data: studentIds } = await supabase
       .from('students')
       .select('id')
@@ -55,6 +53,8 @@ export async function TeacherDashboard({
       .eq('status', 'active')
 
     const ids = studentIds?.map((s) => s.id) || []
+    totalStudents = ids.length
+
     if (ids.length > 0) {
       const { count: agendasCount } = await supabase
         .from('daily_logs')

@@ -42,13 +42,18 @@ export function FamilyStudentProvider({ children }: { children: React.ReactNode 
   const searchParams = useSearchParams()
   const [students, setStudents] = useState<GuardianStudent[]>([])
   const [activeStudentId, setActiveStudentId] = useState<string | null>(null)
+  const studentParam = searchParams.get('student')
+
+  // Lista de hijos: una sola vez al montar (no en cada cambio de ?date=)
   useEffect(() => {
+    let cancelled = false
+
     async function load() {
       const supabase = createClient()
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user || cancelled) return
 
       const { data: links } = await supabase
         .from('student_guardians')
@@ -67,6 +72,8 @@ export function FamilyStudentProvider({ children }: { children: React.ReactNode 
         )
         .eq('guardian_id', user.id)
         .order('is_primary', { ascending: false })
+
+      if (cancelled) return
 
       const parsed: GuardianStudent[] = (links || [])
         .map((link) => {
@@ -89,21 +96,29 @@ export function FamilyStudentProvider({ children }: { children: React.ReactNode 
         .filter((s): s is GuardianStudent => s !== null)
 
       setStudents(parsed)
-
-      const fromUrl = searchParams.get('student')
-      const fromCookie = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith(`${ACTIVE_STUDENT_COOKIE}=`))
-        ?.split('=')[1]
-
-      const resolved = resolveActiveStudentId(parsed, fromUrl || fromCookie)
-      if (resolved) {
-        setActiveStudentId(resolved)
-        setActiveStudentCookie(resolved)
-      }
     }
-    load()
-  }, [searchParams])
+
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Sincronizar alumno activo desde URL/cookie sin re-fetch de la lista
+  useEffect(() => {
+    if (students.length === 0) return
+
+    const fromCookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${ACTIVE_STUDENT_COOKIE}=`))
+      ?.split('=')[1]
+
+    const resolved = resolveActiveStudentId(students, studentParam || fromCookie)
+    if (!resolved) return
+
+    setActiveStudentId((prev) => (prev === resolved ? prev : resolved))
+    setActiveStudentCookie(resolved)
+  }, [students, studentParam])
 
   const setActiveStudent = useCallback(
     (studentId: string) => {

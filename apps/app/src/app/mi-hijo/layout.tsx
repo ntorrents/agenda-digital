@@ -14,6 +14,12 @@ import { FamilyStudentProvider, useFamilyStudent } from '@/components/family/Fam
 import { StudentSwitcher } from '@/components/family/StudentSwitcher'
 import { PetitDiariBrandAvatar } from '@/components/brand/PetitDiariBrand'
 import { PetitDiariBrandMark } from '@/components/brand/PetitDiariBrandFooter'
+import {
+  clearShellCaches,
+  readFamilyShellCache,
+  writeFamilyShellCache,
+} from '@/lib/shell-cache'
+import { getSchoolBrandCached } from '@/app/actions/school'
 
 export default function FamilyLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -61,8 +67,19 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
         data: { user },
       } = await supabase.auth.getUser()
       if (!user) {
+        clearShellCaches()
         router.push('/login')
         return
+      }
+
+      // Pintar shell desde caché de sesión mientras revalidamos
+      const cached = readFamilyShellCache(user.id)
+      if (cached) {
+        if (cached.fullName) setGuardianName(cached.fullName)
+        if (cached.schoolName || cached.logoUrl) {
+          setSchoolInfo({ name: cached.schoolName || 'Petit Diari', logo_url: cached.logoUrl })
+        }
+        setIsReady(true)
       }
 
       const { data: profile } = await supabase
@@ -72,31 +89,39 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
         .single()
 
       if (profile?.force_password_reset) {
+        clearShellCaches()
         router.push('/force-password-reset')
         return
       }
 
-      if (profile?.full_name?.trim()) {
-        setGuardianName(profile.full_name.trim())
-      }
+      const fullName = profile?.full_name?.trim() || ''
+      if (fullName) setGuardianName(fullName)
+
+      let schoolName: string | null = null
+      let logoUrl: string | null = null
 
       if (profile?.school_id) {
-        const { data: school } = await supabase
-          .from('schools')
-          .select('name, logo_url')
-          .eq('id', profile.school_id)
-          .single()
-
-        if (school) {
-          setSchoolInfo({ name: school.name, logo_url: school.logo_url })
+        const brand = await getSchoolBrandCached(profile.school_id)
+        if (brand) {
+          schoolName = brand.name
+          logoUrl = brand.logo_url
+          setSchoolInfo({ name: brand.name, logo_url: brand.logo_url })
         }
       }
+
+      writeFamilyShellCache({
+        userId: user.id,
+        fullName: fullName || tLayout('defaultGuardian'),
+        schoolName,
+        logoUrl,
+      })
       setIsReady(true)
     }
-    loadProfile()
-  }, [router])
+    void loadProfile()
+  }, [router, tLayout])
 
   const handleLogout = async () => {
+    clearShellCaches()
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
