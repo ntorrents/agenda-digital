@@ -50,9 +50,16 @@ function isFresh(at: number) {
   return Date.now() - at < TTL_MS
 }
 
-export function readFamilyShellCache(userId: string): FamilyShellCache | null {
+/** Lectura síncrona sin userId — hidratar shell en el primer paint. */
+export function peekFamilyShellCache(): FamilyShellCache | null {
   const data = readJson<FamilyShellCache>(FAMILY_KEY)
-  if (!data || data.userId !== userId || !isFresh(data.at)) return null
+  if (!data || !isFresh(data.at)) return null
+  return data
+}
+
+export function readFamilyShellCache(userId: string): FamilyShellCache | null {
+  const data = peekFamilyShellCache()
+  if (!data || data.userId !== userId) return null
   return data
 }
 
@@ -60,9 +67,16 @@ export function writeFamilyShellCache(data: Omit<FamilyShellCache, 'at'>) {
   writeJson(FAMILY_KEY, { ...data, at: Date.now() })
 }
 
-export function readDashboardShellCache(userId: string): DashboardShellCache | null {
+/** Lectura síncrona sin userId — hidratar shell dashboard en el primer paint. */
+export function peekDashboardShellCache(): DashboardShellCache | null {
   const data = readJson<DashboardShellCache>(DASHBOARD_KEY)
-  if (!data || data.userId !== userId || !isFresh(data.at)) return null
+  if (!data || !isFresh(data.at)) return null
+  return data
+}
+
+export function readDashboardShellCache(userId: string): DashboardShellCache | null {
+  const data = peekDashboardShellCache()
+  if (!data || data.userId !== userId) return null
   return data
 }
 

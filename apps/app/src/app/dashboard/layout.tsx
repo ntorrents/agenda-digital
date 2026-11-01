@@ -28,6 +28,7 @@ import { PetitDiariBrandAvatar } from '@/components/brand/PetitDiariBrand'
 import { PetitDiariBrandMark } from '@/components/brand/PetitDiariBrandFooter'
 import {
   clearShellCaches,
+  peekDashboardShellCache,
   readDashboardShellCache,
   writeDashboardShellCache,
 } from '@/lib/shell-cache'
@@ -39,11 +40,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const tNav = useTranslations('navigation')
   const tCommon = useTranslations('common')
   const locale = useLocale() as Locale
-  const [userName, setUserName] = useState<string>('Marta Rovira')
-  const [role, setRole] = useState<string>('teacher')
-  const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(null)
+  const [bootCache] = useState(() => peekDashboardShellCache())
+  const [userName, setUserName] = useState<string>(
+    () => bootCache?.fullName || 'Usuari'
+  )
+  const [role, setRole] = useState<string>(() => bootCache?.role || 'teacher')
+  const [schoolInfo, setSchoolInfo] = useState<{name: string, logo_url: string | null} | null>(
+    () =>
+      bootCache?.schoolName || bootCache?.logoUrl
+        ? { name: bootCache.schoolName || 'Petit Diari', logo_url: bootCache.logoUrl }
+        : null
+  )
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isReady, setIsReady] = useState(false)
+  const [isReady, setIsReady] = useState(() => Boolean(bootCache))
 
   useEffect(() => {
     async function loadProfile() {
@@ -63,6 +72,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           setSchoolInfo({ name: cached.schoolName || 'Petit Diari', logo_url: cached.logoUrl })
         }
         setIsReady(true)
+      } else if (bootCache && bootCache.userId !== user.id) {
+        clearShellCaches()
+        setSchoolInfo(null)
+        setUserName(user.user_metadata?.full_name || 'Usuari')
+        setIsReady(false)
       } else if (user.user_metadata?.full_name) {
         setUserName(user.user_metadata.full_name)
       }
@@ -107,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setIsReady(true)
     }
     void loadProfile()
-  }, [router])
+  }, [router, bootCache])
 
   const handleLogout = async () => {
     clearShellCaches()
