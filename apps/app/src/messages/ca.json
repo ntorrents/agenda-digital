@@ -115,7 +115,8 @@
     "photos": "Fotos",
     "notices": "Tauler",
     "calendar": "Calendari",
-    "help": "Ajuda"
+    "help": "Ajuda",
+    "menu": "Menú"
   },
   "familyStudent": {
     "viewing": "Veient",
@@ -724,7 +725,10 @@
     "emptyDesc": "L'escola no ha publicat cap menú per aquest mes.",
     "pdfLabel": "Menú complet en PDF",
     "download": "Descarregar",
-    "imageAlt": "Menú del mes"
+    "imageAlt": "Menú del mes",
+    "pdfPreviewTitle": "Vista prèvia del menú PDF",
+    "pdfPreviewHint": "Si no es veu bé al mòbil, obre’l a pantalla completa.",
+    "openFull": "Obrir PDF"
   },
   "familyLayout": {
     "defaultGuardian": "Família",

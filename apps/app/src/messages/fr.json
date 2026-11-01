@@ -100,7 +100,8 @@
     "photos": "Photos",
     "notices": "Avis",
     "calendar": "Calendrier",
-    "help": "Aide"
+    "help": "Aide",
+    "menu": "Menu"
   },
   "agenda": {
     "food": "Alimentation",
@@ -706,7 +707,10 @@
     "emptyDesc": "L'école n'a pas publié de menu pour ce mois.",
     "pdfLabel": "Menu complet en PDF",
     "download": "Télécharger",
-    "imageAlt": "Menu du mois"
+    "imageAlt": "Menu du mois",
+    "pdfPreviewTitle": "Aperçu du menu PDF",
+    "pdfPreviewHint": "S’il ne s’affiche pas bien sur mobile, ouvrez-le en plein écran.",
+    "openFull": "Ouvrir le PDF"
   },
   "familyLayout": {
     "defaultGuardian": "Famille",

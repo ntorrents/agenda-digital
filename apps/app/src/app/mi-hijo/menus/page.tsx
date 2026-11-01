@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCachedDiningMenu } from '@/lib/cache/school-data'
 import { redirect } from 'next/navigation'
-import { CalendarDays, Download } from 'lucide-react'
+import { CalendarDays } from 'lucide-react'
 import Link from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
+import { MenuFilePreview } from '@/components/family/MenuFilePreview'
 
 export default async function MenusViewPage(props: { searchParams: Promise<{ m?: string, y?: string }> }) {
   const searchParams = await props.searchParams
@@ -82,19 +83,7 @@ export default async function MenusViewPage(props: { searchParams: Promise<{ m?:
           
           {existingMenu.file_url && (
             <div className="pt-4 border-t border-stone-100">
-              {existingMenu.file_url.endsWith('.pdf') ? (
-                <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl flex items-center justify-between">
-                  <span className="text-sm font-semibold text-teal-800">{t('pdfLabel')}</span>
-                  <a href={existingMenu.file_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-xl transition-colors">
-                    <Download className="h-4 w-4" />
-                    {t('download')}
-                  </a>
-                </div>
-              ) : (
-                <div className="rounded-2xl overflow-hidden border border-stone-200 bg-stone-50">
-                  <img src={existingMenu.file_url} alt={t('imageAlt')} className="w-full object-contain max-h-[80vh]" />
-                </div>
-              )}
+              <MenuFilePreview fileUrl={existingMenu.file_url} />
             </div>
           )}
         </div>

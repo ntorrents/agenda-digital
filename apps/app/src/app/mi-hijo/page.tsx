@@ -1,10 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, MessageCircle, Image as ImageIcon, Bell, HelpCircle } from 'lucide-react'
+import { Calendar, MessageCircle, Image as ImageIcon, Bell, Utensils } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { HomeStudentPicker } from '@/components/family/HomeStudentPicker'
-import { FamilyHelpGuideLink } from '@/components/family/FamilyHelpGuideLink'
 
 export default async function FamilyAppHome() {
   const supabase = await createClient()
@@ -80,17 +79,15 @@ export default async function FamilyAppHome() {
           </Link>
 
           <Link
-            href="/mi-hijo/ayuda"
+            href="/mi-hijo/menus"
             className="group flex flex-col items-center justify-center gap-3 p-5 rounded-[28px] bg-white border border-stone-200/60 shadow-xs hover:shadow-md transition-all active:scale-95"
           >
-            <div className="h-16 w-16 rounded-[20px] bg-blue-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-              <HelpCircle className="h-8 w-8 text-blue-500" />
+            <div className="h-16 w-16 rounded-[20px] bg-teal-100 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+              <Utensils className="h-8 w-8 text-teal-600" />
             </div>
-            <span className="text-sm font-black text-stone-700">{t('help')}</span>
+            <span className="text-sm font-black text-stone-700">{t('menu')}</span>
           </Link>
         </div>
-
-        <FamilyHelpGuideLink className="pt-2" />
       </div>
     </main>
   )
