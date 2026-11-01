@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isAllowedMenuFileUrl } from '@/lib/menu-file-url'
 
 /**
- * Sirve el fichero del menú desde same-origin para poder embeber PDF
+ * Sirve el fichero del menú desde same-origin para poder embeber PDF/imagen
  * (Supabase Storage a menudo envía cabeceras que bloquean iframe).
- * Solo usuarios autenticados; URL debe ser del proyecto Supabase configurado.
+ * Solo usuarios autenticados; URL debe ser del proyecto / PRE local.
  */
 export async function GET(request: Request) {
   const supabase = await createClient()
@@ -20,43 +21,39 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Missing url' }, { status: 400 })
   }
 
-  let parsed: URL
-  try {
-    parsed = new URL(fileUrl)
-  } catch {
-    return NextResponse.json({ error: 'Invalid url' }, { status: 400 })
-  }
-
   const supabaseBase = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!supabaseBase) {
     return NextResponse.json({ error: 'Misconfigured' }, { status: 500 })
   }
 
-  let allowedHost: string
+  if (!isAllowedMenuFileUrl(fileUrl, supabaseBase)) {
+    return NextResponse.json(
+      { error: 'Forbidden host', detail: 'URL de menú no permitida para proxy' },
+      { status: 403 }
+    )
+  }
+
+  let upstream: Response
   try {
-    allowedHost = new URL(supabaseBase).host
+    upstream = await fetch(fileUrl, {
+      // Evitar cache agresivo de Next sobre ficheros que se reemplazan
+      cache: 'no-store',
+    })
   } catch {
-    return NextResponse.json({ error: 'Misconfigured' }, { status: 500 })
+    return NextResponse.json({ error: 'Upstream unreachable' }, { status: 502 })
   }
-
-  if (parsed.host !== allowedHost) {
-    return NextResponse.json({ error: 'Forbidden host' }, { status: 403 })
-  }
-
-  const upstream = await fetch(fileUrl, {
-    // Cache corto en edge/node según runtime
-    next: { revalidate: 3600 },
-  })
 
   if (!upstream.ok || !upstream.body) {
-    return NextResponse.json({ error: 'Upstream failed' }, { status: 502 })
+    return NextResponse.json(
+      { error: 'Upstream failed', status: upstream.status },
+      { status: 502 }
+    )
   }
 
-  const contentType = upstream.headers.get('content-type') || 'application/pdf'
+  const contentType = upstream.headers.get('content-type') || 'application/octet-stream'
   const headers = new Headers()
   headers.set('Content-Type', contentType)
-  headers.set('Cache-Control', 'private, max-age=3600')
-  // Permitir embeber en la propia app
+  headers.set('Cache-Control', 'private, max-age=300')
   headers.set('Content-Disposition', 'inline')
 
   return new NextResponse(upstream.body, { status: 200, headers })

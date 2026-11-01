@@ -710,7 +710,9 @@
     "imageAlt": "Menu du mois",
     "pdfPreviewTitle": "Aperçu du menu PDF",
     "pdfPreviewHint": "S’il ne s’affiche pas bien sur mobile, ouvrez-le en plein écran.",
-    "openFull": "Ouvrir le PDF"
+    "openFull": "Ouvrir le PDF",
+    "openFullImage": "Ouvrir l’image",
+    "previewFailed": "Impossible d’afficher l’aperçu. Ouvrez ou téléchargez le fichier."
   },
   "familyLayout": {
     "defaultGuardian": "Famille",

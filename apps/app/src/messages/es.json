@@ -731,7 +731,9 @@
     "imageAlt": "Menú del mes",
     "pdfPreviewTitle": "Vista previa del menú PDF",
     "pdfPreviewHint": "Si no se ve bien en el móvil, ábrelo a pantalla completa.",
-    "openFull": "Abrir PDF"
+    "openFull": "Abrir PDF",
+    "openFullImage": "Abrir imagen",
+    "previewFailed": "No se pudo mostrar la vista previa. Ábrelo o descárgalo."
   },
   "familyLayout": {
     "defaultGuardian": "Familia",

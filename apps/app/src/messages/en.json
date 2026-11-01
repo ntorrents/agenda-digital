@@ -730,7 +730,9 @@
     "imageAlt": "Monthly menu",
     "pdfPreviewTitle": "PDF menu preview",
     "pdfPreviewHint": "If it doesn’t display well on mobile, open it full screen.",
-    "openFull": "Open PDF"
+    "openFull": "Open PDF",
+    "openFullImage": "Open image",
+    "previewFailed": "Preview unavailable. Open or download it instead."
   },
   "familyLayout": {
     "defaultGuardian": "Family",
