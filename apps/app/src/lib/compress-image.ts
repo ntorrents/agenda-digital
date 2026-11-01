@@ -72,6 +72,14 @@ export async function compressImageFile(
   }
 }
 
+/**
+ * Comprime en serie (no en paralelo) para no saturar memoria/CPU
+ * al seleccionar muchas fotos a la vez en el móvil.
+ */
 export async function compressImageFiles(files: File[]): Promise<File[]> {
-  return Promise.all(files.map((file) => compressImageFile(file)))
+  const compressed: File[] = []
+  for (const file of files) {
+    compressed.push(await compressImageFile(file))
+  }
+  return compressed
 }

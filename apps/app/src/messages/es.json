@@ -473,7 +473,12 @@
     "btnSaveSend": "Guardar y enviar",
     "btnBackDraft": "Atrás y guardar borrador",
     "saveHint": "Atrás guarda borrador. Este botón envía la agenda a la familia.",
-    "draftBadge": "Borrador (aún no enviada a la familia)"
+    "draftBadge": "Borrador (aún no enviada a la familia)",
+    "photosCount": "{current}/{max} fotos",
+    "photosLimitReached": "Máximo {max} fotos por agenda",
+    "photosTruncated": "Solo se han añadido {added} (máximo {max} fotos)",
+    "photosCompressing": "Preparando fotos…",
+    "photosCompressError": "No se han podido preparar las fotos. Prueba con menos o de menor tamaño."
   },
   "dashboardAgendas": {
     "noClassroom": "No tienes ninguna aula asignada.",

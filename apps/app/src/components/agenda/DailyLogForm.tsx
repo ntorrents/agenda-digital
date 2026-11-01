@@ -9,6 +9,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { CameraCapture } from '@/components/media/CameraCapture'
 import { formatDiaperTypes, normalizeDiaperTypes, toggleDiaperType } from '@/lib/diaper'
 import { compressImageFiles } from '@/lib/compress-image'
+import { MAX_DAILY_LOG_PHOTOS } from '@/lib/daily-log-photos'
 import { PhotoLightbox } from '@/components/media/PhotoLightbox'
 import type { DiaperType } from '@/types/enums'
 
@@ -55,15 +56,25 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
 
   const addPhotoFiles = async (files: File[]) => {
     if (files.length === 0) return
-    const remaining = Math.max(0, 5 - photoFiles.length - photoPreviews.length)
+    const remaining = Math.max(0, MAX_DAILY_LOG_PHOTOS - photoPreviews.length)
+    if (remaining === 0) {
+      alert(t('photosLimitReached', { max: MAX_DAILY_LOG_PHOTOS }))
+      return
+    }
+
     const selected = files.slice(0, remaining)
-    if (selected.length === 0) return
+    if (selected.length < files.length) {
+      alert(t('photosTruncated', { added: selected.length, max: MAX_DAILY_LOG_PHOTOS }))
+    }
 
     setIsCompressingPhotos(true)
     try {
       const compressed = await compressImageFiles(selected)
       setPhotoFiles(prev => [...prev, ...compressed])
       setPhotoPreviews(prev => [...prev, ...compressed.map(f => URL.createObjectURL(f))])
+    } catch (error) {
+      console.error('Error compressing photos:', error)
+      alert(t('photosCompressError'))
     } finally {
       setIsCompressingPhotos(false)
     }
@@ -366,6 +377,11 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
 
             <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoSelect} />
 
+            <p className="text-[11px] font-semibold text-stone-400">
+              {t('photosCount', { current: photoPreviews.length, max: MAX_DAILY_LOG_PHOTOS })}
+              {isCompressingPhotos ? ` · ${t('photosCompressing')}` : ''}
+            </p>
+
             {photoPreviews.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {photoPreviews.map((url, i) => (
@@ -395,12 +411,15 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
               <CameraCapture
                 label={isCompressingPhotos ? '…' : t('btnCamera')}
                 onCapture={(file) => void addPhotoFiles([file])}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer"
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer ${
+                  photoPreviews.length >= MAX_DAILY_LOG_PHOTOS || isCompressingPhotos ? 'opacity-50 pointer-events-none' : ''
+                }`}
               />
               <button
                 type="button"
+                disabled={photoPreviews.length >= MAX_DAILY_LOG_PHOTOS || isCompressingPhotos}
                 onClick={() => galleryRef.current?.click()}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors text-xs font-bold cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
               >
                 <ImageIcon className="h-4 w-4" /> {t('btnGallery')}
               </button>

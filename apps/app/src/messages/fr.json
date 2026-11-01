@@ -450,6 +450,11 @@
     "btnBackDraft": "Retour et enregistrer le brouillon",
     "saveHint": "Retour enregistre un brouillon. Ce bouton envoie l'agenda à la famille.",
     "draftBadge": "Brouillon (pas encore envoyé à la famille)",
+    "photosCount": "{current}/{max} photos",
+    "photosLimitReached": "Maximum {max} photos par agenda",
+    "photosTruncated": "Seules {added} ont été ajoutées (max. {max} photos)",
+    "photosCompressing": "Préparation des photos…",
+    "photosCompressError": "Impossible de préparer les photos. Essayez avec moins ou plus petites.",
     "diaperSoft": "Molle",
     "diaperNormal": "Normale",
     "diaperLiquid": "Liquide"
