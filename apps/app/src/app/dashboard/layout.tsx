@@ -33,6 +33,7 @@ import {
   writeDashboardShellCache,
 } from '@/lib/shell-cache'
 import { getSchoolBrandCached } from '@/app/actions/school'
+import { DashboardHotPrefetch } from '@/components/dashboard/DashboardHotPrefetch'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -252,7 +253,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-800 font-sans flex flex-col lg:flex-row">
-      
+      <DashboardHotPrefetch />
+
       {/* Sidebar Desktop */}
       <aside className="hidden lg:block w-72 h-screen sticky top-0 border-r border-stone-200/80 z-20 shrink-0">
         <SidebarContent />
