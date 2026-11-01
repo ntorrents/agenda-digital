@@ -1,9 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getActiveStudentForGuardian } from '@/lib/guardian-students-server'
-import { fetchFamilyAgendaDay } from '@/app/actions/family-agenda'
 import { FamilyAgendaClient } from '@/components/family/FamilyAgendaClient'
 
+/**
+ * No bloqueamos el render en el fetch de agenda: el cliente pinta desde
+ * prefetch/sessionStorage y revalida solo si aún no estaba fresh.
+ */
 export default async function FamilyAgendaPage(props: {
   searchParams: Promise<{ date?: string; student?: string }>
 }) {
@@ -23,13 +26,11 @@ export default async function FamilyAgendaPage(props: {
   )
   if (!activeStudentId) redirect('/login')
 
-  const fallbackData = await fetchFamilyAgendaDay(activeStudentId, dateStr)
-
   return (
     <FamilyAgendaClient
+      key={`${activeStudentId}-${dateStr}`}
       studentId={activeStudentId}
       dateStr={dateStr}
-      fallbackData={fallbackData}
     />
   )
 }

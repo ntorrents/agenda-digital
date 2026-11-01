@@ -16,10 +16,13 @@ import { PetitDiariBrandAvatar } from '@/components/brand/PetitDiariBrand'
 import { PetitDiariBrandMark } from '@/components/brand/PetitDiariBrandFooter'
 import {
   clearShellCaches,
+  peekFamilyShellCache,
   readFamilyShellCache,
   writeFamilyShellCache,
 } from '@/lib/shell-cache'
+import { clearFamilyDataCaches } from '@/lib/family-data-cache'
 import { getSchoolBrandCached } from '@/app/actions/school'
+import { FamilyHotPrefetch } from '@/components/family/FamilyHotPrefetch'
 
 export default function FamilyLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -46,10 +49,19 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
   const tLayout = useTranslations('familyLayout')
   const locale = useLocale()
   const { displayName, classroomName, activeStudentId, hasMultiple } = useFamilyStudent()
-  const [schoolInfo, setSchoolInfo] = useState<{ name: string; logo_url: string | null } | null>(null)
-  const [guardianName, setGuardianName] = useState(() => tLayout('defaultGuardian'))
+  // Hidratar shell en el primer paint (sin esperar getUser)
+  const [bootCache] = useState(() => peekFamilyShellCache())
+  const [schoolInfo, setSchoolInfo] = useState<{ name: string; logo_url: string | null } | null>(
+    () =>
+      bootCache?.schoolName || bootCache?.logoUrl
+        ? { name: bootCache.schoolName || 'Petit Diari', logo_url: bootCache.logoUrl }
+        : null
+  )
+  const [guardianName, setGuardianName] = useState(
+    () => bootCache?.fullName || tLayout('defaultGuardian')
+  )
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isReady, setIsReady] = useState(false)
+  const [isReady, setIsReady] = useState(() => Boolean(bootCache))
   const currentDate = searchParams.get('date') || new Date().toISOString().split('T')[0]
 
   const dateLocaleMap: Record<string, string> = {
@@ -74,6 +86,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
       } = await supabase.auth.getUser()
       if (!user) {
         clearShellCaches()
+        clearFamilyDataCaches()
         router.push('/login')
         return
       }
@@ -86,6 +99,13 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
           setSchoolInfo({ name: cached.schoolName || 'Petit Diari', logo_url: cached.logoUrl })
         }
         setIsReady(true)
+      } else if (bootCache && bootCache.userId !== user.id) {
+        // Caché de otro usuario en la misma pestaña: no confiar en ella
+        clearShellCaches()
+        clearFamilyDataCaches()
+        setSchoolInfo(null)
+        setGuardianName(tLayout('defaultGuardian'))
+        setIsReady(false)
       }
 
       const { data: profile } = await supabase
@@ -96,6 +116,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
 
       if (profile?.force_password_reset) {
         clearShellCaches()
+        clearFamilyDataCaches()
         router.push('/force-password-reset')
         return
       }
@@ -128,6 +149,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     clearShellCaches()
+    clearFamilyDataCaches()
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
@@ -197,6 +219,7 @@ function FamilyLayoutShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-800 font-sans flex flex-col relative lg:pl-72">
+      <FamilyHotPrefetch />
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 transition-opacity lg:hidden"
