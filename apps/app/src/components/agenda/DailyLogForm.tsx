@@ -188,7 +188,7 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
       <div className="mb-6 space-y-3">
         <button
           type="button"
-          disabled={isSaving}
+          disabled={isSaving || isCompressingPhotos}
           onClick={() => void handleSave('draft')}
           className="inline-flex items-center gap-1.5 -ml-1 px-2 py-1.5 rounded-xl text-sm font-bold text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer disabled:opacity-50"
         >
@@ -433,10 +433,10 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
           </p>
           <Button
             onClick={() => void handleSave('published')}
-            disabled={isSaving}
+            disabled={isSaving || isCompressingPhotos}
             className="w-full h-14 rounded-2xl bg-[#0f766e] hover:bg-[#0d665f] text-white font-black text-sm shadow-xl shadow-[#0f766e]/25 active:scale-[0.98] transition-all cursor-pointer"
           >
-            {isSaving ? (
+            {isSaving || isCompressingPhotos ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               t('btnSaveSend')
