@@ -176,3 +176,26 @@
 .animate-pd-pulse {
   animation: pd-pulse 1.2s ease-in-out infinite;
 }
+
+/* Skeleton sutil: brillo suave que atraviesa el bloque */
+@keyframes pd-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.animate-pd-shimmer {
+  background-image: linear-gradient(
+    105deg,
+    rgb(231 229 228 / 0.35) 0%,
+    rgb(231 229 228 / 0.35) 38%,
+    rgb(250 250 249 / 0.85) 50%,
+    rgb(231 229 228 / 0.35) 62%,
+    rgb(231 229 228 / 0.35) 100%
+  );
+  background-size: 220% 100%;
+  animation: pd-shimmer 1.6s ease-in-out infinite;
+}
