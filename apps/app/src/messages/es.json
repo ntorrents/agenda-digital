@@ -733,7 +733,10 @@
     "pdfPreviewHint": "Si no se ve bien en el móvil, ábrelo a pantalla completa.",
     "openFull": "Abrir PDF",
     "openFullImage": "Abrir imagen",
-    "previewFailed": "No se pudo mostrar la vista previa. Ábrelo o descárgalo."
+    "previewFailed": "No se pudo mostrar la vista previa. Ábrelo o descárgalo.",
+    "pdfRendering": "Preparando vista previa…",
+    "pdfPageAlt": "Menú — página {page}",
+    "pdfRenderedHint": "Vista previa del PDF. Puedes abrirlo o descargarlo si lo necesitas."
   },
   "familyLayout": {
     "defaultGuardian": "Familia",

@@ -1,17 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Download, ExternalLink, FileText, ImageOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { isPdfUrl } from '@/lib/menu-file-url'
+import { PdfMenuPreview } from './PdfMenuPreview'
 
 export function MenuFilePreview({ fileUrl }: { fileUrl: string }) {
   const t = useTranslations('familyMenus')
   const pdf = isPdfUrl(fileUrl)
-  const [failed, setFailed] = useState(false)
+  const [imageFailed, setImageFailed] = useState(false)
+  const [pdfFailed, setPdfFailed] = useState(false)
+  const [imgSrc, setImgSrc] = useState(() => `/api/menu-file?url=${encodeURIComponent(fileUrl)}`)
 
-  // Siempre vía proxy same-origin (PDF e imagen): evita X-Frame / hosts PRE raros
-  const proxySrc = `/api/menu-file?url=${encodeURIComponent(fileUrl)}`
+  const onPdfFailed = useCallback(() => setPdfFailed(true), [])
 
   const actions = (
     <div className="flex flex-wrap gap-2 justify-center">
@@ -40,14 +42,21 @@ export function MenuFilePreview({ fileUrl }: { fileUrl: string }) {
   if (!pdf) {
     return (
       <div className="space-y-3">
-        {!failed ? (
+        {!imageFailed ? (
           <div className="rounded-2xl overflow-hidden border border-stone-200 bg-stone-50">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={proxySrc}
+              src={imgSrc}
               alt={t('imageAlt')}
               className="w-full object-contain max-h-[80vh]"
-              onError={() => setFailed(true)}
+              onError={() => {
+                // 1) falló proxy → probar URL directa; 2) si ya era directa → error
+                if (imgSrc.startsWith('/api/menu-file')) {
+                  setImgSrc(fileUrl)
+                } else {
+                  setImageFailed(true)
+                }
+              }}
             />
           </div>
         ) : (
@@ -68,34 +77,9 @@ export function MenuFilePreview({ fileUrl }: { fileUrl: string }) {
         <span className="text-sm font-semibold">{t('pdfLabel')}</span>
       </div>
 
-      {!failed ? (
-        <div className="rounded-2xl overflow-hidden border border-stone-200 bg-stone-100 shadow-sm">
-          <object
-            data={`${proxySrc}#toolbar=0&navpanes=0&view=FitH`}
-            type="application/pdf"
-            className="w-full h-[min(75vh,820px)] bg-white"
-            onError={() => setFailed(true)}
-          >
-            <iframe
-              src={`${proxySrc}#toolbar=0&navpanes=0&view=FitH`}
-              title={t('pdfPreviewTitle')}
-              className="w-full h-[min(75vh,820px)] bg-white"
-              onLoad={(e) => {
-                // Si el proxy devolvió JSON de error, el iframe muestra texto; detectamos por contentDocument si same-origin
-                try {
-                  const doc = (e.target as HTMLIFrameElement).contentDocument
-                  const text = doc?.body?.innerText?.trim() || ''
-                  if (text.startsWith('{') && text.includes('"error"')) {
-                    setFailed(true)
-                  }
-                } catch {
-                  // cross-origin: ignorar
-                }
-              }}
-            />
-          </object>
-        </div>
-      ) : (
+      {!pdfFailed && <PdfMenuPreview fileUrl={fileUrl} onFailed={onPdfFailed} />}
+
+      {pdfFailed && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-8 text-center space-y-2">
           <FileText className="h-8 w-8 text-amber-500 mx-auto" />
           <p className="text-sm font-semibold text-amber-900">{t('previewFailed')}</p>
@@ -103,9 +87,9 @@ export function MenuFilePreview({ fileUrl }: { fileUrl: string }) {
         </div>
       )}
 
-      {!failed && (
+      {!pdfFailed && (
         <p className="text-[11px] text-stone-400 font-medium text-center px-2">
-          {t('pdfPreviewHint')}
+          {t('pdfRenderedHint')}
         </p>
       )}
 

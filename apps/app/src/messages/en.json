@@ -732,7 +732,10 @@
     "pdfPreviewHint": "If it doesn’t display well on mobile, open it full screen.",
     "openFull": "Open PDF",
     "openFullImage": "Open image",
-    "previewFailed": "Preview unavailable. Open or download it instead."
+    "previewFailed": "Preview unavailable. Open or download it instead.",
+    "pdfRendering": "Preparing preview…",
+    "pdfPageAlt": "Menu — page {page}",
+    "pdfRenderedHint": "PDF preview. You can open or download it if needed."
   },
   "familyLayout": {
     "defaultGuardian": "Family",
