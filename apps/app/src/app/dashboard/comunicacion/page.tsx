@@ -1,3 +1,5 @@
+'use client'
+
 import { MessageSquare, ArrowRight, Bell, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'

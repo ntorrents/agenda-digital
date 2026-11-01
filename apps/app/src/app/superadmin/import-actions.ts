@@ -20,7 +20,7 @@ function revalidateImport(schoolId: string) {
 
 export async function getImportTemplateBase64() {
   await requireSuperadmin()
-  const buf = buildImportTemplateBuffer()
+  const buf = await buildImportTemplateBuffer()
   return { data: buf.toString('base64'), filename: 'plantilla-importacio-petit-diari.xlsx' }
 }
 
@@ -31,7 +31,7 @@ export async function validateSchoolImport(schoolId: string, formData: FormData)
   if (!file || file.size === 0) return { error: 'Selecciona un arxiu Excel (.xlsx)' }
 
   const buffer = await file.arrayBuffer()
-  const { data, errors: parseErrors } = parseImportWorkbook(buffer)
+  const { data, errors: parseErrors } = await parseImportWorkbook(buffer)
   const errors = [...parseErrors]
 
   if (!data) {

@@ -1,6 +1,10 @@
-import * as XLSX from 'xlsx'
+import type { WorkBook, WorkSheet } from 'xlsx'
 import { normalizeEmail } from '@/lib/auth-email'
 import { normalizeGender, normalizeRelation } from '@/lib/guardian-link'
+
+async function loadXlsx() {
+  return import('xlsx')
+}
 
 export type ImportRowError = {
   sheet: string
@@ -61,7 +65,7 @@ function pick(row: Record<string, unknown>, ...keys: string[]): string {
   return ''
 }
 
-function findSheet(wb: XLSX.WorkBook, names: string[]): XLSX.WorkSheet | null {
+function findSheet(wb: WorkBook, names: string[]): WorkSheet | null {
   for (const name of wb.SheetNames) {
     if (names.includes(name.trim().toLowerCase())) {
       return wb.Sheets[name]
@@ -70,7 +74,7 @@ function findSheet(wb: XLSX.WorkBook, names: string[]): XLSX.WorkSheet | null {
   return null
 }
 
-function sheetToRows(sheet: XLSX.WorkSheet): Record<string, unknown>[] {
+function sheetToRows(sheet: WorkSheet, XLSX: typeof import('xlsx')): Record<string, unknown>[] {
   return XLSX.utils.sheet_to_json(sheet, { defval: '' }) as Record<string, unknown>[]
 }
 
@@ -88,7 +92,10 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
-export function parseImportWorkbook(buffer: ArrayBuffer): { data?: ParsedImport; errors: ImportRowError[] } {
+export async function parseImportWorkbook(
+  buffer: ArrayBuffer
+): Promise<{ data?: ParsedImport; errors: ImportRowError[] }> {
+  const XLSX = await loadXlsx()
   const errors: ImportRowError[] = []
   const wb = XLSX.read(buffer, { type: 'array' })
 
@@ -109,9 +116,10 @@ export function parseImportWorkbook(buffer: ArrayBuffer): { data?: ParsedImport;
 
   const classrooms: ParsedClassroom[] = []
   const classroomNames = new Set<string>()
+  const aulesRows = sheetToRows(aulesSheet!, XLSX)
 
-  for (let i = 0; i < sheetToRows(aulesSheet!).length; i++) {
-    const row = sheetToRows(aulesSheet!)[i]
+  for (let i = 0; i < aulesRows.length; i++) {
+    const row = aulesRows[i]
     const rowNum = i + 2
     const name = pick(row, 'Nom_Aula', 'Nom Aula', 'Nombre_Aula', 'name')
     const level = pick(row, 'Nivell', 'Nivel', 'Level', 'level') || 'I0'
@@ -136,9 +144,10 @@ export function parseImportWorkbook(buffer: ArrayBuffer): { data?: ParsedImport;
 
   const staff: ParsedStaff[] = []
   const staffEmails = new Set<string>()
+  const staffRows = sheetToRows(staffSheet!, XLSX)
 
-  for (let i = 0; i < sheetToRows(staffSheet!).length; i++) {
-    const row = sheetToRows(staffSheet!)[i]
+  for (let i = 0; i < staffRows.length; i++) {
+    const row = staffRows[i]
     const rowNum = i + 2
     const fullName = pick(row, 'Nom_Complet', 'Nom Complet', 'Nombre', 'full_name')
     const email = normalizeEmail(pick(row, 'Email', 'Correu', 'email'))
@@ -179,9 +188,10 @@ export function parseImportWorkbook(buffer: ArrayBuffer): { data?: ParsedImport;
   }
 
   const students: ParsedStudent[] = []
+  const studentRows = sheetToRows(studentsSheet!, XLSX)
 
-  for (let i = 0; i < sheetToRows(studentsSheet!).length; i++) {
-    const row = sheetToRows(studentsSheet!)[i]
+  for (let i = 0; i < studentRows.length; i++) {
+    const row = studentRows[i]
     const rowNum = i + 2
     const firstName = pick(row, 'Nom', 'Nombre', 'first_name')
     const lastName = pick(row, 'Cognoms', 'Apellidos', 'last_name')
@@ -268,7 +278,8 @@ export function parseImportWorkbook(buffer: ArrayBuffer): { data?: ParsedImport;
   }
 }
 
-export function buildImportTemplateBuffer(): Buffer {
+export async function buildImportTemplateBuffer(): Promise<Buffer> {
+  const XLSX = await loadXlsx()
   const wb = XLSX.utils.book_new()
 
   const aules = [

@@ -7,6 +7,7 @@ import {
   type FamilyAgendaPayload,
 } from '@/app/actions/family-agenda'
 import { FamilyAgendaView } from '@/components/family/FamilyAgendaView'
+import { PageContentSkeleton } from '@/components/ui/skeleton'
 import {
   FAMILY_AGENDA_DEDUP_MS,
   emptyFamilyAgendaPayload,
@@ -77,13 +78,7 @@ export function FamilyAgendaClient({ studentId, dateStr, fallbackData }: Props) 
 
   if (!payload) {
     if (isLoading) {
-      return (
-        <main className="max-w-md mx-auto pt-4 space-y-4 animate-pulse">
-          <div className="h-24 rounded-[28px] bg-stone-200/50" />
-          <div className="h-40 rounded-[28px] bg-stone-200/40" />
-          <div className="h-32 rounded-[28px] bg-stone-200/30" />
-        </main>
-      )
+      return <PageContentSkeleton variant="cards" />
     }
     return <FamilyAgendaView payload={emptyFamilyAgendaPayload()} />
   }
