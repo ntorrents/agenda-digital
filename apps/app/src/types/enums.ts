@@ -37,19 +37,3 @@ export type EventType = 'event' | 'announcement' | 'alert'
 
 /** Visibilidad de evento */
 export type EventAudience = 'school' | 'classroom' | 'individual'
-
-// ============================================
-// Mapeos para i18n — claves de traducción
-// ============================================
-
-export const MOOD_OPTIONS: Mood[] = ['happy', 'calm', 'sad', 'irritable']
-export const MEAL_AMOUNT_OPTIONS: MealAmount[] = ['all', 'most', 'little', 'none']
-export const MEAL_TYPE_OPTIONS: MealType[] = [
-  'breakfast',
-  'first_course',
-  'second_course',
-  'dessert',
-  'snack',
-]
-export const DAILY_LOG_STATUS_OPTIONS: DailyLogStatus[] = ['draft', 'published']
-export const DIAPER_TYPE_OPTIONS: DiaperType[] = ['soft', 'normal', 'liquid']
