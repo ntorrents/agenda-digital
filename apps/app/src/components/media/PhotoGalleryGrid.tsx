@@ -46,6 +46,9 @@ export function PhotoGalleryGrid({
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               unoptimized
             />
+            <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-2 pb-2 pt-6 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-90">
+              Ampliar
+            </span>
             {photo.badge && (
               <span
                 className={`absolute top-2 right-2 text-[9px] uppercase font-black px-2 py-1 rounded-md shadow-sm ${photo.badgeClassName || 'bg-white/90 text-stone-700'}`}
