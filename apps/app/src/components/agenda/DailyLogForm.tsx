@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Smile, Utensils, Droplets, Moon, CheckCircle2, XCircle, ArrowLeft, Image as ImageIcon, Loader2, X } from 'lucide-react'
@@ -11,6 +11,8 @@ import { formatDiaperTypes, normalizeDiaperTypes, toggleDiaperType } from '@/lib
 import { compressImageFiles } from '@/lib/compress-image'
 import { PhotoLightbox } from '@/components/media/PhotoLightbox'
 import type { DiaperType } from '@/types/enums'
+
+const HISTORY_GUARD_KEY = '__dailyLogDraftGuard'
 
 interface DailyLogFormProps {
   studentId: string
@@ -27,6 +29,8 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
   const [isCompressingPhotos, setIsCompressingPhotos] = useState(false)
   const t = useTranslations('dailyLogForm')
   const locale = useLocale()
+  const isExitingRef = useRef(false)
+  const galleryRef = useRef<HTMLInputElement>(null)
 
   const [mood, setMood] = useState<string | null>(initialData?.mood || null)
   const [breakfast, setBreakfast] = useState<string | null>(initialData?.meal_breakfast || null)
@@ -51,7 +55,6 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
     initialData?.photos?.filter(Boolean) || []
   )
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
-  const galleryRef = useRef<HTMLInputElement>(null)
 
   const addPhotoFiles = async (files: File[]) => {
     if (files.length === 0) return
@@ -83,7 +86,27 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
     setPhotoPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
+  const navigateToAgendaList = (href: string) => {
+    const state = window.history.state as Record<string, unknown> | null
+    const onGuardEntry = Boolean(state?.[HISTORY_GUARD_KEY])
+
+    if (!onGuardEntry) {
+      router.replace(href)
+      return
+    }
+
+    // Quitar la entrada del guard del historial y luego sustituir el formulario por la lista
+    const onPop = () => {
+      window.removeEventListener('popstate', onPop)
+      router.replace(href)
+    }
+    window.addEventListener('popstate', onPop)
+    window.history.back()
+  }
+
   const handleSave = async (status: 'draft' | 'published') => {
+    if (isExitingRef.current) return
+    isExitingRef.current = true
     setIsSaving(true)
     try {
       const formData = new FormData()
@@ -118,14 +141,38 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
         params.set('sent', studentName)
       }
 
-      router.push(`/dashboard/agendas?${params.toString()}`)
+      navigateToAgendaList(`/dashboard/agendas?${params.toString()}`)
     } catch (error) {
       console.error('Error saving log:', error)
+      isExitingRef.current = false
       alert(t('errorSaving'))
-    } finally {
       setIsSaving(false)
     }
   }
+
+  const saveDraftFromBrowserBack = useEffectEvent(() => {
+    void handleSave('draft')
+  })
+
+  // Cualquier "atrás" del dispositivo (botón SO o gesto swipe) guarda borrador,
+  // igual que el botón de la app.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    window.history.pushState({ [HISTORY_GUARD_KEY]: true }, '', window.location.href)
+
+    const onPopState = () => {
+      if (isExitingRef.current) return
+      // Reponer el guard mientras guardamos, para no perder la pantalla a medias
+      window.history.pushState({ [HISTORY_GUARD_KEY]: true }, '', window.location.href)
+      saveDraftFromBrowserBack()
+    }
+
+    window.addEventListener('popstate', onPopState)
+    return () => {
+      window.removeEventListener('popstate', onPopState)
+    }
+  }, [])
 
   const mealOptions = [
     { value: 'all', label: t('mealAll'), active: 'bg-emerald-50 text-emerald-700 shadow-xs' },

@@ -472,7 +472,7 @@
     "btnSave": "Guardar Agenda",
     "btnSaveSend": "Guardar y enviar",
     "btnBackDraft": "Atrás y guardar borrador",
-    "saveHint": "Atrás guarda borrador. Este botón envía la agenda a la familia.",
+    "saveHint": "Cualquier atrás (flecha, botón del móvil o gesto) guarda borrador. Este botón envía la agenda a la familia.",
     "draftBadge": "Borrador (aún no enviada a la familia)"
   },
   "dashboardAgendas": {
