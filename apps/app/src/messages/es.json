@@ -115,7 +115,8 @@
     "photos": "Fotos",
     "notices": "Tablón",
     "calendar": "Calendario",
-    "help": "Ayuda"
+    "help": "Ayuda",
+    "menu": "Menú"
   },
   "familyStudent": {
     "viewing": "Viendo",
@@ -735,7 +736,15 @@
     "emptyDesc": "La escuela no ha publicado un menú para este mes.",
     "pdfLabel": "Menú completo en PDF",
     "download": "Descargar",
-    "imageAlt": "Menú del mes"
+    "imageAlt": "Menú del mes",
+    "pdfPreviewTitle": "Vista previa del menú PDF",
+    "pdfPreviewHint": "Si no se ve bien en el móvil, ábrelo a pantalla completa.",
+    "openFull": "Abrir PDF",
+    "openFullImage": "Abrir imagen",
+    "previewFailed": "No se pudo mostrar la vista previa. Ábrelo o descárgalo.",
+    "pdfRendering": "Preparando vista previa…",
+    "pdfPageAlt": "Menú — página {page}",
+    "pdfRenderedHint": "Vista previa del PDF. Puedes abrirlo o descargarlo si lo necesitas."
   },
   "familyLayout": {
     "defaultGuardian": "Familia",
