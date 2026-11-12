@@ -19,7 +19,7 @@ export function LightboxImage({
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={wrapperClassName} aria-label={`${alt}: ampliar`}>
+      <button type="button" onClick={() => setOpen(true)} className={wrapperClassName} aria-label={alt}>
         <img src={src} alt={alt} className={className} />
       </button>
       {open && (

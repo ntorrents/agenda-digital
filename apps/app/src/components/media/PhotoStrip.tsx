@@ -2,18 +2,19 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Expand } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { PhotoLightbox } from './PhotoLightbox'
+import { downloadPhoto, photoFilenameFromUrl } from './downloadPhoto'
 
 export function PhotoStrip({
   photos,
   size = 'md',
   altPrefix = 'Foto',
-  showHint = true,
 }: {
   photos: string[]
   size?: 'sm' | 'md'
   altPrefix?: string
+  /** @deprecated Ya no se muestra texto de ampliar */
   showHint?: boolean
 }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -28,26 +29,30 @@ export function PhotoStrip({
 
   return (
     <>
-      <div className="space-y-1.5">
-        <div className="flex gap-2 flex-wrap sm:flex-nowrap sm:overflow-x-auto pb-1 no-scrollbar snap-x">
-          {photos.map((photo, index) => (
+      <div className="flex gap-2 flex-wrap sm:flex-nowrap sm:overflow-x-auto pb-1 no-scrollbar snap-x">
+        {photos.map((photo, index) => (
+          <div key={`${photo}-${index}`} className="relative shrink-0 snap-start">
             <button
-              key={`${photo}-${index}`}
               type="button"
               onClick={() => setLightboxIndex(index)}
-              aria-label={`${altPrefix} ${index + 1}: ampliar`}
-              className={`group shrink-0 snap-start relative overflow-hidden border border-stone-100 cursor-pointer hover:ring-2 hover:ring-teal-500/30 transition-all ${dim}`}
+              aria-label={`${altPrefix} ${index + 1}`}
+              className={`group relative overflow-hidden border border-stone-100 cursor-pointer hover:ring-2 hover:ring-teal-500/30 transition-all ${dim}`}
             >
               <Image src={photo} alt={`${altPrefix} ${index + 1}`} fill className="object-cover" unoptimized />
-              <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-md bg-black/45 text-white opacity-90 group-hover:opacity-100">
-                <Expand className="h-3 w-3" />
-              </span>
             </button>
-          ))}
-        </div>
-        {showHint && (
-          <p className="text-[10px] font-semibold text-stone-400 px-0.5">Toca una foto para ampliar</p>
-        )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                void downloadPhoto(photo, photoFilenameFromUrl(photo, index))
+              }}
+              aria-label={`Descargar ${altPrefix} ${index + 1}`}
+              className="absolute -bottom-1 -right-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white text-stone-700 shadow-sm border border-stone-200 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 transition-colors"
+            >
+              <Download className="h-3 w-3" />
+            </button>
+          </div>
+        ))}
       </div>
 
       {lightboxIndex !== null && (

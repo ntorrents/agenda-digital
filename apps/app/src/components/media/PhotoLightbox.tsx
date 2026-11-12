@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
 import { ZoomableImage } from './ZoomableImage'
+import { downloadPhoto, photoFilenameFromUrl } from './downloadPhoto'
 
 export type LightboxPhoto = {
   url: string
@@ -63,14 +64,24 @@ export function PhotoLightbox({ photos, index, onClose, onIndexChange }: PhotoLi
         <span className="text-xs font-bold text-white/70 tabular-nums">
           {index + 1} / {photos.length}
         </span>
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-          aria-label="Cerrar"
-        >
-          <X className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void downloadPhoto(current.url, photoFilenameFromUrl(current.url, index))}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+            aria-label="Descargar foto"
+          >
+            <Download className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+            aria-label="Cerrar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-2 sm:px-4 pb-2 min-h-0 relative">
@@ -111,15 +122,11 @@ export function PhotoLightbox({ photos, index, onClose, onIndexChange }: PhotoLi
         )}
       </div>
 
-      <div className="px-6 pb-5 shrink-0 space-y-2" onClick={(e) => e.stopPropagation()}>
-        {current.caption && (
+      {current.caption && (
+        <div className="px-6 pb-5 shrink-0" onClick={(e) => e.stopPropagation()}>
           <p className="text-center text-sm font-medium text-white/80">{current.caption}</p>
-        )}
-        <p className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white/55">
-          <ZoomIn className="h-3.5 w-3.5" />
-          Pellizca o doble toque para ampliar · rueda en el ordenador
-        </p>
-      </div>
+        </div>
+      )}
     </div>,
     document.body
   )

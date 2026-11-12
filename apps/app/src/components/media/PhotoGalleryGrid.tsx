@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from 'react'
 import Image from 'next/image'
+import { Download } from 'lucide-react'
 import { PhotoLightbox, type LightboxPhoto } from './PhotoLightbox'
+import { downloadPhoto, photoFilenameFromUrl } from './downloadPhoto'
 
 type PhotoItem = LightboxPhoto & {
   badge?: string
@@ -33,30 +35,39 @@ export function PhotoGalleryGrid({
     <>
       <div className={`grid ${columnsClass} gap-3 sm:gap-4`}>
         {photos.map((photo, index) => (
-          <button
-            key={`${photo.url}-${index}`}
-            type="button"
-            onClick={() => setLightboxIndex(index)}
-            className={`group relative overflow-hidden bg-stone-100 border border-stone-200/60 shadow-sm hover:shadow-md transition-all cursor-pointer ${thumbClass}`}
-          >
-            <Image
-              src={photo.url}
-              alt={photo.alt || `${altPrefix} ${index + 1}`}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              unoptimized
-            />
-            <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-2 pb-2 pt-6 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-90">
-              Ampliar
-            </span>
-            {photo.badge && (
-              <span
-                className={`absolute top-2 right-2 text-[9px] uppercase font-black px-2 py-1 rounded-md shadow-sm ${photo.badgeClassName || 'bg-white/90 text-stone-700'}`}
-              >
-                {photo.badge}
-              </span>
-            )}
-          </button>
+          <div key={`${photo.url}-${index}`} className="relative">
+            <button
+              type="button"
+              onClick={() => setLightboxIndex(index)}
+              className={`group relative overflow-hidden bg-stone-100 border border-stone-200/60 shadow-sm hover:shadow-md transition-all cursor-pointer w-full ${thumbClass}`}
+            >
+              <Image
+                src={photo.url}
+                alt={photo.alt || `${altPrefix} ${index + 1}`}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                unoptimized
+              />
+              {photo.badge && (
+                <span
+                  className={`absolute top-2 right-2 text-[9px] uppercase font-black px-2 py-1 rounded-md shadow-sm ${photo.badgeClassName || 'bg-white/90 text-stone-700'}`}
+                >
+                  {photo.badge}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                void downloadPhoto(photo.url, photoFilenameFromUrl(photo.url, index))
+              }}
+              aria-label={`Descargar ${photo.alt || `${altPrefix} ${index + 1}`}`}
+              className="absolute bottom-2 left-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-stone-700 shadow-sm border border-stone-200/80 hover:bg-teal-50 hover:text-teal-700 transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" />
+            </button>
+          </div>
         ))}
       </div>
 
