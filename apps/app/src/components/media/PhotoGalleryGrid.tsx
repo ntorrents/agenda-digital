@@ -50,7 +50,7 @@ export function PhotoGalleryGrid({
               />
               {photo.badge && (
                 <span
-                  className={`absolute top-2 right-2 text-[9px] uppercase font-black px-2 py-1 rounded-md shadow-sm ${photo.badgeClassName || 'bg-white/90 text-stone-700'}`}
+                  className={`absolute top-1.5 right-1.5 text-[8px] uppercase font-bold leading-none px-1.5 py-0.5 rounded shadow-sm ${photo.badgeClassName || 'bg-white/90 text-stone-700'}`}
                 >
                   {photo.badge}
                 </span>

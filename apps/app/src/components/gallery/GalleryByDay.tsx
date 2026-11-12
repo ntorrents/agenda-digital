@@ -20,15 +20,16 @@ export function GalleryByDay({
             {formatGalleryDayHeader(date, locale)}
           </h3>
           <PhotoGalleryGrid
-            photos={photos.map((photo, index) => ({
+            photos={photos.map((photo) => ({
               url: photo.url,
               alt: `${photoAltPrefix} ${date}`,
               caption: photo.context,
-              badge: photo.typeLabel,
-              badgeClassName:
-                photo.type === 'individual'
-                  ? 'bg-white/90 text-stone-700'
-                  : 'bg-emerald-500/90 text-white',
+              ...(photo.type === 'group'
+                ? {
+                    badge: photo.typeLabel,
+                    badgeClassName: 'bg-emerald-500/90 text-white',
+                  }
+                : {}),
             }))}
             altPrefix={photoAltPrefix}
           />
