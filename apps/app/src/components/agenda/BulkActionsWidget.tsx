@@ -8,10 +8,14 @@ import {
   Loader2,
   ImagePlus,
   CalendarDays,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react'
 import { bulkMarkLunch } from '@/app/actions/daily-logs'
 import { saveGlobalNoteAndPhoto } from '@/app/actions/aula'
-import { compressImageFile } from '@/lib/compress-image'
+import { compressImageFiles } from '@/lib/compress-image'
+import { MAX_CLASSROOM_GROUP_PHOTOS } from '@/lib/daily-log-photos'
+import { CameraCapture } from '@/components/media/CameraCapture'
 import { useTranslations } from 'next-intl'
 
 type Panel = 'menu' | 'day-note' | 'group-photo'
@@ -32,16 +36,22 @@ export function BulkActionsWidget({
   const [isOpen, setIsOpen] = useState(false)
   const [panel, setPanel] = useState<Panel>('menu')
   const [isLoading, setIsLoading] = useState(false)
+  const [isCompressing, setIsCompressing] = useState(false)
   const [dayNote, setDayNote] = useState('')
-  const [globalPhotoPreview, setGlobalPhotoPreview] = useState<string | null>(null)
-  const [globalPhotoFile, setGlobalPhotoFile] = useState<File | null>(null)
+  const [globalPhotoFiles, setGlobalPhotoFiles] = useState<File[]>([])
+  const [globalPhotoPreviews, setGlobalPhotoPreviews] = useState<string[]>([])
 
   const close = () => {
     setIsOpen(false)
     setPanel('menu')
     setDayNote('')
-    setGlobalPhotoFile(null)
-    setGlobalPhotoPreview(null)
+    setGlobalPhotoFiles([])
+    setGlobalPhotoPreviews((prev) => {
+      prev.forEach((url) => {
+        if (url.startsWith('blob:')) URL.revokeObjectURL(url)
+      })
+      return []
+    })
   }
 
   const handleLunch = async () => {
@@ -86,21 +96,50 @@ export function BulkActionsWidget({
     }
   }
 
-  const handleGlobalPhotoSelect = async (file: File) => {
-    const compressed = await compressImageFile(file)
-    setGlobalPhotoFile(compressed)
-    setGlobalPhotoPreview(URL.createObjectURL(compressed))
+  const addGroupPhotos = async (files: File[]) => {
+    if (files.length === 0) return
+    const remaining = Math.max(0, MAX_CLASSROOM_GROUP_PHOTOS - globalPhotoFiles.length)
+    if (remaining === 0) {
+      alert(t('photosLimitReached', { max: MAX_CLASSROOM_GROUP_PHOTOS }))
+      return
+    }
+
+    const selected = files.slice(0, remaining)
+    if (selected.length < files.length) {
+      alert(t('photosTruncated', { added: selected.length, max: MAX_CLASSROOM_GROUP_PHOTOS }))
+    }
+
+    setIsCompressing(true)
+    try {
+      const compressed = await compressImageFiles(selected)
+      setGlobalPhotoFiles((prev) => [...prev, ...compressed])
+      setGlobalPhotoPreviews((prev) => [...prev, ...compressed.map((f) => URL.createObjectURL(f))])
+    } catch (error) {
+      console.error(error)
+      alert(t('errorGeneric'))
+    } finally {
+      setIsCompressing(false)
+    }
+  }
+
+  const removePendingPhoto = (index: number) => {
+    setGlobalPhotoFiles((prev) => prev.filter((_, i) => i !== index))
+    setGlobalPhotoPreviews((prev) => {
+      const url = prev[index]
+      if (url?.startsWith('blob:')) URL.revokeObjectURL(url)
+      return prev.filter((_, i) => i !== index)
+    })
   }
 
   const handleGroupPhoto = async () => {
-    if (isLoading || !globalPhotoFile) return
+    if (isLoading || globalPhotoFiles.length === 0) return
     setIsLoading(true)
     try {
       const formData = new FormData()
       formData.append('classroomId', classroomId)
       formData.append('schoolId', schoolId)
       formData.append('dateStr', dateStr)
-      formData.append('file', globalPhotoFile)
+      globalPhotoFiles.forEach((file) => formData.append('photos', file))
 
       const result = await saveGlobalNoteAndPhoto(formData)
       if (!result.success) throw new Error(result.error || t('errorGeneric'))
@@ -199,7 +238,7 @@ export function BulkActionsWidget({
       )}
 
       {isOpen && panel === 'group-photo' && (
-        <div className="absolute right-0 mt-2 w-72 bg-white border border-stone-200/80 rounded-2xl shadow-xl z-10 p-3 animate-in fade-in">
+        <div className="absolute right-0 mt-2 w-80 bg-white border border-stone-200/80 rounded-2xl shadow-xl z-10 p-3 animate-in fade-in">
           <label className="text-[10px] font-black uppercase text-stone-500 tracking-wider mb-1 block">
             {t('groupPhoto')}
           </label>
@@ -208,29 +247,64 @@ export function BulkActionsWidget({
             ref={galleryRef}
             type="file"
             accept="image/*"
+            multiple
             className="hidden"
             onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) void handleGlobalPhotoSelect(file)
+              void addGroupPhotos(Array.from(e.target.files || []))
               e.target.value = ''
             }}
           />
-          {globalPhotoPreview ? (
-            <img
-              src={globalPhotoPreview}
-              alt="Preview"
-              className="w-full h-28 object-cover rounded-xl border border-stone-200 mb-2"
+
+          {globalPhotoPreviews.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {globalPhotoPreviews.map((url, index) => (
+                <div key={`${url}-${index}`} className="relative">
+                  <img
+                    src={url}
+                    alt=""
+                    className="h-16 w-16 object-cover rounded-xl border border-stone-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removePendingPhoto(index)}
+                    className="absolute -top-1.5 -right-1.5 bg-white border border-stone-200 rounded-full h-5 w-5 flex items-center justify-center text-stone-500 hover:text-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-2 mb-2">
+            <CameraCapture
+              label={isCompressing ? '…' : t('btnCamera')}
+              onCapture={(file) => void addGroupPhotos([file])}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 text-[10px] font-bold cursor-pointer ${
+                globalPhotoFiles.length >= MAX_CLASSROOM_GROUP_PHOTOS || isCompressing
+                  ? 'opacity-50 pointer-events-none'
+                  : ''
+              }`}
             />
-          ) : (
             <button
               type="button"
+              disabled={globalPhotoFiles.length >= MAX_CLASSROOM_GROUP_PHOTOS || isCompressing}
               onClick={() => galleryRef.current?.click()}
-              className="w-full py-6 rounded-xl border border-dashed border-stone-300 text-stone-500 text-xs font-bold hover:bg-stone-50"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-dashed border-stone-300 text-stone-500 hover:bg-stone-50 text-[10px] font-bold disabled:opacity-50"
             >
+              <ImageIcon className="h-3.5 w-3.5" />
               {t('pickPhoto')}
             </button>
-          )}
-          <div className="flex gap-2 mt-3">
+          </div>
+
+          <p className="text-[10px] text-stone-400 mb-2">
+            {t('photosCount', {
+              current: globalPhotoFiles.length,
+              max: MAX_CLASSROOM_GROUP_PHOTOS,
+            })}
+          </p>
+
+          <div className="flex gap-2 mt-1">
             <button
               onClick={() => setPanel('menu')}
               className="flex-1 py-1.5 rounded-lg text-[10px] font-bold text-stone-500 hover:bg-stone-100"
@@ -239,7 +313,7 @@ export function BulkActionsWidget({
             </button>
             <button
               onClick={handleGroupPhoto}
-              disabled={isLoading || !globalPhotoFile}
+              disabled={isLoading || isCompressing || globalPhotoFiles.length === 0}
               className="flex-1 py-1.5 rounded-lg text-[10px] font-bold bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
             >
               {isLoading ? t('uploading') : t('publish')}

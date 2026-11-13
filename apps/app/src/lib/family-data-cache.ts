@@ -97,11 +97,16 @@ export function clearFamilyDataCaches() {
 export function emptyFamilyAgendaPayload(
   partial?: Partial<FamilyAgendaPayload>
 ): FamilyAgendaPayload {
+  const photos =
+    partial?.globalNotePhotos ??
+    (partial?.globalNotePhoto ? [partial.globalNotePhoto] : [])
+
   return {
     studentName: partial?.studentName ?? '',
     dailyLog: partial?.dailyLog ?? null,
     globalNote: partial?.globalNote ?? null,
-    globalNotePhoto: partial?.globalNotePhoto ?? null,
+    globalNotePhoto: photos[0] ?? partial?.globalNotePhoto ?? null,
+    globalNotePhotos: photos,
     settings: partial?.settings ?? {},
     isFuture: partial?.isFuture ?? false,
   }

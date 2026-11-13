@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Smile, Utensils, Droplets, Moon, CheckCircle2, XCircle, ArrowLeft, Image as ImageIcon, Loader2, X } from 'lucide-react'
 import { upsertDailyLog } from '@/app/actions/daily-logs'
+import { removeClassroomGroupPhoto } from '@/app/actions/aula'
 import { useTranslations, useLocale } from 'next-intl'
 import { CameraCapture } from '@/components/media/CameraCapture'
 import { formatDiaperTypes, normalizeDiaperTypes, toggleDiaperType } from '@/lib/diaper'
@@ -21,15 +22,33 @@ interface DailyLogFormProps {
   studentName: string
   dateStr: string
   classroomId: string
+  schoolId?: string
   initialData?: any
   settings?: any
+  initialGroupPhotos?: string[]
 }
 
-export function DailyLogForm({ studentId, studentName, dateStr, classroomId, initialData, settings = {} }: DailyLogFormProps) {
+export function DailyLogForm({
+  studentId,
+  studentName,
+  dateStr,
+  classroomId,
+  schoolId,
+  initialData,
+  settings = {},
+  initialGroupPhotos = [],
+}: DailyLogFormProps) {
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   const [isCompressingPhotos, setIsCompressingPhotos] = useState(false)
   const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [groupPhotos, setGroupPhotos] = useState<string[]>(initialGroupPhotos.filter(Boolean))
+  const [removingGroupUrl, setRemovingGroupUrl] = useState<string | null>(null)
+
+  const initialGroupKey = initialGroupPhotos.filter(Boolean).join('|')
+  useEffect(() => {
+    setGroupPhotos(initialGroupKey ? initialGroupKey.split('|') : [])
+  }, [initialGroupKey])
   const t = useTranslations('dailyLogForm')
   const locale = useLocale()
   const isExitingRef = useRef(false)
@@ -144,6 +163,29 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
     const fileIndex = index - existingCount
     setPhotoFiles(prev => prev.filter((_, i) => i !== fileIndex))
     setPhotoPreviews(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleRemoveGroupPhoto = async (url: string) => {
+    if (!schoolId || removingGroupUrl) return
+    if (!window.confirm(t('groupPhotoRemoveConfirm'))) return
+
+    setRemovingGroupUrl(url)
+    try {
+      const formData = new FormData()
+      formData.append('classroomId', classroomId)
+      formData.append('schoolId', schoolId)
+      formData.append('dateStr', dateStr)
+      formData.append('photoUrl', url)
+      const result = await removeClassroomGroupPhoto(formData)
+      if (!result.success) throw new Error(result.error || t('errorSaving'))
+      setGroupPhotos(result.photoUrls || groupPhotos.filter((photo) => photo !== url))
+      router.refresh()
+    } catch (error) {
+      console.error(error)
+      alert(error instanceof Error ? error.message : t('errorSaving'))
+    } finally {
+      setRemovingGroupUrl(null)
+    }
   }
 
   const handleSave = async (status: 'draft' | 'published') => {
@@ -490,6 +532,42 @@ export function DailyLogForm({ studentId, studentName, dateStr, classroomId, ini
             />
 
             <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoSelect} />
+
+            {groupPhotos.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[11px] font-bold text-violet-600 uppercase tracking-wider">
+                  {t('groupPhotosTitle')}
+                </p>
+                <p className="text-[10px] text-stone-400 font-medium">{t('groupPhotosHint')}</p>
+                <div className="flex flex-wrap gap-2">
+                  {groupPhotos.map((url, i) => (
+                    <div key={`group-${url}-${i}`} className="relative">
+                      <img
+                        src={url}
+                        alt=""
+                        className="h-20 w-20 object-cover rounded-xl border border-violet-200"
+                      />
+                      <span className="absolute bottom-1 left-1 rounded bg-violet-600/90 px-1 py-0.5 text-[8px] font-bold uppercase text-white leading-none">
+                        {t('groupPhotoBadge')}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={removingGroupUrl === url}
+                        onClick={() => void handleRemoveGroupPhoto(url)}
+                        className="absolute -top-1.5 -right-1.5 bg-white border border-stone-200 rounded-full h-5 w-5 flex items-center justify-center text-stone-500 hover:text-red-600 disabled:opacity-50"
+                        aria-label={t('groupPhotoRemove')}
+                      >
+                        {removingGroupUrl === url ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <X className="h-3 w-3" />
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <p className="text-[11px] font-semibold text-stone-400">
               {t('photosCount', { current: photoPreviews.length, max: MAX_DAILY_LOG_PHOTOS })}

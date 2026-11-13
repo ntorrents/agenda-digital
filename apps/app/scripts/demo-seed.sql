@@ -64,9 +64,13 @@ CREATE TABLE IF NOT EXISTS public.classroom_daily_notes (
   date DATE NOT NULL,
   note TEXT,
   photo_url TEXT,
+  photo_urls TEXT[] DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   UNIQUE(classroom_id, date)
 );
+
+ALTER TABLE public.classroom_daily_notes
+  ADD COLUMN IF NOT EXISTS photo_urls TEXT[] DEFAULT '{}';
 
 ALTER TABLE public.classroom_daily_notes ENABLE ROW LEVEL SECURITY;
 
