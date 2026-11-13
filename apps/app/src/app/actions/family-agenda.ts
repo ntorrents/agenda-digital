@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCachedSchoolSettings } from '@/lib/cache/school-data'
 import { logAuditError } from '@/lib/audit-log'
+import { classNotePhotoUrls } from '@/lib/photos'
 
 export type FamilyAgendaDailyLog = {
   photos?: (string | null)[] | null
@@ -26,7 +27,9 @@ export type FamilyAgendaPayload = {
   studentName: string
   dailyLog: FamilyAgendaDailyLog | null
   globalNote: string | null
+  /** @deprecated usar globalNotePhotos */
   globalNotePhoto: string | null
+  globalNotePhotos: string[]
   settings: Record<string, unknown>
   isFuture: boolean
 }
@@ -70,9 +73,8 @@ export async function fetchFamilyAgendaDay(
 
     let dailyLog: FamilyAgendaDailyLog | null = null
     let globalNote: string | null = null
-    let globalNotePhoto: string | null = null
+    let globalNotePhotos: string[] = []
 
-    // Paralelizar: log del día + nota de aula + settings (agenda del día sigue fresca)
     const logPromise = !isFuture
       ? supabase
           .from('daily_logs')
@@ -92,11 +94,17 @@ export async function fetchFamilyAgendaDay(
       !isFuture && student?.classroom_id
         ? supabase
             .from('classroom_daily_notes')
-            .select('note, photo_url')
+            .select('note, photo_url, photo_urls')
             .eq('classroom_id', student.classroom_id)
             .eq('date', dateStr)
             .maybeSingle()
-        : Promise.resolve({ data: null as { note?: string | null; photo_url?: string | null } | null })
+        : Promise.resolve({
+            data: null as {
+              note?: string | null
+              photo_url?: string | null
+              photo_urls?: string[] | null
+            } | null,
+          })
 
     const settingsPromise = student?.school_id
       ? getCachedSchoolSettings(student.school_id)
@@ -111,19 +119,19 @@ export async function fetchFamilyAgendaDay(
     dailyLog = logRes.data
     if (noteRes.data) {
       globalNote = noteRes.data.note?.trim() || null
-      globalNotePhoto = noteRes.data.photo_url || null
+      globalNotePhotos = classNotePhotoUrls(noteRes.data)
     }
 
     return {
       studentName: student?.first_name || '',
       dailyLog,
       globalNote,
-      globalNotePhoto,
+      globalNotePhoto: globalNotePhotos[0] || null,
+      globalNotePhotos,
       settings,
       isFuture,
     }
   } catch (e) {
-    // No registrar Forbidden/Unauthenticated com a error de sistema (soroll)
     const msg = e instanceof Error ? e.message : String(e)
     if (msg !== 'Forbidden' && msg !== 'Unauthenticated') {
       await logAuditError({

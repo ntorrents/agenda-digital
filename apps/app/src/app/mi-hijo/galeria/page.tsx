@@ -51,11 +51,17 @@ export default async function GaleriaPage(props: {
   const notesQuery = student?.classroom_id
     ? supabase
         .from('classroom_daily_notes')
-        .select('date, photo_url')
+        .select('date, photo_url, photo_urls')
         .eq('classroom_id', student.classroom_id)
-        .not('photo_url', 'is', null)
+        .or('photo_url.not.is.null,photo_urls.neq.{}')
         .order('date', { ascending: false })
-    : Promise.resolve({ data: null as { date: string; photo_url: string | null }[] | null })
+    : Promise.resolve({
+        data: null as {
+          date: string
+          photo_url: string | null
+          photo_urls?: string[] | null
+        }[] | null,
+      })
 
   const [{ data: logsWithPhotos }, { data: classNotes }] = await Promise.all([
     logsQuery,

@@ -34,9 +34,9 @@ export default async function DashboardGaleriaPage() {
 
   let classNotesQuery = supabase
     .from('classroom_daily_notes')
-    .select('date, photo_url, classroom_id, classrooms(name)')
+    .select('date, photo_url, photo_urls, classroom_id, classrooms(name)')
     .eq('school_id', profile.school_id)
-    .not('photo_url', 'is', null)
+    .or('photo_url.not.is.null,photo_urls.neq.{}')
 
   let dailyLogsQuery = supabase
     .from('daily_logs')
@@ -58,6 +58,7 @@ export default async function DashboardGaleriaPage() {
     ...(classNotes || []).flatMap((p: {
       date: string
       photo_url?: string | null
+      photo_urls?: string[] | null
       classroom_id: string
       classrooms?: { name: string } | { name: string }[] | null
     }) => {

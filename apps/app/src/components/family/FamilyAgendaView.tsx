@@ -17,6 +17,13 @@ export function FamilyAgendaView({
 }) {
   const t = useTranslations('agenda')
   const { dailyLog, globalNote, globalNotePhoto, settings, isFuture } = payload
+  const groupPhotos =
+    payload.globalNotePhotos?.length
+      ? payload.globalNotePhotos
+      : globalNotePhoto
+        ? [globalNotePhoto]
+        : []
+  const hasClassroomExtras = Boolean(globalNote?.trim() || groupPhotos.length > 0)
 
   const mealMap: Record<string, string> = {
     all: t('meals.all'),
@@ -38,15 +45,19 @@ export function FamilyAgendaView({
     liquid: t('diaper.liquid'),
   }
 
-  const dayNote =
-    globalNote || globalNotePhoto ? (
-      <AgendaDayNote
-        note={globalNote}
-        photoUrl={globalNotePhoto}
-        title={t('globalNotes')}
-        photoAlt={t('photo')}
-      />
+  const groupPhotoSection =
+    groupPhotos.length > 0 ? (
+      <div className="bg-white border border-violet-200/50 rounded-[28px] p-4 shadow-xs">
+        <h3 className="text-[11px] font-black uppercase text-violet-600 tracking-wider mb-3 px-1">
+          {t('groupPhotos')}
+        </h3>
+        <PhotoStrip photos={groupPhotos} altPrefix={t('groupPhoto')} />
+      </div>
     ) : null
+
+  const dayNote = globalNote?.trim() ? (
+    <AgendaDayNote note={globalNote} title={t('globalNotes')} />
+  ) : null
 
   return (
     <main className="max-w-md mx-auto pt-4 space-y-5">
@@ -61,6 +72,7 @@ export function FamilyAgendaView({
           </div>
         ) : !dailyLog ? (
           <>
+            {groupPhotoSection}
             {dayNote}
             <div className="rounded-[28px] border border-stone-200/80 bg-stone-50 p-8 text-center shadow-xs">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-stone-400 mb-3 shadow-sm">
@@ -68,12 +80,13 @@ export function FamilyAgendaView({
               </div>
               <h3 className="text-sm font-bold text-stone-800">{t('notFilled')}</h3>
               <p className="text-xs text-stone-500 mt-1">
-                {globalNote || globalNotePhoto ? t('dayNoteOnly') : t('notFilledDesc')}
+                {hasClassroomExtras ? t('dayNoteOnly') : t('notFilledDesc')}
               </p>
             </div>
           </>
         ) : (
           <>
+            {groupPhotoSection}
             {dayNote}
             {dailyLog.photos && dailyLog.photos.length > 0 && (
               <div className="bg-white border border-stone-200/60 rounded-[28px] p-4 shadow-xs">

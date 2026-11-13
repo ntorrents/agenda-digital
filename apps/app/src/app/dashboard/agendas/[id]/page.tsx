@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { DailyLogForm } from '@/components/agenda/DailyLogForm'
 import { CheckCircle2 } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { classNotePhotoUrls } from '@/lib/photos'
 
 export default async function StudentLogPage(props: { params: Promise<{ id: string }>, searchParams: Promise<{ date?: string, success?: string }> }) {
   const params = await props.params
@@ -41,18 +42,23 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
 
   const settings = await getCachedSchoolSettings(schoolId)
 
-  // Fetch existing log for this date if it exists
-  const { data: existingLog } = await supabase
-    .from('daily_logs')
-    .select('*')
-    .eq('student_id', studentId)
-    .eq('date', dateStr)
-    .maybeSingle()
-
-  // Fetch guardians
-  const { data: guardiansData } = await supabase
-    .from('student_guardians')
-    .select(`
+  // Fetch existing log + classroom group photos for this date
+  const [{ data: existingLog }, { data: classroomNote }, { data: guardiansData }] = await Promise.all([
+    supabase
+      .from('daily_logs')
+      .select('*')
+      .eq('student_id', studentId)
+      .eq('date', dateStr)
+      .maybeSingle(),
+    supabase
+      .from('classroom_daily_notes')
+      .select('photo_url, photo_urls')
+      .eq('classroom_id', student.classroom_id)
+      .eq('date', dateStr)
+      .maybeSingle(),
+    supabase
+      .from('student_guardians')
+      .select(`
       relation,
       profiles (
         full_name,
@@ -60,7 +66,10 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
         email
       )
     `)
-    .eq('student_id', studentId)
+      .eq('student_id', studentId),
+  ])
+
+  const groupPhotos = classNotePhotoUrls(classroomNote || {})
 
   const t = await getTranslations('dashboardAgendas')
 
@@ -108,8 +117,10 @@ export default async function StudentLogPage(props: { params: Promise<{ id: stri
         studentName={`${student.first_name} ${student.last_name}`}
         dateStr={dateStr}
         classroomId={student.classroom_id}
+        schoolId={schoolId}
         initialData={existingLog || undefined}
         settings={settings}
+        initialGroupPhotos={groupPhotos}
       />
     </main>
   )
